@@ -1,0 +1,1271 @@
+# DIGITAL TOUCHPAD — COMPLETE WEBSITE UI/UX DESIGN AND DEVELOPMENT PROMPT
+## NOTHING UI INSPIRED • PREMIUM MINIMALISM • MODERN GLASSMORPHISM
+
+You are an award-winning product designer, senior UI/UX architect, frontend engineer, interaction designer and design systems specialist.
+
+Your task is to design and develop the complete official website for **DIGITAL TOUCHPAD**, a universal cross-platform wireless touchpad ecosystem.
+
+This is a fresh website development task.
+
+Build a visually exceptional, fully responsive, polished and functional website. Do not create just a landing-page mockup. The website must have a consistent design system, meaningful navigation, complete content sections, responsive layouts, functional interactions and a premium product identity.
+
+The two user-provided reference images are the primary visual design references.
+
+Study them carefully before designing.
+
+They are inspiration for the visual language, not templates to reproduce.
+
+Do not copy their exact widgets, application content, layouts or unrelated features. Translate their visual characteristics into a website specifically designed for Digital Touchpad.
+
+---
+
+# 1. PRODUCT UNDERSTANDING
+
+## What is Digital Touchpad?
+
+Digital Touchpad transforms a supported smartphone or tablet into a wireless touchpad and remote-control surface for a supported laptop or desktop computer.
+
+The product is designed around:
+
+- Android.
+- iOS.
+- Windows.
+- macOS.
+- Linux.
+- Chromebook, subject to validated compatibility.
+
+The mobile application communicates with a desktop receiver through supported connection methods.
+
+The user can control the computer using touch gestures, mouse operations, keyboard input and additional controls where supported.
+
+## Website's purpose
+
+The website must communicate the product quickly and convincingly.
+
+A visitor should understand within a few seconds:
+
+1. What Digital Touchpad does.
+2. How it works.
+3. Which devices it supports.
+4. How to connect a phone to a computer.
+5. What features it provides.
+6. Where to download the applications.
+7. How to get help.
+
+The website must feel like the official website of a premium technology product.
+
+It must not look like a generic SaaS template, ordinary portfolio, admin dashboard or gaming website.
+
+---
+
+# 2. VISUAL DESIGN DIRECTION
+
+## 2.1 Main inspiration: Nothing UI
+
+Use the first reference image as the main inspiration for the visual identity.
+
+Study its:
+
+- Almost-black background.
+- Charcoal surfaces.
+- Monochromatic appearance.
+- Circular controls.
+- Large geometric elements.
+- Dotted digital typography.
+- Minimal white icons.
+- Asymmetrical widget arrangement.
+- Strong contrast.
+- Compact interface elements.
+- Minimalist visual hierarchy.
+- Subtle texture.
+
+Translate these characteristics into a sophisticated web design.
+
+Do not copy its unrelated search bar, battery widget, application shortcuts or exact arrangement.
+
+Instead, use the same design language to represent Digital Touchpad features.
+
+For example:
+
+- Circular pointer-control illustrations.
+- Dotted connection indicators.
+- Minimal connection-status widgets.
+- Circular gesture illustrations.
+- Modular feature tiles.
+- Geometric mouse-pointer patterns.
+- Small technical labels.
+- Abstract wireless signal visualizations.
+
+## 2.2 Secondary inspiration: Premium glassmorphism
+
+Use the second reference image as inspiration for the component styling and information presentation.
+
+Study its:
+
+- Rounded rectangular cards.
+- Soft gradient surfaces.
+- Glass-like visual depth.
+- Subtle shadows.
+- Carefully arranged metrics.
+- Colorful visualizations.
+- Elegant typography.
+- Spacious composition.
+- Premium mobile interface presentation.
+
+Adapt this language to the website.
+
+Use glass effects selectively.
+
+Do not make every element transparent or excessively blurred.
+
+The result must remain readable and professional.
+
+## 2.3 Overall visual identity
+
+The desired combination:
+
+**Nothing-inspired monochrome + subtle premium glassmorphism + modern product presentation.**
+
+The website should feel:
+
+- Minimal.
+- Futuristic.
+- Premium.
+- Clean.
+- Sophisticated.
+- Technically advanced.
+- Distinctive.
+- Calm rather than visually noisy.
+
+Avoid:
+
+- Excessive neon effects.
+- Bright blue gradients everywhere.
+- Generic AI-generated dashboard designs.
+- Excessive rounded cards.
+- Random decorative blobs.
+- Unnecessary animations.
+- Oversized glowing borders.
+- Generic stock photography.
+- Unrelated 3D illustrations.
+
+---
+
+# 3. COLOR SYSTEM
+
+Build a complete design-token system.
+
+Use dark mode as the primary visual identity.
+
+Suggested colors:
+
+### Primary surfaces
+
+- Main background: `#090A0A`
+- Secondary background: `#111313`
+- Card background: `#181B1B`
+- Elevated surface: `#202424`
+- Border: `#303535`
+
+### Typography
+
+- Primary text: `#F4F5F3`
+- Secondary text: `#A5AAA7`
+- Muted text: `#747B77`
+
+### Accent palette
+
+Use accents sparingly and purposefully.
+
+- Electric green: `#B7F36B`
+- Cyan: `#74D7E8`
+- Soft blue: `#84AFFF`
+- Violet: `#B99AEF`
+- Warm coral: `#F18D94`
+
+The accents should help distinguish different product features.
+
+For example:
+
+- Green: connected status and success.
+- Cyan: connectivity.
+- Violet: advanced gestures.
+- Blue: device compatibility.
+- Coral: selected feature or warning.
+
+Do not use every accent in every section.
+
+## Background treatment
+
+Use:
+
+- Very dark neutral backgrounds.
+- Subtle radial gradients.
+- Extremely faint grain texture.
+- Low-contrast geometric shapes.
+- Carefully controlled surface elevation.
+
+Avoid making the entire page a flat black background.
+
+Create visual depth without making the interface noisy.
+
+---
+
+# 4. TYPOGRAPHY
+
+Typography is an important part of the Nothing-inspired identity.
+
+Use a clean, modern sans-serif family.
+
+Preferred combinations:
+
+- Inter.
+- Manrope.
+- Space Grotesk.
+
+Use a monospace or dot-matrix-inspired style selectively for:
+
+- Connection status.
+- Latency indicators.
+- Device identification.
+- Technical labels.
+- Small numerical displays.
+
+Do not use dotted typography for long paragraphs.
+
+Create a clear hierarchy:
+
+1. Large expressive hero headings.
+2. Medium section headings.
+3. Compact card headings.
+4. Readable body text.
+5. Small technical labels.
+
+Use intentional letter spacing for uppercase technical labels.
+
+Typography must remain readable on mobile.
+
+---
+
+# 5. WEBSITE INFORMATION ARCHITECTURE
+
+Create a complete website with the following pages and sections.
+
+## PAGE 1 — HOME
+
+This is the main product landing page.
+
+It must introduce Digital Touchpad and guide visitors toward downloading or learning more.
+
+### 5.1 Navigation bar
+
+Create a premium, minimal navigation bar.
+
+Left:
+
+- Digital Touchpad logo.
+- Product name.
+
+Center or right:
+
+- Product.
+- Features.
+- How It Works.
+- Compatibility.
+- Download.
+- Support.
+
+Include:
+
+- A compact theme control if light mode is implemented.
+- A prominent Download button.
+
+Behavior:
+
+- Sticky navigation.
+- Smooth section navigation.
+- Responsive mobile navigation.
+- Subtle background transition when scrolling.
+- Accessible keyboard navigation.
+
+On mobile, use a clean compact navigation drawer or menu.
+
+Do not overload the navigation.
+
+### 5.2 Hero section
+
+The hero is the most important section.
+
+It must immediately communicate the product.
+
+Suggested headline:
+
+**Your Phone. Your Touchpad.**
+
+Supporting text:
+
+"Turn your smartphone into a wireless touchpad and control your computer with effortless precision."
+
+Primary CTA:
+
+**Explore Digital Touchpad**
+
+Secondary CTA:
+
+**See How It Works**
+
+Show compatibility indicators for:
+
+- Android.
+- iOS.
+- Windows.
+- macOS.
+- Linux.
+
+Use a carefully designed hero composition.
+
+The visual should feature:
+
+- A realistic smartphone mockup.
+- A laptop or desktop mockup.
+- A Digital Touchpad interface displayed on the phone.
+- A desktop receiver interface displayed on the computer.
+- A subtle connection line or wireless signal between them.
+
+Use an asymmetrical composition inspired by the reference images.
+
+The smartphone and computer must be the central visual elements.
+
+Do not use generic floating gradient blobs.
+
+The hero should feel like a premium product advertisement.
+
+The phone screen should visibly show a touchpad.
+
+The computer screen should show a receiver interface with a believable connected status.
+
+Make sure the mockups look like part of one coherent product.
+
+### 5.3 Quick feature strip
+
+Below the hero, create a compact horizontal feature strip.
+
+Possible features:
+
+- Wireless control.
+- Secure pairing.
+- Responsive input.
+- Cross-platform support.
+
+Use small icons, subtle separators and compact typography.
+
+Do not create huge feature cards here.
+
+### 5.4 Product showcase section
+
+Heading:
+
+**One Touch. Complete Control.**
+
+Show the mobile and desktop interfaces together.
+
+Create an interactive or scroll-based product showcase.
+
+Possible showcase states:
+
+1. Touchpad.
+2. Keyboard.
+3. Gestures.
+4. Quick Controls.
+
+When the user selects a feature, update the showcased phone interface.
+
+Each state should have:
+
+- A visual demonstration.
+- A short explanation.
+- A clear feature title.
+- A small interface preview.
+
+Do not merely display four unrelated screenshots.
+
+Make the showcase feel like one coherent product demonstration.
+
+### 5.5 Features section
+
+Heading:
+
+**Everything You Need. Nothing You Don't.**
+
+Use a modular bento-grid layout inspired by the first reference image.
+
+Do not make every card the same size.
+
+Create varied compositions with carefully balanced proportions.
+
+Feature cards:
+
+**A. Precision Touchpad**
+
+Show a circular pointer-control illustration.
+
+Describe smooth pointer movement and natural interaction.
+
+**B. Multi-Touch Gestures**
+
+Illustrate:
+
+- One-finger movement.
+- Two-finger scrolling.
+- Two-finger tap.
+- Drag and drop.
+- Advanced gestures where supported.
+
+**C. Keyboard Control**
+
+Show a compact keyboard interface.
+
+Explain keyboard input and shortcuts.
+
+**D. Secure Pairing**
+
+Illustrate a secure pairing flow.
+
+Explain device approval and trusted-device management.
+
+**E. Universal Connectivity**
+
+Show a phone, wireless network and computer.
+
+Explain local-network connection and supported optional transports.
+
+**F. Media Controls**
+
+Show media controls and volume adjustment.
+
+**G. Presentation Mode**
+
+Show presentation navigation.
+
+**H. Customization**
+
+Show sensitivity, gestures and user preferences.
+
+Each card must have a unique visual treatment.
+
+Use monochrome elements as the base with selective accent colors.
+
+### 5.6 How it works
+
+Heading:
+
+**Connected in Three Simple Steps.**
+
+Create a clear three-step visual sequence.
+
+STEP 01 — Open
+
+Open Digital Touchpad on your phone and the receiver on your computer.
+
+STEP 02 — Connect
+
+Discover the computer and securely pair the devices.
+
+STEP 03 — Control
+
+Use your phone as a wireless touchpad.
+
+Create a visual connection diagram showing the communication flow.
+
+Make the section easy to understand without technical knowledge.
+
+Use subtle animations to connect the steps.
+
+Do not imply that the computer receiver can be avoided when it is required.
+
+### 5.7 Compatibility section
+
+Heading:
+
+**Your Devices. One Experience.**
+
+Create a compatibility showcase.
+
+Group platforms into:
+
+Mobile:
+- Android.
+- iOS.
+
+Desktop:
+- Windows.
+- macOS.
+- Linux.
+
+Additional:
+- Chromebook, when validated.
+
+Use recognizable platform symbols or simple original icons.
+
+Show separate mobile and desktop groups.
+
+Clearly distinguish confirmed support from planned or unverified support.
+
+Never claim all combinations work if they have not been validated.
+
+Provide a link to the full compatibility page.
+
+### 5.8 Privacy and security section
+
+Heading:
+
+**Your Control. Your Devices. Your Privacy.**
+
+Create a visually strong section with a dark card and a subtle green accent.
+
+Explain only security features that are actually implemented.
+
+Possible points:
+
+- Secure device pairing.
+- Authenticated connections.
+- Encrypted communication.
+- Trusted-device management.
+- Local-network operation.
+- No mandatory cloud account for local use.
+
+Do not invent security certifications or claim bank-grade security without evidence.
+
+### 5.9 Final call to action
+
+Heading:
+
+**Ready to Take Control?**
+
+Supporting text:
+
+"Bring the comfort of a touchpad to the device already in your hand."
+
+Buttons:
+
+- Download the App.
+- Explore Compatibility.
+
+Use a visually distinctive final section with a subtle gradient surface.
+
+### 5.10 Footer
+
+Include:
+
+- Digital Touchpad logo.
+- Short product description.
+- Product links.
+- Features.
+- Compatibility.
+- Download.
+- Documentation.
+- Support.
+- Privacy Policy.
+- Terms of Service.
+- Copyright.
+
+Do not add fake social links.
+
+Only include links that have actual destinations.
+
+---
+
+# 6. PAGE 2 — FEATURES
+
+Create a dedicated features page.
+
+This page must explain the product in greater detail.
+
+Include:
+
+1. Touchpad control.
+2. Pointer sensitivity.
+3. Multi-touch gestures.
+4. Drag and drop.
+5. Keyboard controls.
+6. Custom shortcuts.
+7. Media controls.
+8. Presentation mode.
+9. Device management.
+10. Secure pairing.
+11. Reconnection.
+12. Customization.
+
+For each feature, create a section with:
+
+- Feature title.
+- Short description.
+- Visual demonstration.
+- Supported-platform notes where relevant.
+
+Use alternating layouts.
+
+Some sections should have the text on the left and visual on the right.
+
+Others should reverse the arrangement.
+
+Use the visual design of the second reference image for feature panels.
+
+Use subtle gradients to distinguish selected feature demonstrations.
+
+Do not create an enormous wall of text.
+
+---
+
+# 7. PAGE 3 — HOW IT WORKS
+
+Create a detailed visual explanation of the connection process.
+
+Sections:
+
+1. Install the mobile application.
+2. Install the desktop receiver.
+3. Discover nearby computers.
+4. Pair the devices.
+5. Establish a secure session.
+6. Start controlling the computer.
+7. Reconnect to trusted devices.
+
+Create an animated connection diagram.
+
+Show:
+
+Phone → Local network → Desktop receiver → Native computer input.
+
+Include a separate explanation of supported connection environments.
+
+Explain that both devices normally need a supported communication path.
+
+Do not suggest that the application can magically connect through an isolated network.
+
+Include troubleshooting links.
+
+---
+
+# 8. PAGE 4 — COMPATIBILITY
+
+Create a dedicated compatibility page.
+
+Show:
+
+- Android.
+- iOS.
+- Windows.
+- macOS.
+- Linux.
+- Chromebook where validated.
+
+Create a clear compatibility matrix.
+
+Columns:
+
+- Mobile platform.
+- Desktop platform.
+- Connection method.
+- Mouse input.
+- Keyboard support.
+- Additional controls.
+- Verification status.
+
+Do not fill this matrix with invented support claims.
+
+Use statuses such as:
+
+- Supported and verified.
+- In development.
+- Experimental.
+- Not supported.
+
+Add a section explaining operating-system permission requirements.
+
+For example:
+
+- Android local-network permission.
+- iOS local-network permission.
+- Windows firewall requirements where applicable.
+- macOS Accessibility permission.
+- Linux input permissions.
+
+Keep the explanations understandable.
+
+---
+
+# 9. PAGE 5 — DOWNLOAD
+
+Create a dedicated application download page.
+
+The page must be clean and platform-oriented.
+
+Separate:
+
+### Mobile
+
+- Android.
+- iOS.
+
+### Desktop
+
+- Windows.
+- macOS.
+- Linux.
+
+For each platform show:
+
+- Platform icon.
+- Application name.
+- Short description.
+- Version, when available.
+- System requirements.
+- Download button.
+- Installation instructions.
+
+Important:
+
+Never invent download URLs.
+
+Never create download buttons that pretend to work.
+
+If release builds do not yet exist, show a truthful status such as:
+
+- Coming soon.
+- In development.
+- Join release updates, if a real subscription mechanism exists.
+
+Only activate download links when real downloadable artifacts are available.
+
+Include a section:
+
+**Need Help Installing?**
+
+Link to installation documentation.
+
+---
+
+# 10. PAGE 6 — SUPPORT AND FAQ
+
+Create a support page with a searchable FAQ interface.
+
+Suggested questions:
+
+1. What is Digital Touchpad?
+2. Does it work with Android and iPhone?
+3. Does it work with Windows and macOS?
+4. Does it require the same Wi-Fi network?
+5. Why is my computer not appearing?
+6. Why is the desktop receiver required?
+7. Is the connection encrypted?
+8. Does it work without internet?
+9. Can I connect multiple computers?
+10. Can I use Bluetooth?
+11. Why does macOS require Accessibility permission?
+12. What should I do if the connection disconnects?
+
+Use expandable accordion components.
+
+Add search filtering.
+
+Add a contact/support section only if a real contact destination exists.
+
+Do not invent email addresses.
+
+---
+
+# 11. DESIGN SYSTEM AND COMPONENT LIBRARY
+
+Create reusable components.
+
+Examples:
+
+- Navbar.
+- Footer.
+- PrimaryButton.
+- SecondaryButton.
+- PlatformBadge.
+- StatusIndicator.
+- FeatureCard.
+- BentoGrid.
+- DeviceMockup.
+- PhoneMockup.
+- DesktopMockup.
+- ConnectionDiagram.
+- StepCard.
+- CompatibilityCard.
+- GlassPanel.
+- SectionHeading.
+- FAQAccordion.
+- DownloadCard.
+- AnimatedCounter.
+- ScrollReveal.
+
+All components must share consistent design tokens.
+
+Avoid duplicated CSS.
+
+Use a centralized design system.
+
+Create reusable responsive spacing, typography and color variables.
+
+---
+
+# 12. SPECIAL VISUAL COMPONENTS
+
+These components are especially important for Digital Touchpad.
+
+## 12.1 Dotted pointer visual
+
+Create an original visual element inspired by the dotted digital elements in the first reference.
+
+It can represent:
+
+- A mouse pointer.
+- A wireless signal.
+- A connection state.
+- A touch interaction.
+
+Use dots arranged in a deliberate geometric pattern.
+
+Do not simply use a random dotted circle.
+
+## 12.2 Circular gesture visualizations
+
+Create small animated circular illustrations for:
+
+- Pointer movement.
+- Scrolling.
+- Clicking.
+- Dragging.
+- Multi-touch.
+
+Use subtle motion.
+
+Do not animate continuously when the element is not visible.
+
+## 12.3 Connection visualization
+
+Show a mobile device communicating with a desktop receiver.
+
+Use:
+
+- Minimal device outlines.
+- A thin connection line.
+- Small animated packets or pulses.
+- A subtle connected indicator.
+
+Keep it elegant.
+
+## 12.4 Glass feature cards
+
+Use the second reference as inspiration.
+
+Cards may have:
+
+- Dark translucent backgrounds.
+- Subtle gradients.
+- Soft shadows.
+- Fine borders.
+- Small color accents.
+- Minimal data-like visualizations.
+
+Do not overuse blur.
+
+---
+
+# 13. INTERACTIONS AND ANIMATIONS
+
+The website must feel responsive and polished.
+
+Implement:
+
+- Smooth page navigation.
+- Scroll-based section reveals.
+- Subtle card hover effects.
+- Button interaction states.
+- Feature showcase switching.
+- FAQ accordion.
+- Mobile navigation.
+- Theme switching if implemented.
+- Responsive transitions.
+- Interactive compatibility filters where useful.
+
+Use restrained animations.
+
+Recommended behavior:
+
+- Small hover translation.
+- Gentle opacity transitions.
+- Subtle scale changes.
+- Smooth panel transitions.
+- Connection pulse animation.
+- Controlled dotted visual animation.
+
+Avoid:
+
+- Excessive parallax.
+- Long intro animations.
+- Constant background motion.
+- Flashing effects.
+- Overly elastic transitions.
+- Scroll hijacking.
+- Animations that delay access to content.
+
+Respect `prefers-reduced-motion`.
+
+All interactions must work with keyboard navigation and touch.
+
+---
+
+# 14. RESPONSIVE DESIGN
+
+The website must be designed mobile-first but must also look excellent on large desktop displays.
+
+Test layouts at:
+
+- 360px mobile.
+- 390px mobile.
+- 430px mobile.
+- 768px tablet.
+- 1024px laptop.
+- 1366px desktop.
+- 1440px desktop.
+- 1920px wide desktop.
+
+Requirements:
+
+- No horizontal overflow.
+- No clipped text.
+- No overlapping cards.
+- No broken hero compositions.
+- No tiny mobile buttons.
+- No unreadable gradients.
+- No fixed-width desktop-only layouts.
+
+The hero composition must adapt intelligently.
+
+On mobile:
+
+- Stack the phone and computer visuals.
+- Keep the headline prominent.
+- Make CTAs easy to tap.
+- Avoid squeezing the desktop mockup into a tiny area.
+
+On desktop:
+
+- Use generous whitespace.
+- Use asymmetrical layouts.
+- Use wide feature compositions.
+- Maintain visual balance.
+
+---
+
+# 15. LIGHT MODE
+
+Dark mode is the primary design identity.
+
+However, consider implementing a light theme as an optional secondary theme.
+
+The light theme must not be a simple color inversion.
+
+Use:
+
+- Warm off-white backgrounds.
+- Charcoal typography.
+- Soft grey surfaces.
+- Subtle colored gradients.
+- Carefully controlled shadows.
+
+Maintain the same Nothing-inspired identity.
+
+Persist the selected theme.
+
+Respect system theme preference when the user has not manually selected a theme.
+
+If light mode reduces design quality, prioritize an excellent dark-mode experience instead of implementing a weak secondary theme.
+
+---
+
+# 16. TECHNICAL IMPLEMENTATION
+
+First inspect the development environment and select an appropriate modern web stack.
+
+Preferred options:
+
+- React.
+- TypeScript.
+- Next.js or Vite, depending on routing and deployment requirements.
+- Tailwind CSS or a well-structured CSS system.
+- Framer Motion or another suitable lightweight animation solution.
+- Lucide icons or custom SVG icons.
+
+Select the stack based on actual requirements.
+
+Do not install unnecessary libraries.
+
+Use semantic HTML.
+
+Build reusable React components.
+
+Use proper routing.
+
+Keep the code modular.
+
+Separate:
+
+- Pages.
+- Components.
+- Design tokens.
+- Styles.
+- Assets.
+- Animations.
+- Data.
+- Utilities.
+
+Use optimized images and SVG illustrations.
+
+Avoid using enormous background images where CSS or SVG can create the same visual effect more efficiently.
+
+Use appropriate image formats.
+
+Lazy-load below-the-fold media.
+
+Ensure good loading performance.
+
+---
+
+# 17. ACCESSIBILITY AND QUALITY
+
+Implement:
+
+- Semantic headings.
+- Accessible navigation.
+- Keyboard focus states.
+- ARIA labels where required.
+- Sufficient contrast.
+- Accessible buttons.
+- Form labels.
+- Reduced-motion support.
+- Screen-reader-friendly content.
+
+Do not use color alone to communicate connection status.
+
+For example, display both an indicator and text such as "Connected".
+
+Make interactive elements distinguishable.
+
+---
+
+# 18. CONTENT AND BRAND VOICE
+
+The website's writing style should be:
+
+- Confident.
+- Minimal.
+- Clear.
+- Modern.
+- Professional.
+- Human.
+
+Avoid excessive marketing language.
+
+Avoid meaningless phrases such as:
+
+- Revolutionary technology.
+- Game-changing innovation.
+- The future is here.
+- Unmatched experience.
+
+Use simple product-focused language.
+
+Possible brand phrases:
+
+- Your Phone. Your Touchpad.
+- Control Beyond Limits.
+- One Touch. Complete Control.
+- Connected Without Complexity.
+- Your Devices. One Experience.
+
+Do not repeat the same tagline in every section.
+
+---
+
+# 19. SEO AND METADATA
+
+Implement:
+
+- Page titles.
+- Meta descriptions.
+- Open Graph metadata.
+- Appropriate favicon.
+- Semantic page structure.
+- Descriptive image alt text.
+- Sitemap where appropriate.
+- Robots configuration.
+- Clean URLs.
+
+Suggested home-page title:
+
+Digital Touchpad — Your Phone. Your Touchpad.
+
+Suggested description:
+
+Turn your smartphone into a wireless touchpad for your computer. Explore Digital Touchpad's cross-platform controls, gestures and secure connectivity.
+
+Do not add fake reviews, fabricated statistics or unsupported claims.
+
+---
+
+# 20. STRICT DESIGN RULES
+
+These are mandatory:
+
+1. Use both uploaded reference images as visual inspiration.
+2. Follow the Nothing-inspired visual direction.
+3. Do not reproduce the references pixel-for-pixel.
+4. Do not use unrelated widgets from the references.
+5. Do not make the website look like a generic SaaS template.
+6. Do not use excessive neon blue.
+7. Do not create a generic blue-gradient hero.
+8. Do not overuse glassmorphism.
+9. Do not use random stock photographs.
+10. Do not create fake application screenshots that contradict the product.
+11. Do not invent supported platforms.
+12. Do not invent download links.
+13. Do not create nonfunctional buttons.
+14. Do not use placeholder text such as Lorem Ipsum.
+15. Do not create empty pages.
+16. Do not make mobile layouts an afterthought.
+17. Do not add unnecessary animations.
+18. Do not sacrifice accessibility for aesthetics.
+19. Do not add unrelated sections simply to make the website longer.
+20. Maintain one coherent visual language throughout the website.
+
+---
+
+# 21. EXECUTION PLAN
+
+Work through the following stages.
+
+### Stage 1 — Reference analysis
+
+Study both uploaded images.
+
+Identify:
+
+- Color palette.
+- Typography.
+- Spacing.
+- Surface treatments.
+- Card proportions.
+- Icon style.
+- Visual hierarchy.
+- Component arrangements.
+
+Create:
+
+`docs/WEBSITE_DESIGN_DIRECTION.md`
+
+### Stage 2 — Design system
+
+Create:
+
+- Color tokens.
+- Typography tokens.
+- Spacing scale.
+- Border radius scale.
+- Shadows.
+- Buttons.
+- Cards.
+- Navigation.
+- Responsive breakpoints.
+
+Create:
+
+`docs/WEBSITE_DESIGN_SYSTEM.md`
+
+### Stage 3 — Website structure
+
+Create the complete page routing and shared components.
+
+Implement the navigation and footer.
+
+### Stage 4 — Homepage
+
+Build the hero, product showcase, feature grid, connection explanation, compatibility, privacy and final CTA.
+
+The homepage must look complete before moving on.
+
+### Stage 5 — Remaining pages
+
+Implement Features, How It Works, Compatibility, Download and Support.
+
+### Stage 6 — Interactions
+
+Implement animations, interactive showcases, mobile navigation, FAQ search and other functional interactions.
+
+### Stage 7 — Responsive optimization
+
+Test the complete website across the specified screen sizes.
+
+### Stage 8 — Quality assurance
+
+Test:
+
+- Navigation.
+- Links.
+- Buttons.
+- Responsive behavior.
+- Animations.
+- Accessibility.
+- Theme switching if present.
+- Page loading.
+- Browser console.
+- Build output.
+
+Fix all major errors.
+
+### Stage 9 — Final delivery
+
+Provide:
+
+- Complete source code.
+- Page list.
+- Design system.
+- Asset list.
+- Build instructions.
+- Run instructions.
+- Deployment instructions.
+- Testing report.
+
+Do not stop after generating the design.
+
+Actually implement the website and run it.
+
+---
+
+# 22. FINAL DESIGN EXPECTATION
+
+Imagine the official website of a premium technology company that combines the visual identity of Nothing OS with the polish of a carefully designed modern product website.
+
+The first screen should immediately make people interested.
+
+The feature sections should feel like carefully composed product widgets.
+
+The device mockups should look believable.
+
+The typography should be distinctive.
+
+The spacing should be intentional.
+
+The interactions should feel smooth.
+
+The website should look equally impressive on a phone, laptop and large monitor.
+
+The design must be recognizable as Digital Touchpad rather than a generic technology landing page.
+
+**Use the two uploaded images as the primary visual references throughout the design process. Adapt their design language to Digital Touchpad's actual product, content and website structure.**
+
+Now start building the complete website from scratch. Do not stop at planning or wireframes. Implement, run, inspect and refine the actual website until it is polished and functional.

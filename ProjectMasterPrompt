@@ -1,0 +1,1881 @@
+# DIGITAL TOUCHPAD
+# UNIVERSAL CROSS-PLATFORM WIRELESS TOUCHPAD ECOSYSTEM
+## MASTER PRODUCT REQUIREMENTS, ARCHITECTURE, DEVELOPMENT AND EXECUTION PROMPT
+
+You are acting as a complete senior engineering team consisting of:
+
+- Principal Software Architect
+- Cross-Platform Application Architect
+- Android Developer
+- iOS Developer
+- Windows Desktop Developer
+- macOS Developer
+- Linux Systems Developer
+- Network Protocol Engineer
+- Cybersecurity Engineer
+- UI/UX Designer
+- Quality Assurance Engineer
+- Performance Engineer
+- Release and Deployment Engineer
+
+Your responsibility is to inspect, redesign, develop, test and deliver a real, production-oriented application called **DIGITAL TOUCHPAD**.
+
+This is not a request to create a demonstration, prototype UI, theoretical architecture document or simulated application.
+
+You must build a working cross-platform product with actual mobile-to-computer connectivity and genuine system-wide mouse and keyboard input wherever the operating system permits it.
+
+You must work carefully, preserve useful existing code, identify architectural problems, implement the solution in manageable stages and verify your work.
+
+Do not rush into coding before understanding the existing project.
+
+---
+
+# PART 1 — PRODUCT IDENTITY AND VISION
+
+## 1.1 Product name
+
+DIGITAL TOUCHPAD
+
+## 1.2 Product objective
+
+Transform any supported smartphone or tablet into a wireless touchpad and remote-control device for any supported laptop or desktop computer.
+
+The user should be able to control their computer using the phone's touchscreen.
+
+The product must not be designed exclusively for a particular phone manufacturer, computer manufacturer, processor or operating system.
+
+The original Poco F4 and Asus Vivobook are development test devices only. They must never become hardcoded hardware requirements.
+
+## 1.3 Universal device compatibility
+
+The product must be architected for the following device categories.
+
+### Mobile devices
+
+1. Android smartphones.
+2. Android tablets.
+3. Apple iPhones.
+4. Apple iPads.
+
+### Computer devices
+
+1. Windows laptops.
+2. Windows desktop computers.
+3. Apple MacBooks.
+4. Apple Mac desktop computers.
+5. Linux laptops.
+6. Linux desktop computers.
+7. Chromebooks, where the operating system provides a supported implementation.
+
+The application must use native platform capabilities instead of assuming all operating systems behave identically.
+
+A platform can only be labelled supported after its discovery, connection, permissions, input handling and recovery have been validated.
+
+Never advertise universal compatibility as an accomplished fact before testing.
+
+## 1.4 Core product experience
+
+The ideal user journey is:
+
+1. User installs Digital Touchpad on their phone.
+2. User installs the corresponding Digital Touchpad receiver on their computer.
+3. User opens both applications.
+4. The phone automatically discovers available computers.
+5. User selects the computer.
+6. First-time pairing is securely approved.
+7. Future connections require just one tap.
+8. The phone immediately becomes a usable touchpad.
+
+The experience must be simple enough for a nontechnical user.
+
+The user should not need to understand:
+
+- IP addresses.
+- Network ports.
+- Bluetooth profiles.
+- Terminal commands.
+- ADB.
+- USB debugging.
+- Firewall configuration.
+- Developer options.
+- Networking protocols.
+- Input injection APIs.
+
+Manual configuration should exist only as an advanced troubleshooting option.
+
+---
+
+# PART 2 — FIRST ACTION: AUDIT THE EXISTING PROJECT
+
+Before changing any code, inspect the entire existing workspace.
+
+Do not immediately replace the project with a new template.
+
+Identify:
+
+- Existing application structure.
+- Existing Android implementation.
+- Existing desktop implementation.
+- Existing network communication code.
+- Existing Bluetooth implementation.
+- Existing Wi-Fi implementation.
+- Existing input injection logic.
+- Existing pairing and authentication code.
+- Existing user interface.
+- Existing build configurations.
+- Existing dependencies.
+- Existing test coverage.
+- Existing known bugs.
+- Existing documentation.
+- Existing unfinished features.
+
+If the original Digital Touchpad PRD or any related project documentation exists in the workspace, read it completely before making architectural decisions.
+
+Treat the original PRD as the requirements source for existing product features.
+
+Preserve valid requirements and working functionality. If you propose changing an existing requirement, explain why and document the change.
+
+Create:
+
+`docs/PROJECT_AUDIT.md`
+
+The audit must explain:
+
+1. What currently works.
+2. What partially works.
+3. What is broken.
+4. What is missing.
+5. What can be reused.
+6. What must be redesigned.
+7. What dependencies are obsolete or unsuitable.
+8. What technical risks exist.
+9. What implementation order is recommended.
+
+Do not delete existing code until you have identified its purpose and established whether it can be reused.
+
+After the audit, create the revised architecture and begin implementation.
+
+Do not stop after producing the audit.
+
+---
+
+# PART 3 — UNIVERSAL SOFTWARE ARCHITECTURE
+
+## 3.1 Fundamental architectural rule
+
+The application must have a shared cross-platform core and separate native platform implementations.
+
+Do not create one Windows-specific program and claim that it works on every computer.
+
+Do not use Android-specific APIs as the common networking implementation for iOS.
+
+Do not assume Windows input injection works on macOS or Linux.
+
+The product should share the same communication protocol, security model, device identity, pairing model, message definitions, gesture definitions and connection-state model.
+
+The native implementations must handle operating-system-specific functionality.
+
+The architecture should contain these major components:
+
+1. Shared Core.
+2. Mobile Client Applications.
+3. Desktop Receiver Applications.
+4. Transport and Discovery Engine.
+5. Authentication and Pairing System.
+6. Native Input Engine.
+7. Gesture Recognition Engine.
+8. Diagnostics and Logging System.
+9. Capability Detection System.
+10. Build, Packaging and Update System.
+
+## 3.2 Shared core technology
+
+Evaluate Rust as the preferred shared core technology.
+
+Rust can be used for:
+
+- Protocol definitions.
+- Message serialization.
+- Session management.
+- Cryptographic operations.
+- Connection-state management.
+- Network transport abstraction.
+- Input-event representation.
+- Device identity.
+- Diagnostics.
+- Shared validation logic.
+
+Expose the shared functionality through appropriate platform bindings.
+
+Before finalizing the technology, compare Rust with suitable alternatives such as Kotlin Multiplatform.
+
+Select the architecture based on actual platform integration requirements, maintainability, reliability and development complexity.
+
+Do not use multiple programming languages unnecessarily.
+
+The goal is maximum code reuse without sacrificing native platform compatibility.
+
+## 3.3 Android application
+
+Preferred technology:
+
+- Kotlin.
+- Jetpack Compose.
+- Android native networking.
+- Kotlin Coroutines.
+- Android Keystore.
+- Native gesture processing.
+
+The Android application must support a broad range of Android phones and tablets.
+
+Handle:
+
+- Different screen dimensions.
+- Different display densities.
+- Android lifecycle changes.
+- Battery optimization restrictions.
+- Network changes.
+- Wi-Fi switching.
+- Background restrictions.
+- Permission changes.
+- Device rotation.
+- Application process termination.
+- Reconnection after returning to the application.
+
+Consider Android 17 and newer local-network permission requirements, including the applicable `ACCESS_LOCAL_NETWORK` permission and target SDK requirements.
+
+Do not assume that permission behavior is identical across Android versions.
+
+## 3.4 iOS and iPadOS application
+
+Preferred technology:
+
+- Swift.
+- SwiftUI.
+- Network.framework.
+- Bonjour discovery.
+- Keychain.
+- Native touch and gesture processing.
+
+Implement:
+
+- Local-network permission declarations.
+- Bonjour service discovery.
+- Secure communication.
+- Device pairing.
+- Reconnection.
+- Touchpad gestures.
+- iPhone and iPad responsive interfaces.
+- Appropriate application lifecycle handling.
+
+Respect Apple's privacy and background-execution restrictions.
+
+Do not promise that iOS can act as a generic Bluetooth HID mouse on every device.
+
+The primary iOS connection must use the desktop receiver over a supported network connection.
+
+## 3.5 Windows desktop receiver
+
+Preferred technology:
+
+- Modern .NET / C#.
+- WinUI 3 where suitable.
+- Win32 APIs for system input.
+- Windows networking APIs.
+- Protected credential storage.
+- MSIX packaging.
+
+The Windows receiver must:
+
+- Discover and advertise its presence.
+- Accept secure authenticated connections.
+- Receive mouse and keyboard events.
+- Translate events into native Windows input.
+- Report its capabilities.
+- Maintain connection state.
+- Recover from temporary disconnections.
+- Provide understandable diagnostics.
+
+Use `SendInput` where appropriate.
+
+Respect Windows security boundaries, including UIPI.
+
+Do not claim that input injection will work inside elevated applications, secure desktop or protected system interfaces when Windows prevents it.
+
+Avoid unnecessary administrator privileges.
+
+## 3.6 macOS desktop receiver
+
+Preferred technology:
+
+- Swift and native macOS integration.
+- Or a shared Rust receiver core with a native Swift interface.
+
+Use suitable native APIs such as:
+
+- Network.framework.
+- Bonjour.
+- Keychain.
+- CoreGraphics event APIs.
+
+Implement an understandable Accessibility permission flow.
+
+If permission is missing:
+
+1. Detect the missing permission.
+2. Explain why it is required.
+3. Show instructions to enable it.
+4. Allow the user to retry.
+5. Report the actual permission status.
+
+Never attempt to bypass macOS security permissions.
+
+Support both Apple Silicon and Intel Macs where the selected deployment targets permit it.
+
+## 3.7 Linux desktop receiver
+
+Use an appropriate native Linux implementation.
+
+Evaluate:
+
+- Rust.
+- X11 input mechanisms.
+- Wayland-compatible input mechanisms.
+- uinput where appropriate.
+- Desktop portal capabilities where applicable.
+- Distribution-specific permission handling.
+
+Important:
+
+X11 and Wayland must be treated as different environments.
+
+Do not claim Wayland support merely because the application works under X11.
+
+Do not require running the entire receiver as root.
+
+Investigate secure device access and user-level permissions.
+
+Document which desktop environments and distributions have actually been tested.
+
+## 3.8 Chromebook support
+
+Investigate ChromeOS separately.
+
+Evaluate:
+
+- Android application support.
+- Linux container support.
+- Native receiver feasibility.
+- Available input-injection APIs.
+- Permission limitations.
+
+Do not advertise complete Chromebook support until the complete phone-to-Chromebook connection and input path works on real hardware.
+
+---
+
+# PART 4 — UNIVERSAL CONNECTION ENGINE
+
+## 4.1 Main objective
+
+Connectivity is the most important engineering priority.
+
+A beautiful application that cannot connect reliably is a failed product.
+
+Design an Adaptive Multi-Transport Connection Engine.
+
+The connection engine must be independent of the user interface and native input implementation.
+
+The system must automatically select an available supported connection method.
+
+## 4.2 Primary connection: local Wi-Fi
+
+Use a secure persistent local-network connection.
+
+Recommended initial approach:
+
+- TCP.
+- TLS-protected communication.
+- WebSocket or a suitable persistent binary protocol.
+- Compact messages for frequent input events.
+
+Evaluate WebSocket against a direct TCP implementation.
+
+Measure actual latency, reliability, CPU usage and recovery behavior.
+
+Do not assume that UDP is automatically faster or better.
+
+Initially, use a reliable connection for all events.
+
+Only consider a separate UDP pointer stream if real testing demonstrates a meaningful performance improvement.
+
+If UDP is implemented, it must have:
+
+- Session authentication.
+- Encryption or a securely established protected session.
+- Sequence numbers.
+- Replay protection.
+- Message-size limits.
+- Packet-loss handling.
+- Button-state snapshots.
+- Input-release watchdogs.
+- Session expiry.
+
+## 4.3 Universal discovery
+
+Implement automatic discovery using the appropriate platform-native discovery APIs.
+
+Android:
+- Network Service Discovery.
+- mDNS / DNS-SD.
+- Suitable local-network discovery.
+
+iOS:
+- Bonjour.
+- Network.framework.
+
+Windows:
+- Suitable DNS-SD / mDNS implementation.
+
+macOS:
+- Bonjour.
+
+Linux:
+- Avahi or another suitable DNS-SD implementation.
+
+Create a common service identity and discovery specification.
+
+The receiver should advertise:
+
+- Product identifier.
+- Device identifier.
+- Device display name.
+- Protocol version.
+- Supported capabilities.
+- Available connection methods.
+- Pairing status.
+
+Discovery must never automatically grant access to a computer.
+
+## 4.4 Discovery fallback
+
+The application should use the following sequence:
+
+1. Native service discovery.
+2. Validated fallback discovery.
+3. Previously trusted receiver information.
+4. User-selected device.
+5. Advanced manual connection for diagnostics.
+
+Do not perform uncontrolled port scanning.
+
+Do not collect unrelated devices or personal information.
+
+Do not expose the receiver unnecessarily to public network interfaces.
+
+## 4.5 Connection environments
+
+The application must be designed to handle:
+
+- Home Wi-Fi.
+- College Wi-Fi.
+- Office Wi-Fi.
+- 2.4 GHz Wi-Fi.
+- 5 GHz Wi-Fi.
+- Phone hotspot.
+- Computer hotspot.
+- Ethernet-connected computer with Wi-Fi-connected phone.
+- Network interface switching.
+- Router restart.
+- Temporary network loss.
+- Device sleep and wake.
+- VPN interference.
+- Guest network restrictions.
+- Client isolation.
+- Firewall restrictions.
+- Multiple active network adapters.
+
+If the network blocks communication between devices, clearly explain the reason.
+
+Never show a fake successful connection when the devices cannot communicate.
+
+## 4.6 Additional transports
+
+Create a transport abstraction so future transport methods can be added without rewriting the entire product.
+
+Investigate and validate:
+
+### Bluetooth HID
+
+Potential use:
+
+- Receiver-free mode on compatible mobile and desktop combinations.
+
+Important limitations:
+
+- Android Bluetooth HID device support depends on Android version and OEM behavior.
+- iOS does not provide unrestricted generic Bluetooth HID mouse functionality for arbitrary applications.
+- BLE GATT is not equivalent to Bluetooth HID.
+- Desktop Bluetooth stacks have their own compatibility restrictions.
+
+Treat Bluetooth HID as an optional capability, not the universal primary connection.
+
+Only advertise it when the actual hardware and OS combination supports it.
+
+### Wi-Fi Direct
+
+Investigate:
+
+- Android Wi-Fi P2P.
+- Windows Wi-Fi Direct.
+- macOS alternatives where applicable.
+- Linux alternatives where applicable.
+
+Validate discovery, pairing, socket communication, reliability and reconnection on actual devices.
+
+Do not assume that the existence of an API guarantees cross-platform compatibility.
+
+### USB tethering
+
+Investigate USB tethering as an optional recovery connection.
+
+It must not require ADB or USB debugging.
+
+Validate whether the phone and computer can communicate over the resulting network interface.
+
+Do not advertise direct USB support unless it has been demonstrated.
+
+### Hotspot mode
+
+The application must support the same local-network protocol when one device creates a hotspot.
+
+Do not create a completely separate connection architecture for hotspot mode.
+
+## 4.7 Remote network support
+
+Design for a future optional remote mode.
+
+Investigate secure private networking such as:
+
+- User-managed VPN.
+- WireGuard-style private networks.
+- Tailscale-style networking.
+- Authenticated encrypted relay infrastructure.
+
+Local-network operation must not require internet access.
+
+Do not introduce insecure public port forwarding.
+
+Do not expose unauthenticated input endpoints to the internet.
+
+Remote connectivity must be an optional feature with its own threat model.
+
+---
+
+# PART 5 — SECURE PAIRING AND DEVICE IDENTITY
+
+Security must be designed into the application from the beginning.
+
+A computer must never accept arbitrary input from an unknown phone.
+
+## 5.1 First-time pairing
+
+Implement a simple, secure first-time pairing flow.
+
+Suggested sequence:
+
+1. Phone discovers the receiver.
+2. Phone sends a pairing request.
+3. Receiver displays a confirmation request.
+4. User approves the phone on the computer.
+5. Both devices establish trusted identities.
+6. Session keys are negotiated.
+7. The devices store trusted credentials securely.
+8. Future connections use the trusted identity.
+
+A short-lived QR code or pairing code may be used.
+
+It must not be necessary to scan a QR code every time.
+
+Pairing requests must expire.
+
+## 5.2 Security requirements
+
+Implement:
+
+- Authenticated encryption.
+- TLS 1.3 where supported.
+- Strong cryptographic identity.
+- Secure key exchange.
+- Random nonces.
+- Replay protection.
+- Session expiry.
+- Device revocation.
+- Pairing expiration.
+- Rate limiting.
+- Connection authentication.
+- Protected credential storage.
+
+Use:
+
+- Android Keystore.
+- iOS Keychain.
+- Windows protected credential storage.
+- macOS Keychain.
+- Appropriate Linux credential storage.
+
+Never store passwords, private keys or long-term authentication secrets in plaintext configuration files.
+
+## 5.3 Device management
+
+Provide a trusted-device management screen.
+
+The user must be able to:
+
+- View paired devices.
+- See the last connected time.
+- Rename trusted devices.
+- Remove trusted devices.
+- Revoke access.
+- Re-pair devices.
+
+The receiver must independently verify every connection.
+
+Never trust a device merely because it appears in discovery results.
+
+## 5.4 Privacy
+
+The application must not require a cloud account for local-network operation.
+
+Do not transmit pointer data, keyboard data, device identifiers or logs to external servers without an explicit feature requiring it and user consent.
+
+Do not implement analytics that capture keystrokes or pointer content.
+
+Do not collect unnecessary personal information.
+
+---
+
+# PART 6 — COMMON COMMUNICATION PROTOCOL
+
+Design and document a versioned communication protocol.
+
+Create:
+
+`docs/NETWORK_PROTOCOL.md`
+
+Use a well-defined serialization format such as Protobuf or a compact, strictly validated binary protocol.
+
+Choose one and use it consistently.
+
+The protocol must include:
+
+- Protocol version.
+- Message type.
+- Session identifier.
+- Sequence number where applicable.
+- Payload length.
+- Authentication context.
+- Capability negotiation.
+- Error handling.
+
+Define messages for:
+
+- DISCOVERY.
+- PAIR_REQUEST.
+- PAIR_APPROVE.
+- PAIR_REJECT.
+- SESSION_HELLO.
+- SESSION_READY.
+- CAPABILITIES.
+- POINTER_MOVE.
+- POINTER_POSITION.
+- BUTTON_STATE.
+- SCROLL.
+- KEY_DOWN.
+- KEY_UP.
+- KEY_CHORD.
+- ACTION_REQUEST.
+- ACTION_RESULT.
+- HEARTBEAT.
+- LATENCY_SAMPLE.
+- RELEASE_ALL.
+- DISCONNECT.
+- ERROR.
+
+Use appropriate reliable and low-latency message handling.
+
+Pointer movement can be coalesced so that obsolete movement events are dropped when a newer position is available.
+
+Do not drop important button, keyboard or control events without state recovery.
+
+Implement button-state snapshots to recover from missing events.
+
+All messages must be bounded and validated.
+
+Reject malformed, oversized, unsupported or unauthenticated messages.
+
+Document protocol version compatibility and future migration.
+
+---
+
+# PART 7 — CONNECTION STATE MACHINE
+
+Implement a formal state machine.
+
+Required states:
+
+- UNPAIRED.
+- DISCOVERING.
+- DEVICE_FOUND.
+- PAIRING.
+- PAIRED.
+- CONNECTING.
+- CONNECTED.
+- DEGRADED.
+- RECONNECTING.
+- DISCONNECTED.
+- FAILED.
+- REVOKED.
+
+Every state transition must be explicit.
+
+The UI must reflect the actual connection state.
+
+Do not show CONNECTED until:
+
+1. Network connection succeeds.
+2. Authentication succeeds.
+3. Protocol handshake succeeds.
+4. Receiver confirms session readiness.
+5. Required capabilities are negotiated.
+
+Implement reconnection with exponential backoff.
+
+Initial retry schedule:
+
+- 1 second.
+- 2 seconds.
+- 4 seconds.
+- 8 seconds.
+- 16 seconds.
+- 30 seconds maximum.
+
+Add random jitter to avoid synchronized reconnect attempts.
+
+Detect:
+
+- Wi-Fi disconnection.
+- Network interface changes.
+- Receiver restart.
+- Mobile application restart.
+- Computer sleep.
+- Computer wake.
+- Session expiry.
+- Authentication failure.
+- Firewall failure.
+
+When a connection is lost, release all held buttons and keys.
+
+Never leave a stuck mouse button or keyboard key after a disconnect.
+
+---
+
+# PART 8 — NATIVE DESKTOP INPUT ENGINE
+
+This is one of the most important parts of the product.
+
+The phone must control the actual computer, not merely display a cursor inside the receiver window.
+
+Implement a native input adapter for each supported desktop platform.
+
+## 8.1 Mouse operations
+
+Implement:
+
+- Relative pointer movement.
+- Optional absolute pointer movement where supported.
+- Left click.
+- Right click.
+- Middle click.
+- Double click.
+- Press and hold.
+- Drag and drop.
+- Two-finger scrolling.
+- Horizontal scrolling where supported.
+
+The receiver must convert the common input-event format into the correct native platform events.
+
+## 8.2 Keyboard operations
+
+Implement:
+
+- Basic keyboard input.
+- Modifier keys.
+- Key combinations.
+- Escape.
+- Enter.
+- Backspace.
+- Tab.
+- Arrow keys.
+- Function keys where supported.
+- Common shortcuts.
+
+Keyboard support must be explicitly capability-negotiated.
+
+Do not assume the same keyboard layout or key mapping across operating systems.
+
+Handle Unicode text separately from physical key events.
+
+Document platform-specific limitations.
+
+## 8.3 Input safety
+
+Implement a release-all mechanism.
+
+When any of the following occurs:
+
+- Connection loss.
+- Session expiry.
+- Receiver shutdown.
+- Mobile application crash.
+- Input protocol error.
+- Watchdog timeout.
+
+The receiver must release all simulated pressed buttons and keys.
+
+Implement a watchdog that periodically verifies valid session activity.
+
+Do not allow a malformed or unauthenticated event to trigger system input.
+
+---
+
+# PART 9 — MOBILE TOUCHPAD EXPERIENCE
+
+The mobile application must provide a full-screen touchpad interface.
+
+The touchpad must be responsive, comfortable and usable on different screen sizes.
+
+## 9.1 Basic gestures
+
+Implement:
+
+- One-finger movement: move pointer.
+- One-finger tap: left click.
+- One-finger double tap: double click.
+- One-finger hold and move: drag.
+- Two-finger tap: right click.
+- Two-finger vertical movement: vertical scroll.
+- Two-finger horizontal movement: horizontal scroll where supported.
+
+## 9.2 Advanced gestures
+
+Design support for:
+
+- Three-finger swipe.
+- Three-finger tap.
+- Configurable gestures.
+- Optional gesture-based shortcuts.
+- Optional desktop switching.
+- Optional application switching.
+
+Advanced gestures must be configurable.
+
+Do not implement operating-system actions that are unavailable on the target computer.
+
+## 9.3 Gesture engine
+
+Build a dedicated gesture state machine.
+
+It must distinguish:
+
+- Tap.
+- Double tap.
+- Long press.
+- Drag.
+- Multi-touch.
+- Scroll.
+- Swipe.
+
+Avoid conflicting gesture recognition.
+
+Initial tuning values may be used as starting points:
+
+- Tap duration: approximately 180 ms.
+- Tap movement tolerance: approximately 10 dp.
+- Double-tap interval: approximately 300 ms.
+- Long-press threshold: approximately 350 ms.
+- Multi-touch settling interval: approximately 80 ms.
+- Swipe distance: approximately 80 dp.
+
+These are initial engineering values, not fixed universal truths.
+
+Test and tune on different screen sizes and refresh rates.
+
+## 9.4 Sensitivity
+
+Provide:
+
+- Pointer sensitivity.
+- Scroll sensitivity.
+- Acceleration.
+- Gesture sensitivity.
+- Left/right-handed layout.
+- Optional natural scrolling.
+- Optional haptic feedback.
+
+Settings must be persisted locally.
+
+## 9.5 Touchpad interface
+
+The touchpad screen must have:
+
+- Large usable touch surface.
+- Clear connection status.
+- Accessible click controls.
+- Optional keyboard shortcut panel.
+- Optional quick actions.
+- Sensitivity access.
+- Reconnect control.
+- Minimal distractions.
+
+Do not overload the main touchpad with unnecessary controls.
+
+The main goal is to make pointer movement feel natural.
+
+---
+
+# PART 10 — ADDITIONAL FEATURES
+
+Implement additional features only after the basic connection and input pipeline is stable.
+
+Potential features:
+
+### 10.1 Keyboard panel
+
+Provide a virtual keyboard or shortcut interface.
+
+Support common shortcuts such as:
+
+- Copy.
+- Paste.
+- Cut.
+- Undo.
+- Redo.
+- Select all.
+- Alt+Tab.
+- Escape.
+- Enter.
+
+The implementation must respect the target computer's operating-system shortcut conventions.
+
+### 10.2 Media controls
+
+Where supported:
+
+- Play/pause.
+- Next track.
+- Previous track.
+- Volume up.
+- Volume down.
+- Mute.
+
+### 10.3 Presentation mode
+
+Allow the phone to function as a presentation remote.
+
+Potential controls:
+
+- Next slide.
+- Previous slide.
+- Start presentation.
+- End presentation.
+- Black screen where supported.
+
+### 10.4 Quick actions
+
+Create a safe, allowlisted action system.
+
+Do not accept arbitrary shell commands from the phone.
+
+Do not execute arbitrary files or scripts.
+
+Actions must have:
+
+- Unique identifier.
+- Capability check.
+- Explicit result.
+- Permission check.
+- Error response.
+
+Power operations must require confirmation and an appropriate cancellation countdown.
+
+Never claim an action succeeded merely because the request was received.
+
+Report:
+
+- Accepted.
+- Executed.
+- Unsupported.
+- Denied.
+- Failed.
+
+---
+
+# PART 11 — DESKTOP RECEIVER EXPERIENCE
+
+The desktop receiver must be lightweight and unobtrusive.
+
+It should run in the background after the user opens it, subject to platform lifecycle rules.
+
+The interface should include:
+
+- Receiver status.
+- Connection status.
+- Paired-device list.
+- Pairing approval.
+- Network status.
+- Permission status.
+- Capability information.
+- Diagnostics.
+- Settings.
+- Disconnect.
+- Revoke device.
+
+The user should be able to minimize the receiver.
+
+Provide optional start-on-login behavior.
+
+Do not automatically enable startup behavior without user consent.
+
+Do not install hidden services.
+
+Do not require administrator privileges unless a clearly documented platform-specific operation genuinely requires them.
+
+---
+
+# PART 12 — MOBILE APPLICATION EXPERIENCE
+
+Create a polished, consistent interface across Android and iOS.
+
+The visual identity should feel like a modern premium utility application.
+
+Design principles:
+
+- Clean.
+- Minimal.
+- Responsive.
+- Fast.
+- Accessible.
+- Consistent.
+- Professional.
+
+Main screens:
+
+1. Welcome / onboarding.
+2. Device discovery.
+3. Available computers.
+4. Pairing.
+5. Connection status.
+6. Touchpad.
+7. Keyboard.
+8. Quick actions.
+9. Trusted devices.
+10. Settings.
+11. Diagnostics.
+12. About.
+
+The interface must adapt to different device dimensions.
+
+Do not make the application look like a generic dashboard template.
+
+Do not sacrifice actual functionality for visual decoration.
+
+Use meaningful loading, empty, success, disconnected, degraded and error states.
+
+All controls must perform real actions.
+
+---
+
+# PART 13 — DIAGNOSTICS AND ERROR HANDLING
+
+A major requirement is that the application must explain why a connection failed.
+
+Never show only:
+
+"Connection failed."
+
+Provide a meaningful diagnostic category.
+
+Examples:
+
+- Computer not discovered.
+- Discovery permission denied.
+- Local network permission missing.
+- Receiver not running.
+- Network unreachable.
+- Firewall blocked.
+- Pairing required.
+- Authentication failed.
+- Protocol version incompatible.
+- Desktop input permission missing.
+- Input API unavailable.
+- Connection timed out.
+- Receiver restarted.
+- Session expired.
+
+Provide an appropriate recovery instruction for each error.
+
+Create diagnostic logs containing:
+
+- Timestamp.
+- Platform.
+- Application version.
+- Protocol version.
+- Connection state.
+- Transport.
+- Discovery result.
+- Authentication result.
+- Session status.
+- Latency measurements.
+- Input-processing errors.
+
+Never log passwords, private keys, authentication secrets, actual typed content or unnecessary personal information.
+
+Allow the user to export a sanitized diagnostic report.
+
+Do not silently swallow exceptions.
+
+Do not replace errors with fake success states.
+
+---
+
+# PART 14 — PERFORMANCE AND RELIABILITY
+
+The touchpad must feel responsive.
+
+Use these as initial engineering targets, not guaranteed results:
+
+| Metric | Initial target |
+|---|---|
+| First-time pairing | Under 30 seconds on a healthy supported LAN |
+| Trusted connection | Under 3 seconds on a healthy supported LAN |
+| Pointer latency | P95 at or below 50 ms |
+| Input delivery | At least 99.5% in controlled tests |
+| Recoverable reconnection | Target under 5 seconds |
+| Stuck input defects | Zero reproducible defects |
+| Crash-free sessions | At least 99.5% in the measured test population |
+
+Measure performance instead of guessing.
+
+Measure:
+
+- Mobile touch sampling.
+- Gesture recognition.
+- Message creation.
+- Network transmission.
+- Receiver processing.
+- Native input dispatch.
+- End-to-end pointer response.
+
+Record P50, P95 and P99 latency.
+
+Test on different network conditions.
+
+Do not claim a target has been achieved without recorded test evidence.
+
+---
+
+# PART 15 — COMPATIBILITY AND CAPABILITY DETECTION
+
+Build a runtime capability detection system.
+
+The mobile application must understand what the connected receiver supports.
+
+The receiver must report:
+
+- Mouse support.
+- Keyboard support.
+- Scroll support.
+- Media controls.
+- Presentation controls.
+- Advanced gestures.
+- System action support.
+- Platform restrictions.
+- Required permissions.
+
+The application must hide or disable unsupported features.
+
+Show the reason when a feature is unavailable.
+
+For example:
+
+If a Linux desktop is using a Wayland environment where the selected input method is unavailable, do not display full mouse support.
+
+If macOS Accessibility permission is missing, show the permission setup flow.
+
+If Bluetooth HID is unavailable, continue to offer the supported network connection.
+
+Create:
+
+`docs/PLATFORM_COMPATIBILITY.md`
+
+Include an explicit matrix for each platform, operating-system version, architecture and input capability.
+
+Use three labels:
+
+- Implemented and tested.
+- Implemented but not yet verified on real hardware.
+- Not supported / blocked by platform limitation.
+
+Never confuse these statuses.
+
+---
+
+# PART 16 — SECURITY THREAT MODEL
+
+Create:
+
+`docs/SECURITY.md`
+
+Analyze threats including:
+
+- Unknown device connecting to a receiver.
+- Unauthorized pairing.
+- Replay attacks.
+- Man-in-the-middle attacks.
+- Malformed network messages.
+- Excessively large messages.
+- Session hijacking.
+- Stolen paired device.
+- Local-network attackers.
+- Credential theft.
+- Malicious quick-action requests.
+- Remote-network abuse.
+- Denial of service.
+
+For each threat, document:
+
+1. Threat.
+2. Impact.
+3. Mitigation.
+4. Residual risk.
+5. Test case.
+
+Implement security controls rather than merely documenting them.
+
+---
+
+# PART 17 — TESTING STRATEGY
+
+Testing must cover the complete user journey.
+
+## 17.1 Unit tests
+
+Test:
+
+- Protocol serialization.
+- Message validation.
+- Gesture recognition.
+- State transitions.
+- Authentication.
+- Capability negotiation.
+- Button-state tracking.
+- Reconnection policy.
+- Input-release watchdog.
+- Error classification.
+
+## 17.2 Integration tests
+
+Test:
+
+- Discovery.
+- Pairing.
+- Authentication.
+- Session creation.
+- Pointer movement.
+- Mouse clicks.
+- Scroll.
+- Keyboard events.
+- Disconnect.
+- Reconnect.
+- Receiver restart.
+- Credential revocation.
+
+## 17.3 Network tests
+
+Test:
+
+1. Same Wi-Fi.
+2. Different Wi-Fi bands.
+3. Phone hotspot.
+4. Computer hotspot.
+5. Ethernet plus Wi-Fi.
+6. Wi-Fi toggle.
+7. Router restart.
+8. Network change.
+9. Firewall blocking.
+10. Guest-network isolation.
+11. Temporary packet loss.
+12. VPN interference.
+13. Computer sleep and wake.
+14. Phone application restart.
+15. Receiver application restart.
+
+## 17.4 Platform tests
+
+Test the actual mobile and desktop combinations.
+
+At minimum, establish a test matrix covering:
+
+- Android to Windows.
+- Android to macOS.
+- Android to Linux.
+- iOS to Windows.
+- iOS to macOS.
+- iOS to Linux.
+
+Add Android tablet and iPad testing.
+
+Add Chromebook only after establishing its supported receiver architecture.
+
+Test different vendors and device models.
+
+Do not assume one Android phone represents all Android devices.
+
+Do not assume one Linux distribution represents all Linux environments.
+
+## 17.5 Real hardware validation
+
+Simulation is useful but insufficient.
+
+If you do not have physical access to a particular operating system or hardware combination:
+
+- Build the implementation where possible.
+- Run available automated tests.
+- Mark hardware validation as pending.
+- Document what could not be tested.
+- Never claim successful real-device testing.
+
+For the primary connection, establish a repeatable test process.
+
+A suggested release gate is 100 consecutive successful connection and input sessions per supported primary-network configuration.
+
+This is a controlled test target, not proof of universal reliability.
+
+---
+
+# PART 18 — IMPLEMENTATION ROADMAP AND PHASE GATES
+
+Do not implement the entire system in one uncontrolled coding operation.
+
+Work through the following phases.
+
+Each phase must have a working deliverable, tests and a documented completion status.
+
+## PHASE 0 — PROJECT AUDIT
+
+Inspect the complete repository.
+
+Read the original PRD if available.
+
+Identify reusable code and architectural problems.
+
+Deliver:
+
+- Project audit.
+- Existing functionality report.
+- Technology inventory.
+- Risk register.
+- Revised architecture.
+
+Do not destroy working functionality.
+
+## PHASE 1 — SHARED CORE AND PROTOCOL
+
+Implement:
+
+- Shared core.
+- Message format.
+- Versioning.
+- Capability model.
+- State machine.
+- Transport abstraction.
+- Unit tests.
+
+Deliver:
+
+- Compilable shared core.
+- Protocol documentation.
+- Automated tests.
+
+## PHASE 2 — FIRST REAL END-TO-END CONNECTION
+
+Build the smallest genuinely working vertical slice.
+
+Implement one mobile client and one desktop receiver using the shared protocol.
+
+Start with Android and Windows if those environments are available for immediate validation.
+
+However, all design decisions must preserve the universal architecture.
+
+The initial vertical slice must:
+
+1. Launch the phone application.
+2. Launch the computer receiver.
+3. Discover the receiver.
+4. Establish a connection.
+5. Authenticate the session.
+6. Exchange a test message.
+7. Display accurate connection status.
+8. Measure latency.
+9. Disconnect cleanly.
+10. Reconnect.
+
+The receiver must display received test messages and counters.
+
+The mobile client must show actual receiver status.
+
+Do not create a fake connected state.
+
+Do not implement advanced touchpad gestures until this phase works.
+
+## PHASE 3 — SECURE PAIRING AND RECOVERY
+
+Implement:
+
+- Device identity.
+- Pairing approval.
+- Credential storage.
+- Authentication.
+- Session renewal.
+- Revocation.
+- Reconnection.
+- Input-release watchdog.
+- Network-change handling.
+
+Test restart and failure conditions.
+
+## PHASE 4 — BASIC NATIVE TOUCHPAD
+
+Implement:
+
+- Pointer movement.
+- Left click.
+- Right click.
+- Double click.
+- Drag.
+- Scroll.
+
+Test real system-wide input on the first supported desktop platform.
+
+## PHASE 5 — FIRST PLATFORM EXPANSION
+
+Implement and validate the shared protocol with:
+
+- Android to Windows.
+- Android to macOS.
+- Android to Linux.
+
+Create real native receiver adapters.
+
+Do not use fake compatibility layers.
+
+## PHASE 6 — iOS AND IPADOS
+
+Implement the iOS mobile client.
+
+Validate:
+
+- Discovery.
+- Local-network permission.
+- Pairing.
+- Connection.
+- Touch gestures.
+- Pointer control.
+- Reconnection.
+
+Test with each available desktop receiver.
+
+## PHASE 7 — ADVANCED FEATURES
+
+Implement:
+
+- Keyboard.
+- Advanced gestures.
+- Media controls.
+- Presentation mode.
+- Configurable shortcuts.
+- Device management.
+- Additional settings.
+
+## PHASE 8 — ADDITIONAL TRANSPORTS
+
+Investigate and implement only validated options:
+
+- Bluetooth HID.
+- Wi-Fi Direct.
+- USB tethering.
+- Optional private remote networking.
+
+Keep the primary local-network connection fully functional.
+
+## PHASE 9 — RELIABILITY, SECURITY AND PERFORMANCE
+
+Run the complete test matrix.
+
+Fix:
+
+- Crashes.
+- Connection failures.
+- Stuck inputs.
+- Gesture conflicts.
+- Permission failures.
+- Security vulnerabilities.
+- Performance regressions.
+
+## PHASE 10 — RELEASE
+
+Produce platform-specific builds and installation documentation.
+
+Only mark a platform as released when its implementation and release requirements have actually been verified.
+
+---
+
+# PART 19 — BUILD AND RELEASE REQUIREMENTS
+
+Produce appropriate installation packages.
+
+### Android
+
+- Installable Android APK for development/testing.
+- Release-ready Android build.
+- App signing configuration.
+- Permissions documentation.
+- Play Store preparation where appropriate.
+
+### iOS
+
+- Buildable Xcode project.
+- Signing configuration.
+- Entitlements.
+- Local-network usage descriptions.
+- App Store preparation where appropriate.
+
+Do not claim an iOS IPA can be freely installed on every iPhone without Apple's signing and distribution requirements.
+
+### Windows
+
+- Installable MSIX package or another justified installer.
+- Proper application identity.
+- Firewall handling.
+- Startup configuration.
+- Uninstallation support.
+- Upgrade support.
+
+### macOS
+
+- Signed application bundle.
+- Notarization-ready build.
+- Permission instructions.
+- Installation and removal instructions.
+
+### Linux
+
+- Suitable packages such as AppImage, DEB or RPM where practical.
+- Desktop entry.
+- Permission instructions.
+- Uninstallation instructions.
+
+Do not produce empty packages or placeholder installers.
+
+Test installation and uninstallation.
+
+---
+
+# PART 20 — USER-FRIENDLY SETUP AND RECOVERY
+
+The product's installation and connectivity experience is a core feature, not an afterthought.
+
+Design setup so that the user can understand what to do without technical knowledge.
+
+On mobile:
+
+- Display nearby computers.
+- Show whether the receiver is running.
+- Display trusted status.
+- Show the reason when connection fails.
+- Offer a retry button.
+- Provide advanced diagnostics only when needed.
+
+On desktop:
+
+- Display receiver status.
+- Show connected mobile devices.
+- Approve pairing.
+- Show permission problems.
+- Provide clear setup instructions.
+
+The application must never require the user to repeatedly type IP addresses.
+
+If discovery fails, offer a clear troubleshooting flow rather than silently failing.
+
+If a platform requires an installation or permission step, explain it honestly.
+
+---
+
+# PART 21 — DOCUMENTATION DELIVERABLES
+
+Maintain the following documentation throughout development:
+
+`docs/PROJECT_AUDIT.md`
+
+`docs/ARCHITECTURE.md`
+
+`docs/CONNECTION_FLOW.md`
+
+`docs/NETWORK_PROTOCOL.md`
+
+`docs/SECURITY.md`
+
+`docs/PLATFORM_COMPATIBILITY.md`
+
+`docs/ANDROID_COMPATIBILITY.md`
+
+`docs/IOS_COMPATIBILITY.md`
+
+`docs/WINDOWS_COMPATIBILITY.md`
+
+`docs/MACOS_COMPATIBILITY.md`
+
+`docs/LINUX_COMPATIBILITY.md`
+
+`docs/CHROMEOS_COMPATIBILITY.md`
+
+`docs/TEST_PLAN.md`
+
+`docs/TEST_RESULTS.md`
+
+`docs/KNOWN_LIMITATIONS.md`
+
+`docs/INSTALLATION.md`
+
+`docs/DEVELOPMENT_LOG.md`
+
+`docs/RELEASE_CHECKLIST.md`
+
+These documents must describe the actual implementation.
+
+Do not write documentation that claims a feature exists when it has not been implemented.
+
+---
+
+# PART 22 — STRICT DEVELOPMENT RULES
+
+These rules are mandatory.
+
+1. Never pretend a connection succeeded.
+2. Never generate fake latency measurements.
+3. Never create buttons that do nothing.
+4. Never use simulated mouse movement as evidence of native input support.
+5. Never claim an operating system is supported without validation.
+6. Never silently swallow exceptions.
+7. Never leave critical features as TODO placeholders.
+8. Never use hardcoded test IP addresses in the production application.
+9. Never hardcode the original test phone or laptop.
+10. Never store authentication secrets in plaintext.
+11. Never require ADB or USB debugging for ordinary connectivity.
+12. Never execute arbitrary commands received from the mobile client.
+13. Never bypass operating-system security permissions.
+14. Never require unnecessary administrator or root privileges.
+15. Never replace existing working code without first understanding it.
+16. Never create a new architecture that ignores the original PRD.
+17. Never add unnecessary dependencies.
+18. Never build a visual-only prototype and call it complete.
+19. Never mark an untested platform as supported.
+20. Never claim that automated tests prove real hardware compatibility.
+
+If you encounter a limitation, explain it and implement the best supported alternative.
+
+If a platform prevents a particular feature, clearly document the limitation instead of pretending it works.
+
+---
+
+# PART 23 — DEVELOPMENT WORKFLOW
+
+Use this workflow for every significant task:
+
+1. Inspect relevant existing files.
+2. Understand the current implementation.
+3. Identify the actual problem.
+4. Decide the smallest correct architectural change.
+5. Implement the change.
+6. Compile the affected projects.
+7. Run relevant automated tests.
+8. Perform available integration tests.
+9. Inspect the logs and errors.
+10. Fix regressions.
+11. Update documentation.
+12. Record the result in the development log.
+
+After each phase, provide a concise engineering report containing:
+
+- What was implemented.
+- Files created.
+- Files modified.
+- Dependencies added or removed.
+- Build results.
+- Tests executed.
+- Tests passed.
+- Tests failed.
+- Hardware combinations actually verified.
+- Known limitations.
+- Remaining work.
+- Next phase.
+
+If something fails, investigate and fix it before moving forward.
+
+Do not simply continue building features on top of a broken foundation.
+
+---
+
+# PART 24 — PROJECT STRUCTURE
+
+Design a clean, maintainable repository structure.
+
+A possible structure is:
+
+`/apps`
+- `/android`
+- `/ios`
+- `/windows`
+- `/macos`
+- `/linux`
+
+`/core`
+- `/protocol`
+- `/network`
+- `/security`
+- `/discovery`
+- `/session`
+- `/capabilities`
+- `/input-model`
+- `/diagnostics`
+
+`/platform`
+- `/android`
+- `/ios`
+- `/windows`
+- `/macos`
+- `/linux`
+
+`/tests`
+- `/unit`
+- `/integration`
+- `/protocol`
+- `/network`
+- `/platform`
+
+`/docs`
+
+`/scripts`
+
+`/release`
+
+You may modify this structure if there is a better justified architecture.
+
+Avoid duplicating the same protocol or business logic in multiple applications.
+
+Keep platform-specific code isolated.
+
+---
+
+# PART 25 — FINAL DEFINITION OF DONE
+
+Digital Touchpad must not be considered complete simply because all projects compile.
+
+The product is ready for a supported platform only when:
+
+1. The mobile application installs and launches.
+2. The desktop receiver installs and launches.
+3. Discovery works.
+4. Secure first-time pairing works.
+5. Subsequent trusted connections work.
+6. Connection status is accurate.
+7. Real mouse movement works system-wide within platform permissions.
+8. Mouse clicks work.
+9. Scrolling works.
+10. Disconnect recovery works.
+11. No stuck mouse buttons or keys occur.
+12. Permission failures are understandable.
+13. Logs and diagnostics are usable.
+14. The platform's compatibility status is documented.
+15. Installation and removal have been tested.
+16. The release build has been verified.
+
+For each platform, record its own completion status.
+
+A Windows release does not prove macOS support.
+
+An Android release does not prove iOS support.
+
+An X11 Linux test does not prove Wayland support.
+
+A successful emulator test does not prove real-device compatibility.
+
+---
+
+# PART 26 — YOUR FIRST EXECUTION TASK
+
+Now begin working.
+
+Do not respond with only a summary of this prompt.
+
+Do not merely generate a project plan and wait.
+
+Perform these actions:
+
+1. Inspect the current workspace.
+2. Read all relevant project files.
+3. Read the original Digital Touchpad PRD if it exists.
+4. Produce the project audit.
+5. Identify the existing connectivity failures.
+6. Design the universal architecture.
+7. Select the shared-core technology based on evidence.
+8. Define the protocol.
+9. Define the platform compatibility matrix.
+10. Begin implementing Phase 1 and Phase 2.
+
+Prioritize a genuinely working end-to-end connection over visual design.
+
+If the existing project has a working part, preserve it.
+
+If the old architecture is fundamentally unsuitable, explain why and migrate carefully.
+
+Do not attempt to implement every operating system simultaneously before proving the shared core.
+
+Build a real vertical slice first, then expand systematically.
+
+You are authorized to create and modify files in the project workspace, install appropriate development dependencies where available, compile projects, run tests and fix errors.
+
+However, do not perform destructive operations without first understanding their impact.
+
+Do not claim that a physical device was tested unless it was actually tested.
+
+If you need hardware, credentials, platform signing access or user approval that you do not have, identify the exact requirement and continue with all work that can be completed independently.
+
+## THE FINAL PRODUCT VISION
+
+A person should be able to pick up their Android phone or iPhone, open Digital Touchpad, select a nearby Windows PC, Mac or Linux computer, and use the phone as a responsive wireless touchpad.
+
+They should not have to worry about brands, networking complexity or repeated setup.
+
+The connection should feel effortless.
+
+The input should feel natural.
+
+The software should be secure.
+
+The application should be honest about platform limitations.
+
+The architecture should be extensible enough to support additional devices and operating systems in the future.
+
+**Build Digital Touchpad as a real universal cross-platform product—not as a device-specific experiment.**
