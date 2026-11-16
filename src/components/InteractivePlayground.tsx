@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { MousePointer, RefreshCw, Radio, Shield, Terminal, Volume2, Sliders, Play, Laptop, Smartphone, CheckCircle, Zap } from 'lucide-react';
+import { MousePointer, RefreshCw, Radio, Shield, Terminal, Volume2, Sliders, Play, Laptop, Smartphone, CheckCircle, Zap, Wifi, Link2, Unlink } from 'lucide-react';
 import { GestureClassifier } from '../core/protocol/gestureEngine';
-import { createUCPEnvelope, serializePacket } from '../core/protocol/serializer';
+import { createUCPEnvelope } from '../core/protocol/serializer';
 import { ConnectionStateMachine } from '../core/protocol/stateMachine';
 import { ConnectionState, UCPEnvelope } from '../core/protocol/types';
 
@@ -10,6 +10,11 @@ export const InteractivePlayground: React.FC = () => {
   const [stateMachine] = useState(() => new ConnectionStateMachine('CONNECTED'));
   const [classifier] = useState(() => new GestureClassifier(1.2, true));
   const [connectionState, setConnectionState] = useState<ConnectionState>('CONNECTED');
+
+  // Real WebSocket bridge to PC receiver
+  const [pcAddress, setPcAddress] = useState('192.168.1.104:8443');
+  const [isRealConnected, setIsRealConnected] = useState(false);
+  const [realWs, setRealWs] = useState<WebSocket | null>(null);
 
   // Interactive Coordinates & Metrics
   const [cursorPos, setCursorPos] = useState({ x: 50, y: 50 });
@@ -36,15 +41,48 @@ export const InteractivePlayground: React.FC = () => {
     classifier.naturalScrolling = naturalScroll;
   }, [classifier, sensitivity, naturalScroll]);
 
-  // Dispatch a simulated packet
+  // Connect to Real PC WebSocket Receiver
+  const toggleRealConnection = () => {
+    if (isRealConnected && realWs) {
+      realWs.close();
+      setRealWs(null);
+      setIsRealConnected(false);
+      return;
+    }
+
+    try {
+      const cleanAddr = pcAddress.replace('http://', '').replace('ws://', '').trim();
+      const ws = new WebSocket(`ws://${cleanAddr}/ucp`);
+      ws.onopen = () => {
+        setIsRealConnected(true);
+        setRealWs(ws);
+      };
+      ws.onclose = () => {
+        setIsRealConnected(false);
+        setRealWs(null);
+      };
+      ws.onerror = () => {
+        alert(`Could not connect to ws://${cleanAddr}/ucp. Make sure receiver is running!`);
+      };
+    } catch (e) {
+      alert('Invalid receiver address');
+    }
+  };
+
+  // Dispatch a simulated packet + forward to Real PC if connected
   const emitPacket = (type: any, payload: any) => {
     if (connectionState !== 'CONNECTED' && connectionState !== 'DEGRADED') return;
     const packet = createUCPEnvelope(type, 'sess_prod_99x8', payload);
     setRecentPackets((prev) => [packet, ...prev.slice(0, 14)]);
     setLatency(Number((3.1 + Math.random() * 0.9).toFixed(1)));
+
+    // Forward to real Windows PC if connected
+    if (realWs && realWs.readyState === WebSocket.OPEN) {
+      realWs.send(JSON.stringify({ type, payload }));
+    }
   };
 
-  // Handle Touch/Mouse input on the simulated pad
+  // Handle Touch/Mouse input on the pad
   const handlePointerDown = (e: React.PointerEvent) => {
     if (!padRef.current) return;
     setTouchActive(true);
@@ -106,8 +144,8 @@ export const InteractivePlayground: React.FC = () => {
 
   return (
     <div className="py-12 sm:py-20 relative">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
-        {/* Title & HUD */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+        {/* Title & Real PC Bridge Bar */}
         <div className="flex flex-col md:flex-row md:items-center justify-between pb-6 border-b border-white/10 gap-4">
           <div>
             <div className="flex items-center gap-2">
@@ -120,27 +158,39 @@ export const InteractivePlayground: React.FC = () => {
             </p>
           </div>
 
-          {/* Connection State Toggle Bar */}
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-zinc-900 border border-white/10 text-xs font-mono">
-              <span className={`w-2 h-2 rounded-full ${connectionState === 'CONNECTED' ? 'bg-glyph-green animate-pulse' : 'bg-glyph-red'}`}></span>
-              <span className="text-zinc-400">STATE:</span>
-              <span className="text-white font-bold">{connectionState}</span>
-            </div>
-
+          {/* Real PC WebSocket Bridge Input */}
+          <div className="glass-panel-elevated p-2 sm:p-3 rounded-2xl border border-white/15 flex flex-wrap items-center gap-2">
+            <span className="text-[11px] font-mono text-zinc-400 flex items-center gap-1 pl-1">
+              <Wifi className="w-3.5 h-3.5 text-glyph-cyan" />
+              <span>REAL PC:</span>
+            </span>
+            <input
+              type="text"
+              value={pcAddress}
+              onChange={(e) => setPcAddress(e.target.value)}
+              placeholder="192.168.1.xxx:8443"
+              disabled={isRealConnected}
+              className="bg-black/60 border border-white/10 rounded-xl px-2.5 py-1 text-xs font-mono text-white w-40 focus:outline-none focus:border-glyph-cyan"
+            />
             <button
-              onClick={() => {
-                if (connectionState === 'CONNECTED') {
-                  stateMachine.transition('DISCONNECTED', 'User manual disconnect');
-                } else {
-                  stateMachine.transition('CONNECTING', 'User manual reconnect');
-                  setTimeout(() => stateMachine.transition('CONNECTED', 'Handshake OK'), 400);
-                }
-              }}
-              className="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-mono text-xs flex items-center gap-1.5 border border-white/10 transition-colors"
+              onClick={toggleRealConnection}
+              className={`px-3 py-1.5 rounded-xl font-mono text-xs font-bold flex items-center gap-1.5 transition-colors ${
+                isRealConnected
+                  ? 'bg-glyph-green text-black'
+                  : 'bg-white/10 hover:bg-white/20 text-white border border-white/15'
+              }`}
             >
-              <RefreshCw className="w-3.5 h-3.5" />
-              <span>{connectionState === 'CONNECTED' ? 'DISCONNECT' : 'RECONNECT'}</span>
+              {isRealConnected ? (
+                <>
+                  <Unlink className="w-3.5 h-3.5" />
+                  <span>CONNECTED TO PC</span>
+                </>
+              ) : (
+                <>
+                  <Link2 className="w-3.5 h-3.5" />
+                  <span>BRIDGE TO PC</span>
+                </>
+              )}
             </button>
           </div>
         </div>
@@ -228,14 +278,13 @@ export const InteractivePlayground: React.FC = () => {
                     <div className="w-2 h-2 rounded-full bg-glyph-red"></div>
                     <span className="text-zinc-400">Target Display (1920x1080)</span>
                   </div>
-                  <span className="text-glyph-cyan">SendInput Active</span>
+                  <span className="text-glyph-cyan">{isRealConnected ? 'REAL PC BRIDGE ACTIVE' : 'SendInput Active'}</span>
                 </div>
 
                 {/* Display Area with Live Cursor */}
                 <div className="flex-1 my-2 rounded-lg bg-zinc-900/40 border border-white/5 relative overflow-hidden">
                   <div className="absolute inset-0 dot-pattern opacity-25"></div>
 
-                  {/* Desktop Content Illustration */}
                   <div className="p-4 space-y-2">
                     <div className="w-24 h-14 rounded-lg bg-white/5 border border-white/10 p-2 flex flex-col justify-between">
                       <Laptop className="w-4 h-4 text-zinc-400" />
@@ -268,7 +317,7 @@ export const InteractivePlayground: React.FC = () => {
                 {/* Taskbar */}
                 <div className="h-6 rounded bg-zinc-900 border border-white/5 flex items-center justify-between px-2 text-[9px] font-mono text-zinc-400">
                   <span>GlyphPad Receiver v1.0</span>
-                  <span className="text-glyph-green">ONLINE</span>
+                  <span className="text-glyph-green">{isRealConnected ? 'CONNECTED TO REAL PC' : 'ONLINE'}</span>
                 </div>
               </div>
             </div>
