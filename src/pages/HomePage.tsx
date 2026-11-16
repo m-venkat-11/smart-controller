@@ -25,7 +25,12 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
   // Connection & WebSocket state
   const [receiverAddress, setReceiverAddress] = useState<string>(() => {
     if (typeof window !== 'undefined') {
-      return localStorage.getItem('glyph_receiver_addr') || 'localhost:8443';
+      const saved = localStorage.getItem('glyph_receiver_addr');
+      if (saved) return saved;
+      if (window.location.port && window.location.port !== '80' && window.location.port !== '443') {
+        return window.location.host;
+      }
+      return 'localhost:8443';
     }
     return 'localhost:8443';
   });
@@ -80,7 +85,18 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
     disconnectFromReceiver();
 
     try {
-      const cleanAddr = receiverAddress.replace('http://', '').replace('ws://', '').trim();
+      let cleanAddr = receiverAddress
+        .replace('http://', '')
+        .replace('https://', '')
+        .replace('ws://', '')
+        .replace('wss://', '')
+        .trim();
+
+      // If user provided just IP without port, default to 8443
+      if (!cleanAddr.includes(':')) {
+        cleanAddr = `${cleanAddr}:8443`;
+      }
+
       localStorage.setItem('glyph_receiver_addr', cleanAddr);
 
       setConnectionState('CONNECTING');

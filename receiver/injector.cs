@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -13,6 +14,9 @@ namespace GlyphPadReceiver {
 
         [DllImport("user32.dll")]
         static extern bool LockWorkStation();
+
+        [DllImport("PowrProf.dll", CharSet = CharSet.Auto, ExactSpelling = true)]
+        static extern bool SetSuspendState(bool hiberate, bool forceCritical, bool disableWakeEvent);
 
         // Mouse flags
         const uint MOUSEEVENTF_MOVE = 0x0001;
@@ -47,6 +51,7 @@ namespace GlyphPadReceiver {
         const byte VK_UP = 0x26;
         const byte VK_RIGHT = 0x27;
         const byte VK_DOWN = 0x28;
+        const byte VK_SNAPSHOT = 0x2C; // Print Screen
         const byte VK_DELETE = 0x2E;
         const byte VK_LWIN = 0x5B;
 
@@ -55,6 +60,7 @@ namespace GlyphPadReceiver {
         const byte VK_VOLUME_UP = 0xAF;
         const byte VK_MEDIA_NEXT_TRACK = 0xB0;
         const byte VK_MEDIA_PREV_TRACK = 0xB1;
+        const byte VK_MEDIA_STOP = 0xB2;
         const byte VK_MEDIA_PLAY_PAUSE = 0xB3;
 
         static void Main(string[] args) {
@@ -123,7 +129,7 @@ namespace GlyphPadReceiver {
                             mouse_event(MOUSEEVENTF_MIDDLEUP, 0, 0, 0, UIntPtr.Zero);
                             break;
 
-                        case "S": // Scroll: S <delta>
+                        case "S": // Scroll Vertical: S <delta>
                             if (parts.Length >= 2) {
                                 int delta = int.Parse(parts[1]);
                                 mouse_event(MOUSEEVENTF_WHEEL, 0, 0, (uint)delta, UIntPtr.Zero);
@@ -137,14 +143,14 @@ namespace GlyphPadReceiver {
                             }
                             break;
 
-                        case "K": // Press key: K <vkCode>
+                        case "K": // Key code: K <vk>
                             if (parts.Length >= 2) {
                                 byte vk = byte.Parse(parts[1]);
                                 TapKey(vk);
                             }
                             break;
 
-                        case "TEXT": // Type text: TEXT <base64 encoded UTF8 string>
+                        case "TEXT": // Type text: TEXT <base64>
                             if (parts.Length >= 2) {
                                 byte[] bytes = Convert.FromBase64String(parts[1]);
                                 string text = Encoding.UTF8.GetString(bytes);
@@ -173,9 +179,24 @@ namespace GlyphPadReceiver {
             keybd_event(vk, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
         }
 
+        static void SendChord(byte mod1, byte key) {
+            keybd_event(mod1, 0, 0, UIntPtr.Zero);
+            keybd_event(key, 0, 0, UIntPtr.Zero);
+            keybd_event(key, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
+            keybd_event(mod1, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
+        }
+
+        static void SendChord3(byte mod1, byte mod2, byte key) {
+            keybd_event(mod1, 0, 0, UIntPtr.Zero);
+            keybd_event(mod2, 0, 0, UIntPtr.Zero);
+            keybd_event(key, 0, 0, UIntPtr.Zero);
+            keybd_event(key, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
+            keybd_event(mod2, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
+            keybd_event(mod1, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
+        }
+
         static void TypeString(string text) {
             foreach (char c in text) {
-                // Unicode keystroke
                 keybd_event(0, (byte)c, KEYEVENTF_UNICODE, UIntPtr.Zero);
                 keybd_event(0, (byte)c, KEYEVENTF_UNICODE | KEYEVENTF_KEYUP, UIntPtr.Zero);
             }
@@ -193,100 +214,230 @@ namespace GlyphPadReceiver {
 
         static void HandleAction(string action) {
             switch (action.ToUpper()) {
-                case "SHOW_DESKTOP": // Win + D
-                    keybd_event(VK_LWIN, 0, 0, UIntPtr.Zero);
-                    keybd_event(0x44, 0, 0, UIntPtr.Zero); // 'D'
-                    keybd_event(0x44, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
-                    keybd_event(VK_LWIN, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
+                // 1. WINDOWS SYSTEM & APPS (PRD Section 09)
+                case "SETTINGS": // Win + I
+                    SendChord(VK_LWIN, 0x49); // 'I'
+                    break;
+
+                case "EXPLORER": // Win + E
+                    SendChord(VK_LWIN, 0x45); // 'E'
+                    break;
+
+                case "SEARCH": // Win + S
+                    SendChord(VK_LWIN, 0x53); // 'S'
                     break;
 
                 case "TASK_MANAGER": // Ctrl + Shift + Esc
-                    keybd_event(VK_CONTROL, 0, 0, UIntPtr.Zero);
-                    keybd_event(VK_SHIFT, 0, 0, UIntPtr.Zero);
-                    keybd_event(VK_ESCAPE, 0, 0, UIntPtr.Zero);
-                    keybd_event(VK_ESCAPE, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
-                    keybd_event(VK_SHIFT, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
-                    keybd_event(VK_CONTROL, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
+                    SendChord3(VK_CONTROL, VK_SHIFT, VK_ESCAPE);
                     break;
 
+                case "TERMINAL": // Open terminal
+                    try { Process.Start("wt.exe"); } catch {
+                        try { Process.Start("powershell.exe"); } catch { }
+                    }
+                    break;
+
+                case "CALCULATOR":
+                    try { Process.Start("calc.exe"); } catch { }
+                    break;
+
+                case "BROWSER":
+                    try { Process.Start("https://"); } catch { }
+                    break;
+
+                case "NOTEPAD":
+                    try { Process.Start("notepad.exe"); } catch { }
+                    break;
+
+                case "CONTROL_PANEL":
+                    try { Process.Start("control.exe"); } catch { }
+                    break;
+
+                // 2. WINDOW MANAGEMENT (PRD Page 8 & 9)
+                case "SHOW_DESKTOP": // Win + D
+                    SendChord(VK_LWIN, 0x44); // 'D'
+                    break;
+
+                case "MINIMIZE_ALL": // Win + M
+                    SendChord(VK_LWIN, 0x4D); // 'M'
+                    break;
+
+                case "RESTORE_ALL": // Win + Shift + M
+                    SendChord3(VK_LWIN, VK_SHIFT, 0x4D);
+                    break;
+
+                case "TASK_VIEW": // Win + Tab
+                    SendChord(VK_LWIN, VK_TAB);
+                    break;
+
+                case "ALT_TAB": // Alt + Tab
+                    SendChord(VK_MENU, VK_TAB);
+                    break;
+
+                case "SNAP_LEFT": // Win + Left
+                    SendChord(VK_LWIN, VK_LEFT);
+                    break;
+
+                case "SNAP_RIGHT": // Win + Right
+                    SendChord(VK_LWIN, VK_RIGHT);
+                    break;
+
+                case "MAXIMIZE": // Win + Up
+                    SendChord(VK_LWIN, VK_UP);
+                    break;
+
+                case "MINIMIZE": // Win + Down
+                    SendChord(VK_LWIN, VK_DOWN);
+                    break;
+
+                // 3. VIRTUAL DESKTOPS
+                case "DESKTOP_LEFT": // Win + Ctrl + Left
+                    SendChord3(VK_LWIN, VK_CONTROL, VK_LEFT);
+                    break;
+
+                case "DESKTOP_RIGHT": // Win + Ctrl + Right
+                    SendChord3(VK_LWIN, VK_CONTROL, VK_RIGHT);
+                    break;
+
+                case "NEW_DESKTOP": // Win + Ctrl + D
+                    SendChord3(VK_LWIN, VK_CONTROL, 0x44); // 'D'
+                    break;
+
+                case "CLOSE_DESKTOP": // Win + Ctrl + F4
+                    SendChord3(VK_LWIN, VK_CONTROL, 0x73); // VK_F4
+                    break;
+
+                // 4. DISPLAY & SCREENSHOT
+                case "SNIP": // Win + Shift + S
+                    SendChord3(VK_LWIN, VK_SHIFT, 0x53); // 'S'
+                    break;
+
+                case "SCREENSHOT": // Print Screen
+                    TapKey(VK_SNAPSHOT);
+                    break;
+
+                case "PROJECT_SCREEN": // Win + P
+                    SendChord(VK_LWIN, 0x50); // 'P'
+                    break;
+
+                // 5. AUDIO & MEDIA CONTROLS
+                case "VOL_UP":
+                    TapKey(VK_VOLUME_UP);
+                    break;
+
+                case "VOL_DOWN":
+                    TapKey(VK_VOLUME_DOWN);
+                    break;
+
+                case "MUTE":
+                    TapKey(VK_VOLUME_MUTE);
+                    break;
+
+                case "MEDIA_PLAY_PAUSE":
+                    TapKey(VK_MEDIA_PLAY_PAUSE);
+                    break;
+
+                case "MEDIA_NEXT":
+                    TapKey(VK_MEDIA_NEXT_TRACK);
+                    break;
+
+                case "MEDIA_PREV":
+                    TapKey(VK_MEDIA_PREV_TRACK);
+                    break;
+
+                case "MEDIA_STOP":
+                    TapKey(VK_MEDIA_STOP);
+                    break;
+
+                // 6. EDITING SHORTCUTS
+                case "COPY": // Ctrl + C
+                    SendChord(VK_CONTROL, 0x43);
+                    break;
+
+                case "PASTE": // Ctrl + V
+                    SendChord(VK_CONTROL, 0x56);
+                    break;
+
+                case "CUT": // Ctrl + X
+                    SendChord(VK_CONTROL, 0x58);
+                    break;
+
+                case "UNDO": // Ctrl + Z
+                    SendChord(VK_CONTROL, 0x5A);
+                    break;
+
+                case "REDO": // Ctrl + Y
+                    SendChord(VK_CONTROL, 0x59);
+                    break;
+
+                case "SELECT_ALL": // Ctrl + A
+                    SendChord(VK_CONTROL, 0x41);
+                    break;
+
+                case "FIND": // Ctrl + F
+                    SendChord(VK_CONTROL, 0x46);
+                    break;
+
+                case "SAVE": // Ctrl + S
+                    SendChord(VK_CONTROL, 0x53);
+                    break;
+
+                case "ZOOM_IN": // Ctrl + Plus
+                    SendChord(VK_CONTROL, 0xBB);
+                    break;
+
+                case "ZOOM_OUT": // Ctrl + Minus
+                    SendChord(VK_CONTROL, 0xBD);
+                    break;
+
+                // 7. PRESENTATION MODE
+                case "SLIDE_NEXT":
+                    TapKey(VK_NEXT);
+                    break;
+
+                case "SLIDE_PREV":
+                    TapKey(VK_PRIOR);
+                    break;
+
+                case "FULLSCREEN":
+                case "START_SLIDES": // F5
+                    TapKey(0x74); // VK_F5
+                    break;
+
+                case "SLIDES_CURRENT": // Shift + F5
+                    SendChord(VK_SHIFT, 0x74);
+                    break;
+
+                case "END_SLIDES": // Esc
+                    TapKey(VK_ESCAPE);
+                    break;
+
+                case "BLACK_SCREEN": // 'B'
+                    TapKey(0x42);
+                    break;
+
+                case "WHITE_SCREEN": // 'W'
+                    TapKey(0x57);
+                    break;
+
+                // 8. POWER & SECURITY
                 case "LOCK_PC":
                     LockWorkStation();
                     break;
 
-                case "SNIP": // Win + Shift + S
-                    keybd_event(VK_LWIN, 0, 0, UIntPtr.Zero);
-                    keybd_event(VK_SHIFT, 0, 0, UIntPtr.Zero);
-                    keybd_event(0x53, 0, 0, UIntPtr.Zero); // 'S'
-                    keybd_event(0x53, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
-                    keybd_event(VK_SHIFT, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
-                    keybd_event(VK_LWIN, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
+                case "SLEEP":
+                    try { SetSuspendState(false, true, true); } catch { }
                     break;
 
-                case "ALT_TAB":
-                    keybd_event(VK_MENU, 0, 0, UIntPtr.Zero);
-                    keybd_event(VK_TAB, 0, 0, UIntPtr.Zero);
-                    keybd_event(VK_TAB, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
-                    keybd_event(VK_MENU, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
+                case "RESTART":
+                    try { Process.Start("shutdown.exe", "/r /t 0"); } catch { }
                     break;
 
-                case "DESKTOP_LEFT": // Win + Ctrl + Left
-                    keybd_event(VK_LWIN, 0, 0, UIntPtr.Zero);
-                    keybd_event(VK_CONTROL, 0, 0, UIntPtr.Zero);
-                    keybd_event(VK_LEFT, 0, 0, UIntPtr.Zero);
-                    keybd_event(VK_LEFT, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
-                    keybd_event(VK_CONTROL, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
-                    keybd_event(VK_LWIN, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
+                case "SHUTDOWN":
+                    try { Process.Start("shutdown.exe", "/s /t 0"); } catch { }
                     break;
 
-                case "DESKTOP_RIGHT": // Win + Ctrl + Right
-                    keybd_event(VK_LWIN, 0, 0, UIntPtr.Zero);
-                    keybd_event(VK_CONTROL, 0, 0, UIntPtr.Zero);
-                    keybd_event(VK_RIGHT, 0, 0, UIntPtr.Zero);
-                    keybd_event(VK_RIGHT, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
-                    keybd_event(VK_CONTROL, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
-                    keybd_event(VK_LWIN, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
-                    break;
-
-                case "COPY": // Ctrl + C
-                    keybd_event(VK_CONTROL, 0, 0, UIntPtr.Zero);
-                    keybd_event(0x43, 0, 0, UIntPtr.Zero); // 'C'
-                    keybd_event(0x43, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
-                    keybd_event(VK_CONTROL, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
-                    break;
-
-                case "PASTE": // Ctrl + V
-                    keybd_event(VK_CONTROL, 0, 0, UIntPtr.Zero);
-                    keybd_event(0x56, 0, 0, UIntPtr.Zero); // 'V'
-                    keybd_event(0x56, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
-                    keybd_event(VK_CONTROL, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
-                    break;
-
-                case "UNDO": // Ctrl + Z
-                    keybd_event(VK_CONTROL, 0, 0, UIntPtr.Zero);
-                    keybd_event(0x5A, 0, 0, UIntPtr.Zero); // 'Z'
-                    keybd_event(0x5A, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
-                    keybd_event(VK_CONTROL, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
-                    break;
-
-                case "SELECT_ALL": // Ctrl + A
-                    keybd_event(VK_CONTROL, 0, 0, UIntPtr.Zero);
-                    keybd_event(0x41, 0, 0, UIntPtr.Zero); // 'A'
-                    keybd_event(0x41, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
-                    keybd_event(VK_CONTROL, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
-                    break;
-
-                case "SLIDE_NEXT": // Page Down / Right Arrow
-                    TapKey(VK_NEXT);
-                    break;
-
-                case "SLIDE_PREV": // Page Up / Left Arrow
-                    TapKey(VK_PRIOR);
-                    break;
-
-                case "FULLSCREEN": // F5
-                    TapKey(0x74); // VK_F5
-                    break;
-
+                // 9. BASIC KEYS
                 case "ESC":
                     TapKey(VK_ESCAPE);
                     break;
@@ -321,30 +472,6 @@ namespace GlyphPadReceiver {
 
                 case "RIGHT":
                     TapKey(VK_RIGHT);
-                    break;
-
-                case "VOL_UP":
-                    TapKey(VK_VOLUME_UP);
-                    break;
-
-                case "VOL_DOWN":
-                    TapKey(VK_VOLUME_DOWN);
-                    break;
-
-                case "MUTE":
-                    TapKey(VK_VOLUME_MUTE);
-                    break;
-
-                case "MEDIA_PLAY_PAUSE":
-                    TapKey(VK_MEDIA_PLAY_PAUSE);
-                    break;
-
-                case "MEDIA_NEXT":
-                    TapKey(VK_MEDIA_NEXT_TRACK);
-                    break;
-
-                case "MEDIA_PREV":
-                    TapKey(VK_MEDIA_PREV_TRACK);
                     break;
             }
         }

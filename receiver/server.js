@@ -13,7 +13,7 @@ const { WebSocketServer } = require('ws');
 
 const PORT = process.env.PORT || 8443;
 
-// Find local IPv4 address
+// Find non-internal IPv4 address
 function getLocalIp() {
   const nets = os.networkInterfaces();
   for (const name of Object.keys(nets)) {
@@ -28,32 +28,57 @@ function getLocalIp() {
 
 const localIp = getLocalIp();
 
-// Spawn C# Input Injector subprocess
-const injectorPath = path.join(__dirname, 'injector.exe');
-if (!fs.existsSync(injectorPath)) {
-  console.error('[Error] receiver/injector.exe not found! Please compile injector.cs first.');
-  process.exit(1);
+// Spawn C# Input Injector subprocess safely
+let injector = null;
+try {
+  injector = spawn('injector.exe', [], {
+    cwd: __dirname,
+    shell: true,
+    stdio: ['pipe', 'pipe', 'pipe'],
+    windowsHide: true,
+  });
+
+  injector.on('spawn', () => {
+    console.log('[GlyphPad] C# Native Win32 Input Injector attached.');
+  });
+
+  injector.on('error', (err) => {
+    console.warn('[GlyphPad] Injector process warning:', err.message);
+  });
+} catch (e) {
+  console.warn('[GlyphPad] Could not spawn injector.exe:', e.message);
 }
 
-const injector = spawn(injectorPath, [], {
-  stdio: ['pipe', 'inherit', 'inherit'],
-});
-
-injector.on('error', (err) => {
-  console.error('[Injector Error]', err);
-});
-
 function sendCommand(cmd) {
-  if (injector.stdin.writable) {
-    injector.stdin.write(cmd + '\n');
+  if (injector && injector.stdin && injector.stdin.writable) {
+    try {
+      injector.stdin.write(cmd + '\n');
+    } catch (_) {}
   }
 }
 
+// MIME types for static files
+const MIME_TYPES = {
+  '.html': 'text/html; charset=utf-8',
+  '.js': 'application/javascript; charset=utf-8',
+  '.css': 'text/css; charset=utf-8',
+  '.json': 'application/json; charset=utf-8',
+  '.svg': 'image/svg+xml',
+  '.png': 'image/png',
+  '.ico': 'image/x-icon',
+  '.woff2': 'font/woff2',
+  '.woff': 'font/woff',
+  '.ttf': 'font/ttf',
+};
+
+// Dist folder path
+const distPath = path.join(__dirname, '..', 'dist');
+
 // Create HTTP Server
 const server = http.createServer((req, res) => {
-  // Enable CORS
+  // Enable full CORS for web controller access
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', '*');
 
   if (req.method === 'OPTIONS') {
@@ -62,7 +87,11 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  if (req.url === '/status') {
+  const parsedUrl = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
+  const pathname = parsedUrl.pathname;
+
+  // Status endpoint for receiver discovery & health check
+  if (pathname === '/status' || pathname === '/health') {
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({
       status: 'READY',
@@ -75,35 +104,56 @@ const server = http.createServer((req, res) => {
       clients: wss ? wss.clients.size : 0,
       timestamp: Date.now()
     }));
-  } else if (req.url === '/' || req.url === '/controller') {
-    // Redirect to the rich web controller app or serve quick fallback
-    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-    res.end(`<!DOCTYPE html>
-<html lang="en">
+    return;
+  }
+
+  // Serve static files from dist/ if available
+  if (fs.existsSync(distPath)) {
+    let filePath = path.join(distPath, pathname === '/' ? 'index.html' : pathname);
+
+    // If file doesn't exist, fallback to index.html (SPA routing)
+    if (!fs.existsSync(filePath) || fs.statSync(filePath).isDirectory()) {
+      filePath = path.join(distPath, 'index.html');
+    }
+
+    if (fs.existsSync(filePath)) {
+      const ext = path.extname(filePath).toLowerCase();
+      const contentType = MIME_TYPES[ext] || 'application/octet-stream';
+
+      fs.readFile(filePath, (err, content) => {
+        if (err) {
+          res.writeHead(500);
+          res.end('Error loading asset');
+        } else {
+          res.writeHead(200, { 'Content-Type': contentType });
+          res.end(content);
+        }
+      });
+      return;
+    }
+  }
+
+  // Fallback landing page if dist/ hasn't been built
+  res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+  res.end(`<!DOCTYPE html>
+<html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta charset="utf-8">
   <title>GlyphPad Receiver v1.0</title>
   <style>
-    body { background: #08090a; color: #f5f6f8; font-family: monospace; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; text-align: center; }
-    .card { background: #14171a; border: 1px solid rgba(255,255,255,0.15); border-radius: 20px; padding: 24px; max-width: 90%; }
-    .status { color: #00e575; font-weight: bold; margin-bottom: 12px; font-size: 16px; }
-    .btn { display: inline-block; background: #eb0029; color: white; padding: 12px 24px; border-radius: 12px; text-decoration: none; font-weight: bold; margin-top: 16px; }
+    body { background: #08090a; color: #fff; font-family: monospace; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; text-align: center; }
+    .card { background: #121417; border: 1px solid rgba(255,255,255,0.15); border-radius: 24px; padding: 32px; max-width: 90%; }
+    .btn { display: inline-block; background: #eb0029; color: #fff; padding: 12px 24px; border-radius: 12px; text-decoration: none; font-weight: bold; margin-top: 16px; }
   </style>
 </head>
 <body>
   <div class="card">
-    <div class="status">● RECEIVER RUNNING ON ${os.hostname()}</div>
-    <p>Local IP: <strong>${localIp}:${PORT}</strong></p>
-    <p>Launch the full GlyphPad Web App connected to this receiver:</p>
-    <a class="btn" href="https://smart-controller.vercel.app">LAUNCH GLYPHPAD CONSOLE</a>
+    <h2 style="color:#00e575">● GLYPHPAD RECEIVER RUNNING</h2>
+    <p>Host: <strong>${os.hostname()}</strong> | IP: <strong>${localIp}:${PORT}</strong></p>
+    <a class="btn" href="https://smart-controller.vercel.app">LAUNCH WEB CONTROLLER</a>
   </div>
 </body>
 </html>`);
-  } else {
-    res.writeHead(404);
-    res.end();
-  }
 });
 
 // Create WebSocket Server
@@ -114,9 +164,9 @@ let clientCount = 0;
 wss.on('connection', (ws, req) => {
   clientCount++;
   const clientIp = req.socket.remoteAddress;
-  console.log(`[GlyphPad] Controller connected from ${clientIp} (Active clients: ${clientCount})`);
+  console.log(`[GlyphPad] Client connected from ${clientIp} (Total active: ${clientCount})`);
 
-  // Send handshake welcome
+  // Send handshake greeting
   ws.send(JSON.stringify({
     type: 'SESSION_ACK',
     payload: {
@@ -201,14 +251,14 @@ wss.on('connection', (ws, req) => {
           break;
       }
     } catch (e) {
-      // Discard invalid packet
+      // Discard malformed packet
     }
   });
 
   ws.on('close', () => {
     clientCount--;
     sendCommand('RELEASE_ALL');
-    console.log(`[GlyphPad] Controller disconnected. (Active: ${clientCount})`);
+    console.log(`[GlyphPad] Client disconnected. (Remaining: ${clientCount})`);
   });
 });
 
@@ -220,19 +270,21 @@ server.listen(PORT, '0.0.0.0', () => {
   console.log('              Universal Wireless Touchpad Host                  ');
   console.log('================================================================');
   console.log(` Host Name   : ${os.hostname()}`);
-  console.log(` Windows OS  : ${os.type()} ${os.release()}`);
+  console.log(` Windows OS  : ${os.type()} ${os.release()} (${os.arch()})`);
   console.log(` Status      : ACTIVE & LISTENING`);
-  console.log(` Local IP    : http://${localIp}:${PORT}`);
+  console.log(` Local URL   : http://${localIp}:${PORT}`);
   console.log('----------------------------------------------------------------');
-  console.log(' HOW TO CONNECT:');
-  console.log(` 1. Open GlyphPad: https://smart-controller.vercel.app`);
-  console.log(` 2. In Connection Settings, enter: ${localIp}:${PORT}`);
-  console.log(' 3. Your phone/browser will instantly control this Windows PC!');
+  console.log(' 📱 HOW TO CONNECT YOUR PHONE:');
+  console.log(` 1. Connect your phone to the same Wi-Fi.`);
+  console.log(` 2. On your phone browser, open:`);
+  console.log(`    👉 http://${localIp}:${PORT}`);
+  console.log(' 3. The full GlyphPad controller loads directly from your PC!');
+  console.log('    Your phone will instantly control your computer.');
   console.log('================================================================\n');
 });
 
 process.on('SIGINT', () => {
   sendCommand('RELEASE_ALL');
-  injector.kill();
+  if (injector) injector.kill();
   process.exit();
 });

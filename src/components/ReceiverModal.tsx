@@ -111,23 +111,31 @@ export const ReceiverModal: React.FC<ReceiverModalProps> = ({
         </div>
 
         {/* Quick Setup Instructions */}
-        <div className="rounded-2xl bg-white/5 border border-white/10 p-4 space-y-2 font-mono text-xs text-zinc-300">
+        <div className="rounded-2xl bg-white/5 border border-white/10 p-4 space-y-3 font-mono text-xs text-zinc-300">
           <div className="font-dot text-[11px] text-white font-bold flex items-center gap-1.5">
             <Terminal className="w-3.5 h-3.5 text-emerald-400" />
-            <span>HOW TO START THE PC RECEIVER:</span>
+            <span>HOW TO CONNECT YOUR PC & PHONE:</span>
           </div>
-          <ol className="list-decimal list-inside space-y-1 text-zinc-400 text-[11px]">
-            <li>Open the project folder on your PC.</li>
-            <li>Double-click <strong>start-receiver.bat</strong> (or run <code className="text-zinc-200">node receiver/server.js</code>).</li>
-            <li>Enter the IP printed in your terminal into the box above.</li>
-            <li>Your touch surface instantly controls your computer!</li>
+          <ol className="list-decimal list-inside space-y-1.5 text-zinc-400 text-[11px]">
+            <li>
+              On your PC, double-click <strong className="text-zinc-200">start-receiver.bat</strong> (or run <code className="text-zinc-200 bg-white/10 px-1 py-0.5 rounded">node receiver/server.js</code>).
+            </li>
+            <li>
+              Your terminal will display your PC's IP, e.g. <strong className="text-emerald-400">http://192.168.1.xxx:8443</strong>.
+            </li>
+            <li>
+              <span className="text-zinc-200 font-bold">📱 On your Phone:</span> Open <strong className="text-emerald-400">http://192.168.1.xxx:8443</strong> in Chrome or Safari. Your PC serves this full app locally and connects with zero configuration!
+            </li>
+            <li>
+              <span className="text-zinc-200 font-bold">💻 In this browser:</span> Type your IP above and click <strong className="text-[#eb0029]">CONNECT</strong>.
+            </li>
           </ol>
         </div>
 
-        {/* Phone Scan Tip */}
-        <div className="text-center pt-2">
-          <span className="font-mono text-xs text-zinc-400">
-            📱 Open <strong>https://smart-controller.vercel.app</strong> on your phone browser while connected to the same Wi-Fi!
+        {/* Local Wi-Fi Tip */}
+        <div className="text-center pt-1">
+          <span className="font-mono text-[11px] text-zinc-400 bg-black/40 px-3 py-1.5 rounded-full border border-white/5">
+            ⚡ Both devices must be on the same Wi-Fi network • Zero Cloud • Local-First
           </span>
         </div>
       </div>
