@@ -7,25 +7,29 @@ export const QuickFeatureStrip: React.FC = () => {
       icon: Zap,
       title: 'SUB-5MS LATENCY',
       desc: 'High-frequency 120Hz touch sampling with zero perceptual delay.',
-      accent: 'text-glyph-cyan',
+      accent: 'text-aura-cyan',
+      glow: 'hover:border-cyan-500/30',
     },
     {
       icon: WifiOff,
       title: 'LOCAL-FIRST LAN',
       desc: '100% offline functionality. Operates without internet or cloud logins.',
-      accent: 'text-glyph-green',
+      accent: 'text-aura-green',
+      glow: 'hover:border-emerald-500/30',
     },
     {
       icon: ShieldCheck,
       title: 'CRYPTOGRAPHIC TRUST',
       desc: 'Mutual pairing approval with TLS 1.3 encryption and replay shields.',
-      accent: 'text-glyph-red',
+      accent: 'text-aura-pink',
+      glow: 'hover:border-pink-500/30',
     },
     {
       icon: Layers,
       title: 'UNIVERSAL HOST REACH',
       desc: 'Native input dispatching across Windows, macOS, and Linux.',
-      accent: 'text-glyph-violet',
+      accent: 'text-aura-purple',
+      glow: 'hover:border-purple-500/30',
     },
   ];
 
@@ -38,14 +42,14 @@ export const QuickFeatureStrip: React.FC = () => {
             return (
               <div
                 key={idx}
-                className="flex items-start gap-3.5 p-3.5 rounded-2xl bg-glyph-surface/40 border border-white/5 hover:border-white/10 transition-colors"
+                className={`flex items-start gap-3.5 p-4 rounded-2xl glass-panel border border-white/5 ${item.glow} transition-all duration-300`}
               >
-                <div className={`p-2 rounded-xl bg-white/5 border border-white/10 shrink-0 ${item.accent}`}>
+                <div className={`p-2.5 rounded-xl bg-white/5 border border-white/10 shrink-0 ${item.accent}`}>
                   <Icon className="w-4 h-4" />
                 </div>
                 <div>
                   <h4 className="font-dot text-xs text-white tracking-wider">{item.title}</h4>
-                  <p className="text-xs text-zinc-400 mt-0.5 leading-relaxed font-sans">{item.desc}</p>
+                  <p className="text-xs text-zinc-400 mt-1 leading-relaxed font-sans">{item.desc}</p>
                 </div>
               </div>
             );

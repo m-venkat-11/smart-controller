@@ -5,13 +5,11 @@
 @layer base {
   :root {
     --bg-dot-color: rgba(255, 255, 255, 0.05);
-    --selection-color: #eb0029;
   }
 
   body {
     background-color: #08090a;
     color: #f5f6f8;
-    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
     background-image: radial-gradient(var(--bg-dot-color) 1px, transparent 1px);
     background-size: 24px 24px;
     background-position: 0 0;
@@ -20,10 +18,13 @@
 
 /* Nothing-OS Inspired Dot-Matrix Typography */
 .font-dot {
-  font-family: 'Space Mono', 'Courier New', monospace;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  font-weight: 700;
+  font-family: 'DotGothic16', 'Silkscreen', 'Space Mono', monospace;
+  letter-spacing: 0.1em;
+}
+
+.font-silk {
+  font-family: 'Silkscreen', monospace;
+  letter-spacing: 0.08em;
 }
 
 .dot-pattern {
@@ -31,7 +32,7 @@
   background-size: 8px 8px;
 }
 
-/* Glassmorphism Classes */
+/* Base Glass Panels */
 .glass-panel {
   background: rgba(17, 19, 21, 0.7);
   backdrop-filter: blur(20px);
@@ -40,43 +41,109 @@
 }
 
 .glass-panel-elevated {
-  background: rgba(24, 27, 30, 0.85);
+  background: rgba(20, 23, 27, 0.85);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
-.glass-panel-glow {
-  background: rgba(17, 19, 21, 0.75);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(235, 0, 41, 0.3);
-  box-shadow: 0 0 35px -8px rgba(235, 0, 41, 0.25);
+/* ============================================================
+   RADIANT GLOW CARDS (EXACT MATCH FOR REFERENCE 2 UI CARDS)
+   ============================================================ */
+
+/* Large Center Hero Card: Pink / Rose / Magenta Radiant Glow */
+.card-radiant-pink {
+  background: radial-gradient(circle at 50% 25%, rgba(225, 29, 72, 0.42) 0%, rgba(136, 19, 55, 0.28) 45%, rgba(17, 19, 23, 0.95) 90%);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(244, 63, 94, 0.35);
+  box-shadow: 0 12px 40px -10px rgba(225, 29, 72, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.2);
 }
 
-/* Tactile Nothing-style circular button */
-.glyph-btn {
+/* Emerald Mint Radiant Card */
+.card-radiant-green {
+  background: radial-gradient(circle at 50% 35%, rgba(0, 201, 117, 0.38) 0%, rgba(6, 78, 59, 0.25) 55%, rgba(15, 23, 20, 0.95) 90%);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(0, 229, 117, 0.3);
+  box-shadow: 0 10px 30px -8px rgba(0, 201, 117, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.15);
+}
+
+/* Deep Ocean Cobalt Sapphire Radiant Card */
+.card-radiant-blue {
+  background: radial-gradient(circle at 40% 35%, rgba(37, 99, 235, 0.38) 0%, rgba(30, 58, 138, 0.25) 55%, rgba(15, 20, 28, 0.95) 90%);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  box-shadow: 0 10px 30px -8px rgba(37, 99, 235, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.15);
+}
+
+/* Berry Magenta Radiant Card */
+.card-radiant-magenta {
+  background: radial-gradient(circle at 50% 35%, rgba(217, 70, 239, 0.35) 0%, rgba(134, 25, 143, 0.25) 55%, rgba(22, 17, 28, 0.95) 90%);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(217, 70, 239, 0.3);
+  box-shadow: 0 10px 30px -8px rgba(217, 70, 239, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.15);
+}
+
+/* Arc Cyan Radiant Card */
+.card-radiant-cyan {
+  background: radial-gradient(circle at 50% 30%, rgba(6, 182, 212, 0.35) 0%, rgba(14, 116, 144, 0.2) 55%, rgba(15, 23, 28, 0.95) 90%);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(6, 182, 212, 0.3);
+  box-shadow: 0 10px 30px -8px rgba(6, 182, 212, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.15);
+}
+
+/* Lime Olive Radiant Card */
+.card-radiant-lime {
+  background: radial-gradient(circle at 50% 35%, rgba(132, 204, 22, 0.32) 0%, rgba(77, 124, 15, 0.2) 55%, rgba(20, 24, 16, 0.95) 90%);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(132, 204, 22, 0.3);
+  box-shadow: 0 10px 30px -8px rgba(132, 204, 22, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.15);
+}
+
+/* Deep Wine Crimson Radiant Card */
+.card-radiant-wine {
+  background: radial-gradient(circle at 50% 35%, rgba(185, 28, 28, 0.38) 0%, rgba(127, 29, 29, 0.22) 55%, rgba(26, 16, 16, 0.95) 90%);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  box-shadow: 0 10px 30px -8px rgba(185, 28, 28, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.15);
+}
+
+/* Deep Royal Purple Radiant Card */
+.card-radiant-purple {
+  background: radial-gradient(circle at 60% 35%, rgba(147, 51, 234, 0.38) 0%, rgba(88, 28, 135, 0.25) 55%, rgba(20, 16, 28, 0.95) 90%);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(168, 85, 247, 0.3);
+  box-shadow: 0 10px 30px -8px rgba(147, 51, 234, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.15);
+}
+
+/* Circular tactile Nothing button */
+.nothing-btn-circle {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #14171a;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.glyph-btn:active {
-  transform: scale(0.96);
+.nothing-btn-circle:hover {
+  background: #202428;
+  border-color: rgba(255, 255, 255, 0.25);
+  transform: scale(1.05);
 }
 
-/* Aura Glows */
-.aura-red {
-  background: radial-gradient(circle, rgba(235, 0, 41, 0.15) 0%, transparent 70%);
-}
-
-.aura-green {
-  background: radial-gradient(circle, rgba(0, 229, 117, 0.15) 0%, transparent 70%);
-}
-
-.aura-cyan {
-  background: radial-gradient(circle, rgba(0, 210, 255, 0.12) 0%, transparent 70%);
-}
-
-.aura-violet {
-  background: radial-gradient(circle, rgba(168, 85, 247, 0.14) 0%, transparent 70%);
+.nothing-btn-circle:active {
+  transform: scale(0.95);
 }
 
 /* Custom Minimalist Scrollbar */

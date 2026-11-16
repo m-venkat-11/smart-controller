@@ -1,0 +1,236 @@
+import React from 'react';
+
+// 5 columns wide x 7 rows high dot-matrix bitmasks for authentic Nothing / Braun LED typography
+const DOT_MAP: Record<string, number[][]> = {
+  '0': [
+    [0, 1, 1, 1, 0],
+    [1, 0, 0, 0, 1],
+    [1, 0, 0, 1, 1],
+    [1, 0, 1, 0, 1],
+    [1, 1, 0, 0, 1],
+    [1, 0, 0, 0, 1],
+    [0, 1, 1, 1, 0],
+  ],
+  '1': [
+    [0, 0, 1, 0, 0],
+    [0, 1, 1, 0, 0],
+    [0, 0, 1, 0, 0],
+    [0, 0, 1, 0, 0],
+    [0, 0, 1, 0, 0],
+    [0, 0, 1, 0, 0],
+    [0, 1, 1, 1, 0],
+  ],
+  '2': [
+    [0, 1, 1, 1, 0],
+    [1, 0, 0, 0, 1],
+    [0, 0, 0, 0, 1],
+    [0, 0, 1, 1, 0],
+    [0, 1, 0, 0, 0],
+    [1, 0, 0, 0, 0],
+    [1, 1, 1, 1, 1],
+  ],
+  '3': [
+    [0, 1, 1, 1, 0],
+    [1, 0, 0, 0, 1],
+    [0, 0, 0, 0, 1],
+    [0, 0, 1, 1, 0],
+    [0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 1],
+    [0, 1, 1, 1, 0],
+  ],
+  '4': [
+    [0, 0, 0, 1, 0],
+    [0, 0, 1, 1, 0],
+    [0, 1, 0, 1, 0],
+    [1, 0, 0, 1, 0],
+    [1, 1, 1, 1, 1],
+    [0, 0, 0, 1, 0],
+    [0, 0, 0, 1, 0],
+  ],
+  '5': [
+    [1, 1, 1, 1, 1],
+    [1, 0, 0, 0, 0],
+    [1, 1, 1, 1, 0],
+    [0, 0, 0, 0, 1],
+    [0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 1],
+    [0, 1, 1, 1, 0],
+  ],
+  '6': [
+    [0, 1, 1, 1, 0],
+    [1, 0, 0, 0, 0],
+    [1, 1, 1, 1, 0],
+    [1, 0, 0, 0, 1],
+    [1, 0, 0, 0, 1],
+    [1, 0, 0, 0, 1],
+    [0, 1, 1, 1, 0],
+  ],
+  '7': [
+    [1, 1, 1, 1, 1],
+    [0, 0, 0, 0, 1],
+    [0, 0, 0, 1, 0],
+    [0, 0, 1, 0, 0],
+    [0, 1, 0, 0, 0],
+    [0, 1, 0, 0, 0],
+    [0, 1, 0, 0, 0],
+  ],
+  '8': [
+    [0, 1, 1, 1, 0],
+    [1, 0, 0, 0, 1],
+    [1, 0, 0, 0, 1],
+    [0, 1, 1, 1, 0],
+    [1, 0, 0, 0, 1],
+    [1, 0, 0, 0, 1],
+    [0, 1, 1, 1, 0],
+  ],
+  '9': [
+    [0, 1, 1, 1, 0],
+    [1, 0, 0, 0, 1],
+    [1, 0, 0, 0, 1],
+    [0, 1, 1, 1, 1],
+    [0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 1],
+    [0, 1, 1, 1, 0],
+  ],
+  ':': [
+    [0, 0, 0, 0, 0],
+    [0, 0, 1, 0, 0],
+    [0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0],
+    [0, 0, 1, 0, 0],
+    [0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0],
+  ],
+  '.': [
+    [0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0],
+    [0, 0, 1, 0, 0],
+    [0, 0, 1, 0, 0],
+  ],
+  '%': [
+    [1, 1, 0, 0, 1],
+    [1, 1, 0, 1, 0],
+    [0, 0, 1, 0, 0],
+    [0, 1, 0, 0, 0],
+    [1, 0, 0, 1, 1],
+    [0, 0, 0, 1, 1],
+    [0, 0, 0, 0, 0],
+  ],
+  '°': [
+    [0, 1, 1, 0, 0],
+    [1, 0, 0, 1, 0],
+    [1, 0, 0, 1, 0],
+    [0, 1, 1, 0, 0],
+    [0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0],
+  ],
+  'C': [
+    [0, 1, 1, 1, 1],
+    [1, 0, 0, 0, 0],
+    [1, 0, 0, 0, 0],
+    [1, 0, 0, 0, 0],
+    [1, 0, 0, 0, 0],
+    [1, 0, 0, 0, 0],
+    [0, 1, 1, 1, 1],
+  ],
+  ' ': [
+    [0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0],
+  ],
+};
+
+interface DotMatrixDisplayProps {
+  value: string | number;
+  size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl';
+  color?: string; // Hex or CSS color for active dots
+  inactiveColor?: string; // Faint inactive dots
+  gap?: number;
+  showInactive?: boolean;
+  className?: string;
+}
+
+export const DotMatrixDisplay: React.FC<DotMatrixDisplayProps> = ({
+  value,
+  size = 'md',
+  color = '#FFFFFF',
+  inactiveColor = 'rgba(255, 255, 255, 0.08)',
+  gap = 2,
+  showInactive = true,
+  className = '',
+}) => {
+  const str = String(value).toUpperCase();
+
+  // Scale dot sizes
+  const dotRadii = {
+    sm: 1.2,
+    md: 1.8,
+    lg: 2.6,
+    xl: 3.4,
+    '2xl': 4.6,
+  };
+
+  const dotSpacing = {
+    sm: 3.2,
+    md: 4.8,
+    lg: 6.8,
+    xl: 8.8,
+    '2xl': 11.5,
+  };
+
+  const r = dotRadii[size];
+  const step = dotSpacing[size];
+  const charWidth = 5 * step;
+  const charHeight = 7 * step;
+  const charSpacing = step * 1.5;
+
+  const totalWidth = str.length * charWidth + Math.max(0, str.length - 1) * charSpacing;
+
+  return (
+    <svg
+      width={totalWidth}
+      height={charHeight}
+      viewBox={`0 0 ${totalWidth} ${charHeight}`}
+      className={`inline-block select-none ${className}`}
+      style={{ overflow: 'visible' }}
+    >
+      {str.split('').map((char, charIdx) => {
+        const matrix = DOT_MAP[char] || DOT_MAP['0'];
+        const offsetX = charIdx * (charWidth + charSpacing);
+
+        return (
+          <g key={charIdx} transform={`translate(${offsetX}, 0)`}>
+            {matrix.map((row, rowIdx) =>
+              row.map((bit, colIdx) => {
+                const cx = colIdx * step + step / 2;
+                const cy = rowIdx * step + step / 2;
+                const active = bit === 1;
+
+                if (!active && !showInactive) return null;
+
+                return (
+                  <circle
+                    key={`${rowIdx}-${colIdx}`}
+                    cx={cx}
+                    cy={cy}
+                    r={r}
+                    fill={active ? color : inactiveColor}
+                    filter={active ? 'drop-shadow(0px 0px 2px rgba(255,255,255,0.6))' : undefined}
+                  />
+                );
+              })
+            )}
+          </g>
+        );
+      })}
+    </svg>
+  );
+};

@@ -19,10 +19,22 @@ export default {
           violet: '#a855f7',
           amber: '#f59e0b',
         },
+        aura: {
+          green: '#00c975',
+          blue: '#2563eb',
+          magenta: '#d946ef',
+          pink: '#e11d48',
+          wine: '#b91c1c',
+          purple: '#9333ea',
+          lime: '#84cc16',
+          cyan: '#06b6d4',
+          amber: '#f59e0b',
+        }
       },
       fontFamily: {
+        dot: ['DotGothic16', 'Silkscreen', 'Space Mono', 'monospace'],
+        silk: ['Silkscreen', 'monospace'],
         mono: ['Space Mono', 'JetBrains Mono', 'monospace'],
-        dot: ['Courier New', 'Space Mono', 'monospace'],
         sans: ['Plus Jakarta Sans', 'Inter', 'system-ui', 'sans-serif'],
       },
       animation: {
@@ -39,9 +51,6 @@ export default {
           '0%, 100%': { transform: 'translateY(0)' },
           '50%': { transform: 'translateY(-6px)' },
         },
-      },
-      backdropBlur: {
-        xs: '2px',
       },
     },
   },

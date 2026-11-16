@@ -211,7 +211,7 @@ export const SupportPage: React.FC = () => {
           <div className="space-y-1">
             <h4 className="font-dot text-sm text-white">REDACTED SYSTEM DIAGNOSTIC REPORT</h4>
             <p className="text-xs text-zinc-400 font-sans">
-              Generate a sanitized, privacy-safe JSON log bundle to share in GitHub issues. All private IPs and credentials are automatically scrubbed.
+              Generate a sanitized, privacy-safe JSON log bundle for diagnostics and technical support. All private IPs and credentials are automatically scrubbed.
             </p>
           </div>
 

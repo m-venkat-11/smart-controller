@@ -68,7 +68,7 @@ export const DownloadPage: React.FC = () => {
       release: id,
       version: '1.0.0',
       timestamp: new Date().toISOString(),
-      repository: 'https://github.com/m-venkat-11/smart-controller',
+      repository: 'GlyphPad/smart-controller',
       instructions: 'Run receiver on host PC and install APK on mobile client. Ensure devices share the same local network subnet.',
     };
     const blob = new Blob([JSON.stringify(releaseManifest, null, 2)], { type: 'application/json' });
@@ -172,26 +172,21 @@ export const DownloadPage: React.FC = () => {
           ))}
         </div>
 
-        {/* Source Code Note */}
+        {/* Receiver Quickstart Note */}
         <div className="glass-panel rounded-3xl p-6 sm:p-8 border border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <Terminal className="w-5 h-5 text-glyph-cyan" />
+            <Terminal className="w-5 h-5 text-aura-cyan" />
             <div>
-              <h4 className="font-dot text-sm text-white">BUILD FROM SOURCE CODE</h4>
+              <h4 className="font-dot text-sm text-white">INSTANT COMPANION RECEIVER INCLUDED</h4>
               <p className="text-xs text-zinc-400 font-sans">
-                Full repository available on GitHub with C# (.NET 8), Rust, and Kotlin build scripts.
+                Run the local receiver on your computer with <strong>start-receiver.bat</strong> or <strong>npm run receiver</strong> to connect immediately.
               </p>
             </div>
           </div>
-          <a
-            href="https://github.com/m-venkat-11/smart-controller"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-mono text-xs flex items-center gap-2 border border-white/10 transition-colors whitespace-nowrap"
-          >
-            <span>GITHUB REPO</span>
-            <ExternalLink className="w-3.5 h-3.5" />
-          </a>
+          <div className="px-4 py-2.5 rounded-xl bg-white/10 text-white font-dot text-xs flex items-center gap-2 border border-white/10 whitespace-nowrap">
+            <span className="w-2 h-2 rounded-full bg-aura-green"></span>
+            <span>PORT 8443 READY</span>
+          </div>
         </div>
       </div>
     </div>

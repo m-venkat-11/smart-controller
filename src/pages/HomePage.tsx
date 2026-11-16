@@ -7,6 +7,7 @@ import { HowItWorks } from '../components/HowItWorks';
 import { CompatibilitySection } from '../components/CompatibilitySection';
 import { PrivacySecurity } from '../components/PrivacySecurity';
 import { ArrowRight, Sparkles, Download } from 'lucide-react';
+import { DotMatrixDisplay } from '../components/DotMatrixDisplay';
 
 interface HomePageProps {
   onNavigate: (page: string) => void;
@@ -23,14 +24,12 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
       <CompatibilitySection onNavigate={onNavigate} />
       <PrivacySecurity />
 
-      {/* Final Call to Action Section */}
+      {/* Final Call to Action Section with Radiant Pink Glassmorphism */}
       <section className="py-20 sm:py-28 relative">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="glass-panel-glow rounded-3xl p-8 sm:p-16 text-center space-y-6 relative overflow-hidden">
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 aura-red pointer-events-none opacity-30 blur-2xl"></div>
-
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-glyph-red/10 border border-glyph-red/20 text-glyph-red font-mono text-xs font-bold">
-              <Sparkles className="w-3.5 h-3.5" />
+          <div className="card-radiant-pink rounded-[36px] p-8 sm:p-16 text-center space-y-6 relative overflow-hidden shadow-2xl">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 border border-white/20 text-white font-dot text-xs font-bold">
+              <Sparkles className="w-3.5 h-3.5 text-amber-300" />
               <span>READY TO TAKE CONTROL?</span>
             </div>
 
@@ -38,24 +37,24 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
               Bring the comfort of a touchpad to the device already in your hand.
             </h2>
 
-            <p className="text-sm sm:text-base text-zinc-400 max-w-xl mx-auto font-sans leading-relaxed">
+            <p className="text-sm sm:text-base text-rose-100/80 max-w-xl mx-auto font-sans leading-relaxed">
               No extra hardware to carry. No latency compromises. Experience the future of mobile-to-computer tactile control today.
             </p>
 
             <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
               <button
                 onClick={() => onNavigate('playground')}
-                className="px-6 py-3.5 rounded-2xl bg-glyph-red hover:bg-glyph-red-bright text-white font-mono text-xs sm:text-sm font-bold flex items-center gap-2 shadow-lg transition-all"
+                className="px-6 py-3.5 rounded-2xl bg-white hover:bg-zinc-200 text-black font-dot text-xs sm:text-sm font-bold flex items-center gap-2.5 shadow-xl transition-all duration-300 active:scale-95"
               >
                 <span>OPEN LIVE SANDBOX</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
               <button
                 onClick={() => onNavigate('download')}
-                className="px-6 py-3.5 rounded-2xl glass-panel-elevated hover:bg-white/10 text-white font-mono text-xs sm:text-sm font-medium border border-white/15 transition-all flex items-center gap-2"
+                className="px-6 py-3.5 rounded-2xl bg-black/40 hover:bg-black/60 text-white font-dot text-xs sm:text-sm font-medium border border-white/20 transition-all flex items-center gap-2"
               >
                 <Download className="w-4 h-4" />
-                <span>DOWNLOAD APPS</span>
+                <span>DOWNLOAD RECEIVER</span>
               </button>
             </div>
           </div>
