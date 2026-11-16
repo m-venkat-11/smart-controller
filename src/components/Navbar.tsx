@@ -90,27 +90,27 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPage, onNavigate }) => {
             <span className="text-white font-dot">04 MS</span>
           </div>
 
-          {/* Live Playground CTA */}
+          {/* Live Controller CTA */}
           <button
-            onClick={() => handleNav('playground')}
+            onClick={() => handleNav('home')}
             className={`px-4 py-2 rounded-xl text-xs font-dot tracking-wider font-bold flex items-center gap-2 transition-all duration-200 ${
-              currentPage === 'playground'
+              currentPage === 'home'
                 ? 'bg-glyph-red text-white shadow-[0_0_25px_-3px_rgba(235,0,41,0.6)]'
-                : 'bg-white/10 hover:bg-glyph-red hover:text-white text-white border border-white/15'
+                : 'bg-[#eb0029] hover:bg-[#c40022] text-white shadow-md'
             }`}
           >
             <Terminal className="w-3.5 h-3.5" />
-            <span>SANDBOX</span>
+            <span>OPEN TOUCHPAD</span>
           </button>
         </div>
 
         {/* Mobile Hamburger Button */}
         <div className="flex sm:hidden items-center gap-2">
           <button
-            onClick={() => handleNav('playground')}
-            className="px-2.5 py-1.5 rounded-lg bg-glyph-red text-white text-[10px] font-dot font-bold"
+            onClick={() => handleNav('home')}
+            className="px-2.5 py-1.5 rounded-lg bg-[#eb0029] text-white text-[10px] font-dot font-bold"
           >
-            SANDBOX
+            CONTROLLER
           </button>
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}

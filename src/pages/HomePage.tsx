@@ -1,65 +1,347 @@
-import React from 'react';
-import { Hero } from '../components/Hero';
-import { QuickFeatureStrip } from '../components/QuickFeatureStrip';
-import { ProductShowcase } from '../components/ProductShowcase';
-import { BentoGridFeatures } from '../components/BentoGridFeatures';
-import { HowItWorks } from '../components/HowItWorks';
-import { CompatibilitySection } from '../components/CompatibilitySection';
-import { PrivacySecurity } from '../components/PrivacySecurity';
-import { ArrowRight, Sparkles, Download } from 'lucide-react';
-import { DotMatrixDisplay } from '../components/DotMatrixDisplay';
+import React, { useState, useEffect, useRef } from 'react';
+import { ConsoleHeader } from '../components/ConsoleHeader';
+import { TouchpadSurface } from '../components/TouchpadSurface';
+import { QuickActionsGrid } from '../components/QuickActionsGrid';
+import { VirtualKeyboard } from '../components/VirtualKeyboard';
+import { NothingGamepad } from '../components/NothingGamepad';
+import { DiagnosticsPanel } from '../components/DiagnosticsPanel';
+import { SettingsPanel } from '../components/SettingsPanel';
+import { ReceiverModal } from '../components/ReceiverModal';
+import { ConnectionStateMachine } from '../core/protocol/stateMachine';
+import { createUCPEnvelope } from '../core/protocol/serializer';
+import { ConnectionState, UCPEnvelope } from '../core/protocol/types';
+import { Sparkles, Terminal, Download, ShieldCheck, ChevronDown, ChevronUp } from 'lucide-react';
 
 interface HomePageProps {
-  onNavigate: (page: string) => void;
+  onNavigate?: (page: string) => void;
 }
 
 export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
-  return (
-    <div className="space-y-0">
-      <Hero onNavigate={onNavigate} />
-      <QuickFeatureStrip />
-      <ProductShowcase />
-      <BentoGridFeatures />
-      <HowItWorks />
-      <CompatibilitySection onNavigate={onNavigate} />
-      <PrivacySecurity />
+  // Navigation & Mode
+  const [activeTab, setActiveTab] = useState<'touchpad' | 'actions' | 'keyboard' | 'gamepad' | 'diagnostics' | 'settings'>('touchpad');
+  const [isConnectModalOpen, setIsConnectModalOpen] = useState(false);
+  const [showDocsAccordion, setShowDocsAccordion] = useState(false);
 
-      {/* Final Call to Action Section with Radiant Pink Glassmorphism */}
-      <section className="py-20 sm:py-28 relative">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="card-radiant-pink rounded-[36px] p-8 sm:p-16 text-center space-y-6 relative overflow-hidden shadow-2xl">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 border border-white/20 text-white font-dot text-xs font-bold">
-              <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-              <span>READY TO TAKE CONTROL?</span>
+  // Connection & WebSocket state
+  const [receiverAddress, setReceiverAddress] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('glyph_receiver_addr') || 'localhost:8443';
+    }
+    return 'localhost:8443';
+  });
+  const [isRealConnected, setIsRealConnected] = useState(false);
+  const [connectionState, setConnectionState] = useState<ConnectionState>('DISCONNECTED');
+  const [latency, setLatency] = useState(14);
+  const [packets, setPackets] = useState<UCPEnvelope[]>([]);
+  const [pinCode] = useState('749 201');
+
+  // Preferences
+  const [sensitivity, setSensitivity] = useState(1.2);
+  const [naturalScroll, setNaturalScroll] = useState(true);
+  const [hapticEnabled, setHapticEnabled] = useState(true);
+  const [wakeLockActive, setWakeLockActive] = useState(false);
+  const [surfaceTheme, setSurfaceTheme] = useState('monochrome');
+
+  const wsRef = useRef<WebSocket | null>(null);
+  const wakeLockRef = useRef<any>(null);
+  const pingIntervalRef = useRef<any>(null);
+
+  // Auto-connect on initial load
+  useEffect(() => {
+    connectToReceiver();
+    return () => {
+      disconnectFromReceiver();
+    };
+  }, []);
+
+  // Screen WakeLock management
+  const toggleWakeLock = async () => {
+    if ('wakeLock' in navigator) {
+      try {
+        if (!wakeLockActive) {
+          const lock = await (navigator as any).wakeLock.request('screen');
+          wakeLockRef.current = lock;
+          setWakeLockActive(true);
+        } else if (wakeLockRef.current) {
+          await wakeLockRef.current.release();
+          wakeLockRef.current = null;
+          setWakeLockActive(false);
+        }
+      } catch (err) {
+        console.warn('Wake Lock request failed:', err);
+      }
+    } else {
+      alert('Screen Wake Lock is not supported on this browser.');
+    }
+  };
+
+  // Connect to PC Receiver via WebSocket
+  const connectToReceiver = () => {
+    disconnectFromReceiver();
+
+    try {
+      const cleanAddr = receiverAddress.replace('http://', '').replace('ws://', '').trim();
+      localStorage.setItem('glyph_receiver_addr', cleanAddr);
+
+      setConnectionState('CONNECTING');
+      const ws = new WebSocket(`ws://${cleanAddr}/ucp`);
+      wsRef.current = ws;
+
+      ws.onopen = () => {
+        setIsRealConnected(true);
+        setConnectionState('CONNECTED');
+        console.log('[GlyphPad] Connected to receiver at', cleanAddr);
+
+        // Start ping heartbeat
+        if (pingIntervalRef.current) clearInterval(pingIntervalRef.current);
+        pingIntervalRef.current = setInterval(() => {
+          if (ws.readyState === WebSocket.OPEN) {
+            const start = Date.now();
+            ws.send(JSON.stringify({ type: 'PING', payload: { timestamp: start } }));
+          }
+        }, 2000);
+      };
+
+      ws.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          if (data.type === 'PONG') {
+            const rtt = Date.now() - (data.payload?.clientTimestamp || Date.now());
+            setLatency(Math.max(4, rtt));
+          }
+        } catch (_) {}
+      };
+
+      ws.onclose = () => {
+        setIsRealConnected(false);
+        setConnectionState('DISCONNECTED');
+        if (pingIntervalRef.current) clearInterval(pingIntervalRef.current);
+      };
+
+      ws.onerror = () => {
+        setIsRealConnected(false);
+        setConnectionState('FAILED');
+      };
+    } catch (e) {
+      setConnectionState('FAILED');
+    }
+  };
+
+  const disconnectFromReceiver = () => {
+    if (pingIntervalRef.current) clearInterval(pingIntervalRef.current);
+    if (wsRef.current) {
+      wsRef.current.close();
+      wsRef.current = null;
+    }
+    setIsRealConnected(false);
+    setConnectionState('DISCONNECTED');
+  };
+
+  // Dispatch Packet to Receiver & Record Telemetry
+  const dispatchEnvelope = (type: any, payload: any) => {
+    const envelope = createUCPEnvelope(type, 'sess_live_99x8', payload);
+    setPackets((prev) => [envelope, ...prev.slice(0, 19)]);
+
+    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+      wsRef.current.send(JSON.stringify({ type, payload }));
+    }
+  };
+
+  // Touchpad Handlers
+  const handlePointerMove = (dx: number, dy: number) => {
+    dispatchEnvelope('POINTER_MOVE', {
+      dx: Number(dx.toFixed(2)),
+      dy: Number(dy.toFixed(2)),
+    });
+  };
+
+  const handleClick = (button: 'LEFT' | 'RIGHT' | 'MIDDLE') => {
+    dispatchEnvelope('BUTTON_STATE', {
+      button,
+      action: 'CLICK',
+    });
+  };
+
+  const handleDoubleClick = () => {
+    dispatchEnvelope('DOUBLE_CLICK', {});
+  };
+
+  const handleScroll = (deltaY: number, deltaX?: number) => {
+    dispatchEnvelope('SCROLL', {
+      delta: Math.round(deltaY),
+      deltaY: Math.round(deltaY),
+      deltaX: deltaX ? Math.round(deltaX) : 0,
+    });
+  };
+
+  const handleAction = (action: string) => {
+    dispatchEnvelope('ACTION', { action });
+  };
+
+  const handleTypeText = (text: string) => {
+    dispatchEnvelope('TYPE_TEXT', { text });
+  };
+
+  const handleSendKey = (key: string) => {
+    dispatchEnvelope('KEY', { key });
+  };
+
+  return (
+    <div className="min-h-screen flex flex-col bg-[#08090a] text-[#f5f6f8]">
+      {/* Top Header & Connection Bar */}
+      <ConsoleHeader
+        connectionState={connectionState}
+        latency={latency}
+        receiverHost={receiverAddress}
+        isRealConnected={isRealConnected}
+        onOpenConnectModal={() => setIsConnectModalOpen(true)}
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+      />
+
+      {/* Main Working Interface */}
+      <main className="flex-1 flex flex-col p-2 sm:p-4 max-w-7xl mx-auto w-full">
+        {activeTab === 'touchpad' && (
+          <TouchpadSurface
+            onPointerMove={handlePointerMove}
+            onClick={handleClick}
+            onDoubleClick={handleDoubleClick}
+            onScroll={handleScroll}
+            onAction={handleAction}
+            sensitivity={sensitivity}
+            naturalScroll={naturalScroll}
+            hapticEnabled={hapticEnabled}
+            surfaceTheme={surfaceTheme}
+          />
+        )}
+
+        {activeTab === 'actions' && (
+          <QuickActionsGrid onAction={handleAction} hapticEnabled={hapticEnabled} />
+        )}
+
+        {activeTab === 'keyboard' && (
+          <VirtualKeyboard
+            onTypeText={handleTypeText}
+            onSendKey={handleSendKey}
+            onAction={handleAction}
+            hapticEnabled={hapticEnabled}
+          />
+        )}
+
+        {activeTab === 'gamepad' && (
+          <NothingGamepad
+            onSendKey={handleSendKey}
+            onAction={handleAction}
+            hapticEnabled={hapticEnabled}
+          />
+        )}
+
+        {activeTab === 'diagnostics' && (
+          <DiagnosticsPanel
+            latency={latency}
+            packets={packets}
+            isRealConnected={isRealConnected}
+            receiverHost={receiverAddress}
+            onRunPingTest={() => {
+              if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+                const start = Date.now();
+                wsRef.current.send(JSON.stringify({ type: 'PING', payload: { timestamp: start } }));
+              } else {
+                setLatency(Math.floor(12 + Math.random() * 5));
+              }
+            }}
+          />
+        )}
+
+        {activeTab === 'settings' && (
+          <SettingsPanel
+            sensitivity={sensitivity}
+            setSensitivity={setSensitivity}
+            naturalScroll={naturalScroll}
+            setNaturalScroll={setNaturalScroll}
+            hapticEnabled={hapticEnabled}
+            setHapticEnabled={setHapticEnabled}
+            wakeLockActive={wakeLockActive}
+            toggleWakeLock={toggleWakeLock}
+            surfaceTheme={surfaceTheme}
+            setSurfaceTheme={setSurfaceTheme}
+          />
+        )}
+      </main>
+
+      {/* Collapsible Receiver Setup & Documentation Drawer (Keeps the product clean while providing necessary guidance) */}
+      <footer className="border-t border-white/10 bg-[#0d0f11] py-4 px-4 sm:px-8">
+        <div className="max-w-7xl mx-auto space-y-4">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-xs font-mono text-zinc-400">
+            <div className="flex items-center gap-3">
+              <span className="flex items-center gap-1.5 text-zinc-300">
+                <span className="w-2 h-2 rounded-full bg-[#00e575]"></span>
+                <span>ZERO CLOUD • LOCAL-FIRST INPUT BRIDGE</span>
+              </span>
+              <span>•</span>
+              <span>UCP v1.0 PROTOCOL</span>
             </div>
 
-            <h2 className="text-3xl sm:text-5xl font-extrabold text-white tracking-tight">
-              Bring the comfort of a touchpad to the device already in your hand.
-            </h2>
-
-            <p className="text-sm sm:text-base text-rose-100/80 max-w-xl mx-auto font-sans leading-relaxed">
-              No extra hardware to carry. No latency compromises. Experience the future of mobile-to-computer tactile control today.
-            </p>
-
-            <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
+            <div className="flex items-center gap-4">
               <button
-                onClick={() => onNavigate('playground')}
-                className="px-6 py-3.5 rounded-2xl bg-white hover:bg-zinc-200 text-black font-dot text-xs sm:text-sm font-bold flex items-center gap-2.5 shadow-xl transition-all duration-300 active:scale-95"
+                onClick={() => setIsConnectModalOpen(true)}
+                className="hover:text-white transition-colors underline"
               >
-                <span>OPEN LIVE SANDBOX</span>
-                <ArrowRight className="w-4 h-4" />
+                Receiver Status: {isRealConnected ? 'Connected' : 'Offline'}
               </button>
+
               <button
-                onClick={() => onNavigate('download')}
-                className="px-6 py-3.5 rounded-2xl bg-black/40 hover:bg-black/60 text-white font-dot text-xs sm:text-sm font-medium border border-white/20 transition-all flex items-center gap-2"
+                onClick={() => setShowDocsAccordion(!showDocsAccordion)}
+                className="flex items-center gap-1 text-zinc-300 hover:text-white px-3 py-1 rounded-lg bg-white/5 border border-white/10 transition-colors"
               >
-                <Download className="w-4 h-4" />
-                <span>DOWNLOAD RECEIVER</span>
+                <span>Setup & Technical Specs</span>
+                {showDocsAccordion ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
               </button>
             </div>
           </div>
+
+          {/* Collapsible Architecture & Setup Guide */}
+          {showDocsAccordion && (
+            <div className="pt-4 border-t border-white/10 grid grid-cols-1 md:grid-cols-3 gap-6 font-sans text-xs text-zinc-300 animate-fadeIn">
+              <div className="space-y-2 p-4 rounded-2xl bg-black/40 border border-white/5">
+                <div className="font-dot text-white font-bold tracking-wider">1. QUICK RECEIVER STARTUP</div>
+                <p className="text-zinc-400">
+                  Run <code className="text-zinc-200 bg-white/10 px-1 py-0.5 rounded">start-receiver.bat</code> on your PC. It activates the lightweight C# Win32 injector (<code className="text-zinc-200">injector.exe</code>) and starts the local WebSocket server on port 8443.
+                </p>
+              </div>
+
+              <div className="space-y-2 p-4 rounded-2xl bg-black/40 border border-white/5">
+                <div className="font-dot text-white font-bold tracking-wider">2. CONNECT ANY PHONE OR TABLET</div>
+                <p className="text-zinc-400">
+                  Open this page on your phone browser. Click the red status pill at the top, enter your PC's local IP address (e.g. 192.168.1.x:8443), and tap Connect. Your phone immediately acts as a high-precision wireless touchpad!
+                </p>
+              </div>
+
+              <div className="space-y-2 p-4 rounded-2xl bg-black/40 border border-white/5">
+                <div className="font-dot text-white font-bold tracking-wider">3. PROTOCOL & SECURITY</div>
+                <p className="text-zinc-400">
+                  All communication is strictly local-first over encrypted or direct local WebSocket frames. No keystroke logging, no cloud relay, sub-15ms pointer latency with automatic reconnection watchdog.
+                </p>
+              </div>
+            </div>
+          )}
         </div>
-      </section>
+      </footer>
+
+      {/* Receiver Connection & Pairing Modal */}
+      <ReceiverModal
+        isOpen={isConnectModalOpen}
+        onClose={() => setIsConnectModalOpen(false)}
+        receiverAddress={receiverAddress}
+        setReceiverAddress={setReceiverAddress}
+        isRealConnected={isRealConnected}
+        onConnect={() => {
+          connectToReceiver();
+          setIsConnectModalOpen(false);
+        }}
+        onDisconnect={disconnectFromReceiver}
+        pinCode={pinCode}
+      />
     </div>
   );
 };

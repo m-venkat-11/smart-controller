@@ -34,21 +34,25 @@ export function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  return (
-    <div className="min-h-screen flex flex-col bg-glyph-bg text-[#f5f6f8] selection:bg-glyph-red selection:text-white">
-      <Navbar currentPage={currentPage} onNavigate={navigateTo} />
+  const isControllerMode = currentPage === 'home' || currentPage === 'playground';
 
-      <main className="flex-1">
+  return (
+    <div className="min-h-screen flex flex-col bg-[#08090a] text-[#f5f6f8] selection:bg-[#eb0029] selection:text-white">
+      {/* Show marketing Navbar only when browsing documentation / download pages */}
+      {!isControllerMode && <Navbar currentPage={currentPage} onNavigate={navigateTo} />}
+
+      <main className="flex-1 flex flex-col">
         {currentPage === 'home' && <HomePage onNavigate={navigateTo} />}
+        {currentPage === 'playground' && <HomePage onNavigate={navigateTo} />}
         {currentPage === 'features' && <FeaturesPage />}
         {currentPage === 'how-it-works' && <HowItWorksPage />}
         {currentPage === 'compatibility' && <CompatibilityPage />}
         {currentPage === 'download' && <DownloadPage />}
         {currentPage === 'support' && <SupportPage />}
-        {currentPage === 'playground' && <PlaygroundPage />}
       </main>
 
-      <Footer onNavigate={navigateTo} />
+      {/* Show marketing Footer only when browsing documentation / download pages */}
+      {!isControllerMode && <Footer onNavigate={navigateTo} />}
     </div>
   );
 }

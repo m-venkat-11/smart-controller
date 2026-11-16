@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Text;
 
 namespace GlyphPadReceiver {
     public class InputInjector {
@@ -27,13 +28,28 @@ namespace GlyphPadReceiver {
         // Keyboard flags
         const uint KEYEVENTF_EXTENDEDKEY = 0x0001;
         const uint KEYEVENTF_KEYUP = 0x0002;
+        const uint KEYEVENTF_UNICODE = 0x0004;
 
         // Virtual key codes
-        const byte VK_LWIN = 0x5B;
-        const byte VK_CONTROL = 0x11;
+        const byte VK_BACK = 0x08;
+        const byte VK_TAB = 0x09;
+        const byte VK_RETURN = 0x0D;
         const byte VK_SHIFT = 0x10;
+        const byte VK_CONTROL = 0x11;
         const byte VK_MENU = 0x12; // Alt
         const byte VK_ESCAPE = 0x1B;
+        const byte VK_SPACE = 0x20;
+        const byte VK_PRIOR = 0x21; // Page Up
+        const byte VK_NEXT = 0x22;  // Page Down
+        const byte VK_END = 0x23;
+        const byte VK_HOME = 0x24;
+        const byte VK_LEFT = 0x25;
+        const byte VK_UP = 0x26;
+        const byte VK_RIGHT = 0x27;
+        const byte VK_DOWN = 0x28;
+        const byte VK_DELETE = 0x2E;
+        const byte VK_LWIN = 0x5B;
+
         const byte VK_VOLUME_MUTE = 0xAD;
         const byte VK_VOLUME_DOWN = 0xAE;
         const byte VK_VOLUME_UP = 0xAF;
@@ -94,6 +110,19 @@ namespace GlyphPadReceiver {
                             mouse_event(MOUSEEVENTF_RIGHTUP, 0, 0, 0, UIntPtr.Zero);
                             break;
 
+                        case "MD": // Middle Down
+                            mouse_event(MOUSEEVENTF_MIDDLEDOWN, 0, 0, 0, UIntPtr.Zero);
+                            break;
+
+                        case "MU": // Middle Up
+                            mouse_event(MOUSEEVENTF_MIDDLEUP, 0, 0, 0, UIntPtr.Zero);
+                            break;
+
+                        case "MC": // Middle Click
+                            mouse_event(MOUSEEVENTF_MIDDLEDOWN, 0, 0, 0, UIntPtr.Zero);
+                            mouse_event(MOUSEEVENTF_MIDDLEUP, 0, 0, 0, UIntPtr.Zero);
+                            break;
+
                         case "S": // Scroll: S <delta>
                             if (parts.Length >= 2) {
                                 int delta = int.Parse(parts[1]);
@@ -105,6 +134,21 @@ namespace GlyphPadReceiver {
                             if (parts.Length >= 2) {
                                 int hdelta = int.Parse(parts[1]);
                                 mouse_event(MOUSEEVENTF_HWHEEL, 0, 0, (uint)hdelta, UIntPtr.Zero);
+                            }
+                            break;
+
+                        case "K": // Press key: K <vkCode>
+                            if (parts.Length >= 2) {
+                                byte vk = byte.Parse(parts[1]);
+                                TapKey(vk);
+                            }
+                            break;
+
+                        case "TEXT": // Type text: TEXT <base64 encoded UTF8 string>
+                            if (parts.Length >= 2) {
+                                byte[] bytes = Convert.FromBase64String(parts[1]);
+                                string text = Encoding.UTF8.GetString(bytes);
+                                TypeString(text);
                             }
                             break;
 
@@ -121,6 +165,19 @@ namespace GlyphPadReceiver {
                 } catch {
                     // Ignore malformed command silently
                 }
+            }
+        }
+
+        static void TapKey(byte vk) {
+            keybd_event(vk, 0, 0, UIntPtr.Zero);
+            keybd_event(vk, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
+        }
+
+        static void TypeString(string text) {
+            foreach (char c in text) {
+                // Unicode keystroke
+                keybd_event(0, (byte)c, KEYEVENTF_UNICODE, UIntPtr.Zero);
+                keybd_event(0, (byte)c, KEYEVENTF_UNICODE | KEYEVENTF_KEYUP, UIntPtr.Zero);
             }
         }
 
@@ -156,34 +213,138 @@ namespace GlyphPadReceiver {
                     LockWorkStation();
                     break;
 
+                case "SNIP": // Win + Shift + S
+                    keybd_event(VK_LWIN, 0, 0, UIntPtr.Zero);
+                    keybd_event(VK_SHIFT, 0, 0, UIntPtr.Zero);
+                    keybd_event(0x53, 0, 0, UIntPtr.Zero); // 'S'
+                    keybd_event(0x53, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
+                    keybd_event(VK_SHIFT, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
+                    keybd_event(VK_LWIN, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
+                    break;
+
+                case "ALT_TAB":
+                    keybd_event(VK_MENU, 0, 0, UIntPtr.Zero);
+                    keybd_event(VK_TAB, 0, 0, UIntPtr.Zero);
+                    keybd_event(VK_TAB, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
+                    keybd_event(VK_MENU, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
+                    break;
+
+                case "DESKTOP_LEFT": // Win + Ctrl + Left
+                    keybd_event(VK_LWIN, 0, 0, UIntPtr.Zero);
+                    keybd_event(VK_CONTROL, 0, 0, UIntPtr.Zero);
+                    keybd_event(VK_LEFT, 0, 0, UIntPtr.Zero);
+                    keybd_event(VK_LEFT, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
+                    keybd_event(VK_CONTROL, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
+                    keybd_event(VK_LWIN, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
+                    break;
+
+                case "DESKTOP_RIGHT": // Win + Ctrl + Right
+                    keybd_event(VK_LWIN, 0, 0, UIntPtr.Zero);
+                    keybd_event(VK_CONTROL, 0, 0, UIntPtr.Zero);
+                    keybd_event(VK_RIGHT, 0, 0, UIntPtr.Zero);
+                    keybd_event(VK_RIGHT, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
+                    keybd_event(VK_CONTROL, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
+                    keybd_event(VK_LWIN, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
+                    break;
+
+                case "COPY": // Ctrl + C
+                    keybd_event(VK_CONTROL, 0, 0, UIntPtr.Zero);
+                    keybd_event(0x43, 0, 0, UIntPtr.Zero); // 'C'
+                    keybd_event(0x43, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
+                    keybd_event(VK_CONTROL, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
+                    break;
+
+                case "PASTE": // Ctrl + V
+                    keybd_event(VK_CONTROL, 0, 0, UIntPtr.Zero);
+                    keybd_event(0x56, 0, 0, UIntPtr.Zero); // 'V'
+                    keybd_event(0x56, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
+                    keybd_event(VK_CONTROL, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
+                    break;
+
+                case "UNDO": // Ctrl + Z
+                    keybd_event(VK_CONTROL, 0, 0, UIntPtr.Zero);
+                    keybd_event(0x5A, 0, 0, UIntPtr.Zero); // 'Z'
+                    keybd_event(0x5A, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
+                    keybd_event(VK_CONTROL, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
+                    break;
+
+                case "SELECT_ALL": // Ctrl + A
+                    keybd_event(VK_CONTROL, 0, 0, UIntPtr.Zero);
+                    keybd_event(0x41, 0, 0, UIntPtr.Zero); // 'A'
+                    keybd_event(0x41, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
+                    keybd_event(VK_CONTROL, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
+                    break;
+
+                case "SLIDE_NEXT": // Page Down / Right Arrow
+                    TapKey(VK_NEXT);
+                    break;
+
+                case "SLIDE_PREV": // Page Up / Left Arrow
+                    TapKey(VK_PRIOR);
+                    break;
+
+                case "FULLSCREEN": // F5
+                    TapKey(0x74); // VK_F5
+                    break;
+
+                case "ESC":
+                    TapKey(VK_ESCAPE);
+                    break;
+
+                case "ENTER":
+                    TapKey(VK_RETURN);
+                    break;
+
+                case "BACKSPACE":
+                    TapKey(VK_BACK);
+                    break;
+
+                case "TAB":
+                    TapKey(VK_TAB);
+                    break;
+
+                case "SPACE":
+                    TapKey(VK_SPACE);
+                    break;
+
+                case "UP":
+                    TapKey(VK_UP);
+                    break;
+
+                case "DOWN":
+                    TapKey(VK_DOWN);
+                    break;
+
+                case "LEFT":
+                    TapKey(VK_LEFT);
+                    break;
+
+                case "RIGHT":
+                    TapKey(VK_RIGHT);
+                    break;
+
                 case "VOL_UP":
-                    keybd_event(VK_VOLUME_UP, 0, 0, UIntPtr.Zero);
-                    keybd_event(VK_VOLUME_UP, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
+                    TapKey(VK_VOLUME_UP);
                     break;
 
                 case "VOL_DOWN":
-                    keybd_event(VK_VOLUME_DOWN, 0, 0, UIntPtr.Zero);
-                    keybd_event(VK_VOLUME_DOWN, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
+                    TapKey(VK_VOLUME_DOWN);
                     break;
 
                 case "MUTE":
-                    keybd_event(VK_VOLUME_MUTE, 0, 0, UIntPtr.Zero);
-                    keybd_event(VK_VOLUME_MUTE, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
+                    TapKey(VK_VOLUME_MUTE);
                     break;
 
                 case "MEDIA_PLAY_PAUSE":
-                    keybd_event(VK_MEDIA_PLAY_PAUSE, 0, 0, UIntPtr.Zero);
-                    keybd_event(VK_MEDIA_PLAY_PAUSE, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
+                    TapKey(VK_MEDIA_PLAY_PAUSE);
                     break;
 
                 case "MEDIA_NEXT":
-                    keybd_event(VK_MEDIA_NEXT_TRACK, 0, 0, UIntPtr.Zero);
-                    keybd_event(VK_MEDIA_NEXT_TRACK, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
+                    TapKey(VK_MEDIA_NEXT_TRACK);
                     break;
 
                 case "MEDIA_PREV":
-                    keybd_event(VK_MEDIA_PREV_TRACK, 0, 0, UIntPtr.Zero);
-                    keybd_event(VK_MEDIA_PREV_TRACK, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
+                    TapKey(VK_MEDIA_PREV_TRACK);
                     break;
             }
         }
