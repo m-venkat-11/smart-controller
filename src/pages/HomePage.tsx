@@ -89,8 +89,8 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
     }
   };
 
-  // Connect to PC Receiver via WebSocket
-  const connectToReceiver = (customAddress?: string) => {
+  // Connect to PC Receiver via WebSocket (UCP v2.0 with Fast One-Tap Reconnect & QR Challenge)
+  const connectToReceiver = (customAddress?: string, authToken?: string, pin?: string) => {
     disconnectFromReceiver();
 
     const targetAddr = customAddress || receiverAddress;
@@ -117,7 +117,53 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
       ws.onopen = () => {
         setIsRealConnected(true);
         setConnectionState('CONNECTED');
-        console.log('[GlyphPad] Connected to receiver at', cleanAddr);
+        console.log('[Digital Touchpad] Connected to receiver at', cleanAddr);
+
+        // Check for QR pairing parameters in URL query
+        let urlPin = pin || '';
+        let urlToken = '';
+        if (typeof window !== 'undefined' && window.location.search) {
+          const params = new URLSearchParams(window.location.search);
+          if (params.get('pair')) urlPin = params.get('pair')!;
+          if (params.get('token')) urlToken = params.get('token')!;
+        }
+
+        const deviceId =
+          localStorage.getItem('digital_touchpad_device_id') ||
+          `phone_${Math.random().toString(36).substring(2, 9)}`;
+        localStorage.setItem('digital_touchpad_device_id', deviceId);
+
+        const savedToken = authToken || localStorage.getItem('digital_touchpad_auth_token');
+
+        // If already trusted with token and no explicit PIN, send fast SESSION_RESUME
+        if (savedToken && !urlPin) {
+          ws.send(
+            JSON.stringify({
+              type: 'SESSION_RESUME',
+              payload: { deviceId, authToken: savedToken },
+            })
+          );
+        } else if (urlPin || urlToken) {
+          // Send 1-time pairing challenge
+          ws.send(
+            JSON.stringify({
+              type: 'PAIR_REQUEST',
+              payload: {
+                deviceId,
+                deviceName:
+                  typeof navigator !== 'undefined'
+                    ? navigator.userAgent.includes('iPhone')
+                      ? 'Apple iPhone'
+                      : navigator.userAgent.includes('Android')
+                      ? 'Android Phone'
+                      : 'Mobile Client'
+                    : 'Mobile Client',
+                pin: urlPin,
+                token: urlToken,
+              },
+            })
+          );
+        }
 
         // Start ping heartbeat
         if (pingIntervalRef.current) clearInterval(pingIntervalRef.current);
@@ -147,6 +193,13 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
               } else {
                 setActivePlatform('windows');
               }
+            }
+          }
+
+          if (data.type === 'PAIR_ACK' && data.payload) {
+            if (data.payload.authToken) {
+              localStorage.setItem('digital_touchpad_auth_token', data.payload.authToken);
+              console.log('[Digital Touchpad] ✓ One-time secure pairing completed and saved.');
             }
           }
 
@@ -407,12 +460,8 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
         isRealConnected={isRealConnected}
         receiverAddress={receiverAddress}
         setReceiverAddress={setReceiverAddress}
-        onConnect={(target) => {
-          if (target) {
-            connectToReceiver(target);
-          } else {
-            connectToReceiver();
-          }
+        onConnect={(target, authToken, pin) => {
+          connectToReceiver(target, authToken, pin);
         }}
         onDisconnect={disconnectFromReceiver}
         pinCode={pinCode}

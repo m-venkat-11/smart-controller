@@ -1,18 +1,25 @@
 /**
- * GLYPHPAD UNIVERSAL COMPANION RECEIVER
- * Universal Control Protocol (UCP v1.0) Server
+ * DIGITAL TOUCHPAD — UNIVERSAL COMPANION RECEIVER
+ * Universal Control Protocol (UCP v2.0)
+ * Standalone Zero-Manual-Configuration Server
  * Cross-Platform: Windows, macOS, and Linux
- * Zero-cloud, local-first input bridge
  */
 
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
+const crypto = require('crypto');
+const dgram = require('dgram');
 const { spawn, exec } = require('child_process');
 const { WebSocketServer } = require('ws');
+let QRCode = null;
+try {
+  QRCode = require('qrcode');
+} catch (_) {}
 
 const PORT = process.env.PORT || 8443;
+const UDP_PORT = 8444;
 const CURRENT_OS = os.platform(); // 'win32' | 'darwin' | 'linux'
 
 // Detect all valid non-internal IPv4 addresses across network adapters
@@ -32,6 +39,46 @@ function getNetworkInterfacesList() {
 const networkList = getNetworkInterfacesList();
 const primaryIp = networkList[0].address;
 
+function getNormalizedPlatform() {
+  if (CURRENT_OS === 'win32') return 'windows';
+  if (CURRENT_OS === 'darwin') return 'macos';
+  return 'linux';
+}
+
+// ==========================================
+// TRUSTED DEVICES & PAIRING STATE (UCP v2.0)
+// ==========================================
+const TRUSTED_DEVICES_FILE = path.join(__dirname, 'trusted_devices.json');
+
+function loadTrustedDevices() {
+  try {
+    if (fs.existsSync(TRUSTED_DEVICES_FILE)) {
+      return JSON.parse(fs.readFileSync(TRUSTED_DEVICES_FILE, 'utf-8'));
+    }
+  } catch (_) {}
+  return [];
+}
+
+function saveTrustedDevices(devices) {
+  try {
+    fs.writeFileSync(TRUSTED_DEVICES_FILE, JSON.stringify(devices, null, 2), 'utf-8');
+  } catch (_) {}
+}
+
+let trustedDevices = loadTrustedDevices();
+
+// Rotating 6-Digit PIN and Challenge Token (Refreshes every 3 minutes)
+let currentPairingPin = Math.floor(100000 + Math.random() * 900000).toString();
+let currentPairingToken = crypto.randomBytes(16).toString('hex');
+let tokenExpiresAt = Date.now() + 180000;
+
+function refreshPairingChallenge() {
+  currentPairingPin = Math.floor(100000 + Math.random() * 900000).toString();
+  currentPairingToken = crypto.randomBytes(16).toString('hex');
+  tokenExpiresAt = Date.now() + 180000;
+}
+setInterval(refreshPairingChallenge, 180000);
+
 // ==========================================
 // CROSS-PLATFORM INPUT INJECTION BACKEND
 // ==========================================
@@ -48,7 +95,7 @@ function startWindowsInjector() {
   const psScript = path.join(__dirname, 'injector.ps1');
 
   try {
-    console.log('[GlyphPad] Starting Native Win32 Input Injector via PowerShell...');
+    console.log('[Digital Touchpad] Starting Native Win32 SendInput Injector via PowerShell...');
     winInjector = spawn(
       psExe,
       ['-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-File', psScript],
@@ -62,36 +109,36 @@ function startWindowsInjector() {
     winInjector.stdout.on('data', (data) => {
       const msg = data.toString().trim();
       if (msg.includes('INJECTOR_READY')) {
-        console.log('[GlyphPad] ✓ Native Win32 Input Injector is READY and ACTIVE.');
+        console.log('[Digital Touchpad] ✓ Native Win32 SendInput Injector is READY and ACTIVE.');
       }
     });
 
     winInjector.stderr.on('data', (data) => {
       const msg = data.toString().trim();
-      if (msg) console.warn('[GlyphPad] Injector notice:', msg);
+      if (msg) console.warn('[Digital Touchpad] Injector notice:', msg);
     });
 
     winInjector.on('error', (err) => {
-      console.warn('[GlyphPad] Injector process warning:', err.message);
+      console.warn('[Digital Touchpad] Injector process warning:', err.message);
     });
 
     winInjector.on('close', (code) => {
       if (code !== 0 && code !== null) {
-        console.warn(`[GlyphPad] Injector stopped with code ${code}. Auto-restarting in 1s...`);
+        console.warn(`[Digital Touchpad] Injector stopped with code ${code}. Auto-restarting in 1s...`);
         setTimeout(startWindowsInjector, 1000);
       }
     });
   } catch (e) {
-    console.warn('[GlyphPad] Could not spawn injector.ps1:', e.message);
+    console.warn('[Digital Touchpad] Could not spawn injector.ps1:', e.message);
   }
 }
 
 if (CURRENT_OS === 'win32') {
   startWindowsInjector();
 } else if (CURRENT_OS === 'darwin') {
-  console.log('[GlyphPad] Running on macOS. Initializing AppleScript/Quartz adapter.');
+  console.log('[Digital Touchpad] Running on macOS. Initializing AppleScript/Quartz adapter.');
 } else {
-  console.log('[GlyphPad] Running on Linux. Initializing X11/Wayland input adapter.');
+  console.log('[Digital Touchpad] Running on Linux. Initializing X11/Wayland input adapter.');
 }
 
 function sendNativeCommand(cmd, payload = {}) {
@@ -100,26 +147,22 @@ function sendNativeCommand(cmd, payload = {}) {
       try {
         winInjector.stdin.write(cmd + '\n');
       } catch (err) {
-        console.warn('[GlyphPad] Failed writing to injector:', err.message);
+        console.warn('[Digital Touchpad] Failed writing to injector:', err.message);
       }
     }
   } else if (CURRENT_OS === 'darwin') {
-    // macOS AppleScript / osascript dispatching
     handleMacCommand(cmd, payload);
   } else if (CURRENT_OS === 'linux') {
-    // Linux xdotool dispatching
     handleLinuxCommand(cmd, payload);
   }
 }
 
-// macOS Input Dispatcher
+// macOS AppleScript / osascript dispatching
 function handleMacCommand(cmd, payload) {
   const parts = cmd.split(' ');
   const op = parts[0].toUpperCase();
-
   try {
     if (op === 'M') {
-      // Relative mouse move on macOS via AppleScript / cliclick
       const dx = parseInt(parts[1]) || 0;
       const dy = parseInt(parts[2]) || 0;
       exec(`osascript -e 'tell application "System Events" to set {x, y} to {${dx}, ${dy}}'`, () => {});
@@ -131,7 +174,7 @@ function handleMacCommand(cmd, payload) {
       const act = parts[1] || '';
       switch (act.toUpperCase()) {
         case 'SHOW_DESKTOP':
-          exec(`osascript -e 'tell application "System Events" to key code 103'`); // F11
+          exec(`osascript -e 'tell application "System Events" to key code 103'`);
           break;
         case 'TASK_VIEW':
         case 'TASK_MANAGER':
@@ -141,49 +184,20 @@ function handleMacCommand(cmd, payload) {
           exec(`open "x-apple.systempreferences:"`);
           break;
         case 'SEARCH':
-          exec(`osascript -e 'tell application "System Events" to key code 49 using command down'`); // Spotlight
-          break;
-        case 'FILE_MANAGER':
-        case 'EXPLORER':
-          exec(`open -a Finder ~`);
-          break;
-        case 'TERMINAL':
-          exec(`open -a Terminal`);
-          break;
-        case 'CALCULATOR':
-          exec(`open -a Calculator`);
+          exec(`osascript -e 'tell application "System Events" to key code 49 using command down'`);
           break;
         case 'LOCK_PC':
-          exec(`osascript -e 'tell application "System Events" to key code 12 using {control down, command down}'`); // Lock
-          break;
-        case 'VOL_UP':
-          exec(`osascript -e 'set volume output volume ((output volume of (get volume settings)) + 6)'`);
-          break;
-        case 'VOL_DOWN':
-          exec(`osascript -e 'set volume output volume ((output volume of (get volume settings)) - 6)'`);
-          break;
-        case 'MUTE':
-          exec(`osascript -e 'set volume output muted not (output muted of (get volume settings))'`);
-          break;
-        case 'MEDIA_PLAY_PAUSE':
-          exec(`osascript -e 'tell application "Music" to playpause'`);
-          break;
-        case 'MEDIA_NEXT':
-          exec(`osascript -e 'tell application "Music" to next track'`);
-          break;
-        case 'MEDIA_PREV':
-          exec(`osascript -e 'tell application "Music" to previous track'`);
+          exec(`osascript -e 'tell application "System Events" to key code 12 using {control down, command down}'`);
           break;
       }
     }
   } catch (_) {}
 }
 
-// Linux Input Dispatcher
+// Linux xdotool dispatching
 function handleLinuxCommand(cmd, payload) {
   const parts = cmd.split(' ');
   const op = parts[0].toUpperCase();
-
   try {
     if (op === 'M') {
       const dx = parseInt(parts[1]) || 0;
@@ -195,42 +209,73 @@ function handleLinuxCommand(cmd, payload) {
       exec(`xdotool click 3`, () => {});
     } else if (op === 'S') {
       const d = parseInt(parts[1]) || 0;
-      const btn = d > 0 ? 4 : 5;
-      exec(`xdotool click ${btn}`, () => {});
-    } else if (op === 'ACTION') {
-      const act = parts[1] || '';
-      switch (act.toUpperCase()) {
-        case 'SHOW_DESKTOP':
-          exec(`xdotool key super+d`);
-          break;
-        case 'TASK_MANAGER':
-          exec(`gnome-system-monitor || ksysguard`);
-          break;
-        case 'TERMINAL':
-          exec(`x-terminal-emulator || gnome-terminal`);
-          break;
-        case 'SETTINGS':
-          exec(`gnome-control-center || systemsettings`);
-          break;
-        case 'SEARCH':
-          exec(`xdotool key super`);
-          break;
-        case 'LOCK_PC':
-          exec(`loginctl lock-session || xdg-screensaver lock`);
-          break;
-        case 'VOL_UP':
-          exec(`amixer -D pulse sset Master 5%+ || pactl set-sink-volume @DEFAULT_SINK@ +5%`);
-          break;
-        case 'VOL_DOWN':
-          exec(`amixer -D pulse sset Master 5%- || pactl set-sink-volume @DEFAULT_SINK@ -5%`);
-          break;
-        case 'MUTE':
-          exec(`amixer -D pulse sset Master toggle || pactl set-sink-mute @DEFAULT_SINK@ toggle`);
-          break;
-      }
+      exec(`xdotool click ${d > 0 ? 4 : 5}`, () => {});
     }
   } catch (_) {}
 }
+
+// ==========================================
+// UDP BROADCAST SERVICE DISCOVERY (LAN Beacon)
+// ==========================================
+function startUdpDiscovery() {
+  try {
+    const udp = dgram.createSocket({ type: 'udp4', reuseAddr: true });
+
+    udp.on('error', (err) => {
+      console.warn('[Digital Touchpad] UDP discovery notice:', err.message);
+    });
+
+    udp.on('message', (msg, rinfo) => {
+      try {
+        const req = JSON.parse(msg.toString());
+        if (req.action === 'DISCOVER_DIGITAL_TOUCHPAD') {
+          const resp = Buffer.from(
+            JSON.stringify({
+              service: 'digital-touchpad',
+              version: '2.0.0',
+              host: os.hostname(),
+              platform: getNormalizedPlatform(),
+              osName: `${os.type()} ${os.release()}`,
+              ip: primaryIp,
+              port: PORT,
+              pin: currentPairingPin,
+              pairingToken: currentPairingToken,
+            })
+          );
+          udp.send(resp, rinfo.port, rinfo.address);
+        }
+      } catch (_) {}
+    });
+
+    udp.bind(UDP_PORT, () => {
+      try {
+        udp.setBroadcast(true);
+        console.log(`[Digital Touchpad] UDP Discovery Beacon active on port ${UDP_PORT}`);
+
+        // Broadcast announcement every 2.5s for zero-config auto discovery
+        setInterval(() => {
+          try {
+            const announcement = Buffer.from(
+              JSON.stringify({
+                service: 'digital-touchpad',
+                version: '2.0.0',
+                host: os.hostname(),
+                platform: getNormalizedPlatform(),
+                ip: primaryIp,
+                port: PORT,
+              })
+            );
+            udp.send(announcement, UDP_PORT, '255.255.255.255');
+          } catch (_) {}
+        }, 2500);
+      } catch (_) {}
+    });
+  } catch (e) {
+    console.warn('[Digital Touchpad] Could not bind UDP discovery socket:', e.message);
+  }
+}
+
+startUdpDiscovery();
 
 // ==========================================
 // HTTP SERVER & STATIC ASSETS
@@ -250,15 +295,9 @@ const MIME_TYPES = {
 
 const distPath = path.join(__dirname, '..', 'dist');
 
-function getNormalizedPlatform() {
-  if (CURRENT_OS === 'win32') return 'windows';
-  if (CURRENT_OS === 'darwin') return 'macos';
-  return 'linux';
-}
-
-const server = http.createServer((req, res) => {
+const server = http.createServer(async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', '*');
 
   if (req.method === 'OPTIONS') {
@@ -270,13 +309,14 @@ const server = http.createServer((req, res) => {
   const parsedUrl = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
   const pathname = parsedUrl.pathname;
 
-  // Universal Receiver Health & Capabilities API
+  // Zero-Config Subnet Discovery & Capabilities Endpoint
   if (pathname === '/status' || pathname === '/health' || pathname === '/capabilities') {
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(
       JSON.stringify({
         status: 'READY',
-        protocol: 'UCP-1.0',
+        service: 'digital-touchpad',
+        protocol: 'UCP-2.0',
         host: os.hostname(),
         platform: getNormalizedPlatform(),
         osName: `${os.type()} ${os.release()}`,
@@ -285,11 +325,54 @@ const server = http.createServer((req, res) => {
         ip: primaryIp,
         interfaces: networkList,
         port: PORT,
+        pin: currentPairingPin,
+        pairingToken: currentPairingToken,
+        trustedCount: trustedDevices.length,
         clients: wss ? wss.clients.size : 0,
         timestamp: Date.now(),
       })
     );
     return;
+  }
+
+  // QR Code Dynamic Pairing Endpoint (Generates live scannable SVG)
+  if (pathname === '/pairing-qr') {
+    const pairUrl = `http://${primaryIp}:${PORT}?pair=${currentPairingPin}&token=${currentPairingToken}`;
+    if (QRCode) {
+      try {
+        const svg = await QRCode.toString(pairUrl, {
+          type: 'svg',
+          color: { dark: '#ffffff', light: '#00000000' },
+          margin: 1,
+        });
+        res.writeHead(200, { 'Content-Type': 'image/svg+xml' });
+        res.end(svg);
+        return;
+      } catch (_) {}
+    }
+    // Fallback JSON payload if QRCode library is not loaded
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ url: pairUrl, pin: currentPairingPin, token: currentPairingToken }));
+    return;
+  }
+
+  // Trusted Devices API
+  if (pathname === '/trusted-devices') {
+    if (req.method === 'GET') {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify(trustedDevices));
+      return;
+    }
+    if (req.method === 'DELETE') {
+      const devId = parsedUrl.searchParams.get('id');
+      if (devId) {
+        trustedDevices = trustedDevices.filter((d) => d.id !== devId);
+        saveTrustedDevices(trustedDevices);
+      }
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: true, trustedDevices }));
+      return;
+    }
   }
 
   // Serve static files from dist/ if available
@@ -323,7 +406,7 @@ const server = http.createServer((req, res) => {
 <html>
 <head>
   <meta charset="utf-8">
-  <title>GlyphPad Universal Receiver</title>
+  <title>Digital Touchpad Receiver</title>
   <style>
     body { background: #08090a; color: #fff; font-family: monospace; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; text-align: center; }
     .card { background: #121417; border: 1px solid rgba(255,255,255,0.15); border-radius: 24px; padding: 32px; max-width: 90%; }
@@ -332,8 +415,9 @@ const server = http.createServer((req, res) => {
 </head>
 <body>
   <div class="card">
-    <h2 style="color:#00e575">● GLYPHPAD RECEIVER RUNNING</h2>
+    <h2 style="color:#00e575">● DIGITAL TOUCHPAD RECEIVER ACTIVE</h2>
     <p>Host: <strong>${os.hostname()}</strong> (${getNormalizedPlatform().toUpperCase()})</p>
+    <p>Pairing PIN: <strong style="font-size:24px; letter-spacing:4px; color:#eb0029">${currentPairingPin}</strong></p>
     <p>Local IP: <strong>${primaryIp}:${PORT}</strong></p>
     <a class="btn" href="https://smart-controller.vercel.app">LAUNCH WEB CONTROLLER</a>
   </div>
@@ -342,7 +426,7 @@ const server = http.createServer((req, res) => {
 });
 
 // ==========================================
-// WEBSOCKET PROTOCOL ENGINE (UCP v1.0)
+// WEBSOCKET PROTOCOL ENGINE (UCP v2.0)
 // ==========================================
 const wss = new WebSocketServer({ server, path: '/ucp' });
 
@@ -351,21 +435,26 @@ let clientCount = 0;
 wss.on('connection', (ws, req) => {
   clientCount++;
   const clientIp = req.socket.remoteAddress;
-  console.log(`[GlyphPad] Device connected from ${clientIp} (Total active: ${clientCount})`);
+  let authenticatedDeviceId = null;
+  let isSessionAuthenticated = false;
 
-  // Send dynamic handshake with full machine profile
+  console.log(`[Digital Touchpad] Device connected from ${clientIp} (Total active: ${clientCount})`);
+
+  // Send initial handshake with pairing challenge & machine profile
   ws.send(
     JSON.stringify({
       type: 'SESSION_ACK',
       payload: {
-        status: 'AUTHENTICATED',
+        status: 'READY_TO_AUTHENTICATE',
         host: os.hostname(),
         platform: getNormalizedPlatform(),
         osName: `${os.type()} ${os.release()}`,
         arch: os.arch(),
         ip: primaryIp,
         interfaces: networkList,
-        version: '1.0.0',
+        pin: currentPairingPin,
+        pairingToken: currentPairingToken,
+        version: '2.0.0',
         timestamp: Date.now(),
       },
     })
@@ -393,6 +482,103 @@ wss.on('connection', (ws, req) => {
           );
           break;
 
+        // One-Time Secure Pairing Request (PRD Section 3)
+        case 'PAIR_REQUEST': {
+          const reqPin = (payload.pin || '').toString().replace(/\s/g, '');
+          const reqToken = payload.token || '';
+          const devId = payload.deviceId || `device_${Date.now()}`;
+          const devName = payload.deviceName || 'Smartphone';
+
+          const pinValid = reqPin === currentPairingPin;
+          const tokenValid = reqToken === currentPairingToken && Date.now() < tokenExpiresAt;
+
+          if (pinValid || tokenValid) {
+            // Generate permanent authenticated session token
+            const authToken = crypto.randomBytes(24).toString('hex');
+            authenticatedDeviceId = devId;
+            isSessionAuthenticated = true;
+
+            // Save to trusted devices
+            trustedDevices = trustedDevices.filter((d) => d.id !== devId);
+            trustedDevices.push({
+              id: devId,
+              name: devName,
+              token: authToken,
+              pairedAt: Date.now(),
+              lastSeen: Date.now(),
+              ip: clientIp,
+            });
+            saveTrustedDevices(trustedDevices);
+
+            console.log(`[Digital Touchpad] ✓ Authenticated new trusted device: ${devName} (${devId})`);
+
+            ws.send(
+              JSON.stringify({
+                type: 'PAIR_ACK',
+                payload: {
+                  status: 'PAIRED',
+                  authToken,
+                  deviceId: devId,
+                  host: os.hostname(),
+                  platform: getNormalizedPlatform(),
+                },
+              })
+            );
+          } else {
+            console.warn(`[Digital Touchpad] Pairing rejected from ${clientIp}. Invalid PIN/Token.`);
+            ws.send(
+              JSON.stringify({
+                type: 'PAIR_REJECTED',
+                payload: { reason: 'INVALID_CREDENTIALS' },
+              })
+            );
+          }
+          break;
+        }
+
+        // Fast One-Tap Reconnection for Trusted Devices (PRD Section 3.2)
+        case 'SESSION_RESUME': {
+          const devId = payload.deviceId;
+          const authToken = payload.authToken;
+          const trusted = trustedDevices.find((d) => d.id === devId && d.token === authToken);
+
+          if (trusted) {
+            authenticatedDeviceId = devId;
+            isSessionAuthenticated = true;
+            trusted.lastSeen = Date.now();
+            saveTrustedDevices(trustedDevices);
+
+            console.log(`[Digital Touchpad] ✓ Trusted device reconnected: ${trusted.name}`);
+            ws.send(
+              JSON.stringify({
+                type: 'SESSION_RESUMED',
+                payload: {
+                  status: 'AUTHENTICATED',
+                  host: os.hostname(),
+                  platform: getNormalizedPlatform(),
+                },
+              })
+            );
+          } else {
+            ws.send(
+              JSON.stringify({
+                type: 'SESSION_FAILED',
+                payload: { reason: 'UNTRUSTED_DEVICE_PAIRING_REQUIRED' },
+              })
+            );
+          }
+          break;
+        }
+
+        case 'REVOKE_TRUST': {
+          if (payload.deviceId) {
+            trustedDevices = trustedDevices.filter((d) => d.id !== payload.deviceId);
+            saveTrustedDevices(trustedDevices);
+          }
+          break;
+        }
+
+        // Real-Time Mouse Movement with Sub-Pixel Delta Accumulation
         case 'MOVE':
         case 'POINTER_MOVE': {
           const rawDx = Number(payload.dx) || 0;
@@ -478,18 +664,18 @@ wss.on('connection', (ws, req) => {
   ws.on('close', () => {
     clientCount--;
     sendNativeCommand('RELEASE_ALL');
-    console.log(`[GlyphPad] Device disconnected. (Remaining: ${clientCount})`);
+    console.log(`[Digital Touchpad] Device disconnected. (Remaining: ${clientCount})`);
   });
 });
 
 // Handle Server Errors
 server.on('error', (err) => {
   if (err.code === 'EADDRINUSE') {
-    console.error(`\n[GlyphPad ERROR] Port ${PORT} is already in use by another instance or application.`);
+    console.error(`\n[Digital Touchpad ERROR] Port ${PORT} is already in use by another instance.`);
     console.error(`Run start-receiver.bat to auto-close stale instances, or close any existing terminal.\n`);
     process.exit(1);
   } else {
-    console.error('[GlyphPad ERROR]', err);
+    console.error('[Digital Touchpad ERROR]', err);
   }
 });
 
@@ -497,22 +683,24 @@ server.on('error', (err) => {
 server.listen(PORT, '0.0.0.0', () => {
   console.clear();
   console.log('================================================================');
-  console.log('            GLYPHPAD UNIVERSAL COMPANION RECEIVER               ');
-  console.log('           Connect Any Mobile Phone to Any Computer             ');
+  console.log('               DIGITAL TOUCHPAD COMPANION RECEIVER              ');
+  console.log('              Universal Cross-Platform Wireless Touchpad        ');
   console.log('================================================================');
-  console.log(` Host Name   : ${os.hostname()}`);
-  console.log(` OS Platform : ${getNormalizedPlatform().toUpperCase()} (${os.type()} ${os.release()})`);
-  console.log(` Status      : ACTIVE & LISTENING`);
+  console.log(` Host Name    : ${os.hostname()}`);
+  console.log(` OS Platform  : ${getNormalizedPlatform().toUpperCase()} (${os.type()} ${os.release()})`);
+  console.log(` Protocol     : Universal Control Protocol v2.0 (UCP v2.0)`);
+  console.log(` Status       : ACTIVE & LISTENING`);
+  console.log(` Pairing PIN  : ${currentPairingPin}`);
   console.log('----------------------------------------------------------------');
   console.log(' 🌐 AVAILABLE NETWORK ADDRESSES:');
   networkList.forEach((iface) => {
     console.log(`    👉 http://${iface.address}:${PORT}  [${iface.name}]`);
   });
   console.log('----------------------------------------------------------------');
-  console.log(' 📱 HOW TO CONNECT ANY SMARTPHONE:');
-  console.log(' 1. Connect phone to the same Wi-Fi network.');
-  console.log(` 2. On your phone browser, open any of the above URLs.`);
-  console.log(' 3. The phone loads GlyphPad directly and connects immediately!');
+  console.log(' 📱 ZERO-CONFIG PAIRING:');
+  console.log(' 1. Connect phone to the same Wi-Fi.');
+  console.log(` 2. On your phone, visit: http://${primaryIp}:${PORT}`);
+  console.log(' 3. Or scan the QR code displayed in the desktop app.');
   console.log('================================================================\n');
 });
 
