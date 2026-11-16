@@ -31,14 +31,16 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
   // Connection & WebSocket state
   const [receiverAddress, setReceiverAddress] = useState<string>(() => {
     if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('glyph_receiver_addr');
-      if (saved) return saved;
+      // If loaded directly from the PC receiver (e.g. http://192.168.1.4:8443)
       if (window.location.port && window.location.port !== '80' && window.location.port !== '443') {
         return window.location.host;
       }
-      return 'localhost:8443';
+      const saved = localStorage.getItem('glyph_receiver_addr');
+      if (saved && !saved.includes('localhost')) return saved;
+      // Default to common PC IP or host
+      return '192.168.1.4:8443';
     }
-    return 'localhost:8443';
+    return '192.168.1.4:8443';
   });
   const [isRealConnected, setIsRealConnected] = useState(false);
   const [connectionState, setConnectionState] = useState<ConnectionState>('DISCONNECTED');
@@ -236,6 +238,17 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#08090a] text-[#f5f6f8]">
+      {/* Mobile HTTPS Mixed-Content Guidance Pill */}
+      {typeof window !== 'undefined' && window.location.protocol === 'https:' && !isRealConnected && (
+        <div className="bg-[#14171a] border-b border-[#eb0029]/40 px-3 py-2 text-center text-xs font-mono text-zinc-300 flex items-center justify-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-[#eb0029] animate-pulse"></span>
+          <span>
+            Mobile Wi-Fi Notice: If connecting from mobile, open{' '}
+            <strong className="text-[#00e575]">http://{receiverAddress}</strong> directly in your phone browser to bypass HTTPS network restrictions.
+          </span>
+        </div>
+      )}
+
       {/* Top Header & Connection Bar with Dynamic OS State */}
       <ConsoleHeader
         connectionState={connectionState}

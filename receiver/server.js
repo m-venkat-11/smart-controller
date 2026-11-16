@@ -482,6 +482,17 @@ wss.on('connection', (ws, req) => {
   });
 });
 
+// Handle Server Errors
+server.on('error', (err) => {
+  if (err.code === 'EADDRINUSE') {
+    console.error(`\n[GlyphPad ERROR] Port ${PORT} is already in use by another instance or application.`);
+    console.error(`Run start-receiver.bat to auto-close stale instances, or close any existing terminal.\n`);
+    process.exit(1);
+  } else {
+    console.error('[GlyphPad ERROR]', err);
+  }
+});
+
 // Start Server
 server.listen(PORT, '0.0.0.0', () => {
   console.clear();
