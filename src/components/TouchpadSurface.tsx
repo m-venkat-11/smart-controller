@@ -36,6 +36,7 @@ export const TouchpadSurface: React.FC<TouchpadSurfaceProps> = ({
   const [currentGesture, setCurrentGesture] = useState<string>('READY');
   const [dragLock, setDragLock] = useState<boolean>(false);
   const [cursorPosPreview, setCursorPosPreview] = useState<{ x: number; y: number }>({ x: 50, y: 50 });
+  const [txCount, setTxCount] = useState<number>(0);
 
   // Touch tracking state
   const touchStartRef = useRef<{
@@ -64,150 +65,168 @@ export const TouchpadSurface: React.FC<TouchpadSurfaceProps> = ({
     }
   };
 
-  // Touch Event Handlers
-  const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    const touches = Array.from(e.touches).map((t) => ({
-      id: t.identifier,
-      x: t.clientX,
-      y: t.clientY,
-    }));
-    setActiveTouches(touches);
+  // Dedicated Native Non-Passive Touch Listeners (Critical for iOS Safari & Android Chrome)
+  useEffect(() => {
+    const pad = padRef.current;
+    if (!pad) return;
 
-    const first = e.touches[0];
-    touchStartRef.current = {
-      time: Date.now(),
-      count: e.touches.length,
-      startX: first.clientX,
-      startY: first.clientY,
-      lastX: first.clientX,
-      lastY: first.clientY,
-      moved: false,
+    const onTouchStart = (e: TouchEvent) => {
+      e.preventDefault();
+      const touches = Array.from(e.touches).map((t) => ({
+        id: t.identifier,
+        x: t.clientX,
+        y: t.clientY,
+      }));
+      setActiveTouches(touches);
+
+      const first = e.touches[0];
+      touchStartRef.current = {
+        time: Date.now(),
+        count: e.touches.length,
+        startX: first.clientX,
+        startY: first.clientY,
+        lastX: first.clientX,
+        lastY: first.clientY,
+        moved: false,
+      };
+
+      if (e.touches.length === 1) {
+        setCurrentGesture('TRACKING');
+        setTxCount((c) => c + 1);
+      } else if (e.touches.length === 2) {
+        setCurrentGesture('2-FINGER SCROLL');
+        vibrate(15);
+      } else if (e.touches.length >= 3) {
+        setCurrentGesture('3-FINGER GESTURE');
+        vibrate(25);
+      }
     };
 
-    if (e.touches.length === 1) {
-      setCurrentGesture('TRACKING');
-    } else if (e.touches.length === 2) {
-      setCurrentGesture('2-FINGER SCROLL');
-      vibrate(15);
-    } else if (e.touches.length >= 3) {
-      setCurrentGesture('3-FINGER GESTURE');
-      vibrate(25);
-    }
-  };
-
-  const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    const touches = Array.from(e.touches).map((t) => ({
-      id: t.identifier,
-      x: t.clientX,
-      y: t.clientY,
-    }));
-    setActiveTouches(touches);
-
-    const state = touchStartRef.current;
-    if (e.touches.length === 1) {
-      const current = e.touches[0];
-      const rawDx = current.clientX - state.lastX;
-      const rawDy = current.clientY - state.lastY;
-
-      // Pointer acceleration
-      const speed = Math.hypot(rawDx, rawDy);
-      const accel = speed > 10 ? 1.4 : 1.0;
-      const dx = rawDx * sensitivity * accel;
-      const dy = rawDy * sensitivity * accel;
-
-      if (Math.hypot(current.clientX - state.startX, current.clientY - state.startY) > 4) {
-        state.moved = true;
-      }
-
-      onPointerMove(dx, dy);
-
-      setCursorPosPreview((prev) => ({
-        x: Math.max(5, Math.min(95, prev.x + dx * 0.15)),
-        y: Math.max(5, Math.min(95, prev.y + dy * 0.15)),
+    const onTouchMove = (e: TouchEvent) => {
+      e.preventDefault();
+      const touches = Array.from(e.touches).map((t) => ({
+        id: t.identifier,
+        x: t.clientX,
+        y: t.clientY,
       }));
+      setActiveTouches(touches);
 
-      state.lastX = current.clientX;
-      state.lastY = current.clientY;
-      setCurrentGesture(dragLock ? 'DRAGGING' : 'MOVING');
-    } else if (e.touches.length === 2) {
-      state.moved = true;
-      const current = e.touches[0];
-      const rawDy = current.clientY - state.lastY;
-      const rawDx = current.clientX - state.lastX;
+      const state = touchStartRef.current;
+      if (e.touches.length === 1) {
+        const current = e.touches[0];
+        const rawDx = current.clientX - state.lastX;
+        const rawDy = current.clientY - state.lastY;
 
-      const scrollSign = naturalScroll ? -1 : 1;
-      const deltaY = rawDy * scrollSign * 2.5;
-      const deltaX = rawDx * scrollSign * 2.0;
+        // Pointer acceleration & base 1.8x mobile-to-desktop scale
+        const speed = Math.hypot(rawDx, rawDy);
+        const accel = speed > 10 ? 1.5 : (speed > 5 ? 1.25 : 1.0);
+        const dx = rawDx * sensitivity * accel * 1.8;
+        const dy = rawDy * sensitivity * accel * 1.8;
 
-      onScroll(deltaY, deltaX);
-
-      state.lastX = current.clientX;
-      state.lastY = current.clientY;
-      setCurrentGesture('SCROLLING');
-    } else if (e.touches.length === 3) {
-      state.moved = true;
-      const current = e.touches[0];
-      const diffY = current.clientY - state.startY;
-
-      if (diffY > 60) {
-        // 3-finger swipe down -> Show Desktop
-        onAction('SHOW_DESKTOP');
-        setCurrentGesture('SHOW DESKTOP (WIN+D)');
-        vibrate(30);
-        state.startY = current.clientY; // reset to avoid duplicate
-      } else if (diffY < -60) {
-        // 3-finger swipe up -> Task View / Alt Tab
-        onAction('TASK_MANAGER');
-        setCurrentGesture('TASK MANAGER');
-        vibrate(30);
-        state.startY = current.clientY;
-      }
-    }
-  };
-
-  const handleTouchEnd = (e: React.TouchEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    const remaining = Array.from(e.touches).map((t) => ({
-      id: t.identifier,
-      x: t.clientX,
-      y: t.clientY,
-    }));
-    setActiveTouches(remaining);
-
-    const state = touchStartRef.current;
-    const duration = Date.now() - state.time;
-
-    // Detect Tap Gestures
-    if (!state.moved && duration < 240) {
-      if (state.count === 1) {
-        const now = Date.now();
-        if (now - lastTapRef.current < 280) {
-          // Double Tap
-          onDoubleClick();
-          setCurrentGesture('DOUBLE CLICK');
-          vibrate(25);
-          lastTapRef.current = 0;
-        } else {
-          // Single Tap (Left Click)
-          onClick('LEFT');
-          setCurrentGesture('LEFT CLICK');
-          vibrate(15);
-          lastTapRef.current = now;
+        if (Math.hypot(current.clientX - state.startX, current.clientY - state.startY) > 3) {
+          state.moved = true;
         }
-      } else if (state.count === 2) {
-        // Two-finger tap (Right Click)
-        onClick('RIGHT');
-        setCurrentGesture('RIGHT CLICK');
-        vibrate(30);
-      }
-    }
 
-    if (e.touches.length === 0) {
-      setTimeout(() => setCurrentGesture('READY'), 700);
-    }
-  };
+        onPointerMove(dx, dy);
+        setTxCount((c) => c + 1);
+
+        setCursorPosPreview((prev) => ({
+          x: Math.max(5, Math.min(95, prev.x + (dx / 10))),
+          y: Math.max(5, Math.min(95, prev.y + (dy / 10))),
+        }));
+
+        state.lastX = current.clientX;
+        state.lastY = current.clientY;
+        setCurrentGesture(dragLock ? 'DRAGGING' : 'MOVING');
+      } else if (e.touches.length === 2) {
+        state.moved = true;
+        const current = e.touches[0];
+        const rawDy = current.clientY - state.lastY;
+        const rawDx = current.clientX - state.lastX;
+
+        const scrollSign = naturalScroll ? -1 : 1;
+        const deltaY = rawDy * scrollSign * 3.5;
+        const deltaX = rawDx * scrollSign * 3.0;
+
+        onScroll(deltaY, deltaX);
+        setTxCount((c) => c + 1);
+
+        state.lastX = current.clientX;
+        state.lastY = current.clientY;
+        setCurrentGesture('SCROLLING');
+      } else if (e.touches.length === 3) {
+        state.moved = true;
+        const current = e.touches[0];
+        const diffY = current.clientY - state.startY;
+
+        if (diffY > 60) {
+          onAction('SHOW_DESKTOP');
+          setCurrentGesture('SHOW DESKTOP (WIN+D)');
+          vibrate(30);
+          state.startY = current.clientY;
+        } else if (diffY < -60) {
+          onAction('TASK_MANAGER');
+          setCurrentGesture('TASK MANAGER');
+          vibrate(30);
+          state.startY = current.clientY;
+        }
+      }
+    };
+
+    const onTouchEnd = (e: TouchEvent) => {
+      e.preventDefault();
+      const remaining = Array.from(e.touches).map((t) => ({
+        id: t.identifier,
+        x: t.clientX,
+        y: t.clientY,
+      }));
+      setActiveTouches(remaining);
+
+      const state = touchStartRef.current;
+      const duration = Date.now() - state.time;
+
+      // Detect Tap Gestures
+      if (!state.moved && duration < 240) {
+        if (state.count === 1) {
+          const now = Date.now();
+          if (now - lastTapRef.current < 280) {
+            onDoubleClick();
+            setCurrentGesture('DOUBLE CLICK');
+            vibrate(25);
+            lastTapRef.current = 0;
+          } else {
+            onClick('LEFT');
+            setCurrentGesture('LEFT CLICK');
+            vibrate(15);
+            lastTapRef.current = now;
+          }
+          setTxCount((c) => c + 1);
+        } else if (state.count === 2) {
+          onClick('RIGHT');
+          setCurrentGesture('RIGHT CLICK');
+          vibrate(30);
+          setTxCount((c) => c + 1);
+        }
+      }
+
+      if (e.touches.length === 0) {
+        setTimeout(() => setCurrentGesture('READY'), 700);
+      }
+    };
+
+    const options = { passive: false };
+    pad.addEventListener('touchstart', onTouchStart, options);
+    pad.addEventListener('touchmove', onTouchMove, options);
+    pad.addEventListener('touchend', onTouchEnd, options);
+    pad.addEventListener('touchcancel', onTouchEnd, options);
+
+    return () => {
+      pad.removeEventListener('touchstart', onTouchStart);
+      pad.removeEventListener('touchmove', onTouchMove);
+      pad.removeEventListener('touchend', onTouchEnd);
+      pad.removeEventListener('touchcancel', onTouchEnd);
+    };
+  }, [sensitivity, naturalScroll, hapticEnabled, dragLock, onPointerMove, onClick, onDoubleClick, onScroll, onAction]);
 
   // Mouse / Pointer fallback for testing on Desktop
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -281,22 +300,25 @@ export const TouchpadSurface: React.FC<TouchpadSurfaceProps> = ({
           <span className="px-2 py-0.5 rounded-full bg-white/5 border border-white/5">3-Swipe: Desktop</span>
         </div>
 
-        {/* Cursor Position preview mini badge */}
-        <div className="flex items-center gap-1.5 font-mono text-[10px] text-zinc-300 bg-white/5 px-2.5 py-1 rounded-full border border-white/10">
-          <MousePointer className="w-3 h-3 text-[#eb0029]" />
-          <span>{Math.round(cursorPosPreview.x)}%</span>
-          <span className="text-zinc-600">|</span>
-          <span>{Math.round(cursorPosPreview.y)}%</span>
+        {/* Live Packet Counter & Cursor Position */}
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 font-mono text-[10px] text-[#00e575] bg-[#00e575]/10 px-2 py-0.5 rounded-full border border-[#00e575]/20">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#00e575] animate-ping"></span>
+            <span>TX {txCount}</span>
+          </div>
+
+          <div className="flex items-center gap-1.5 font-mono text-[10px] text-zinc-300 bg-white/5 px-2.5 py-1 rounded-full border border-white/10">
+            <MousePointer className="w-3 h-3 text-[#eb0029]" />
+            <span>{Math.round(cursorPosPreview.x)}%</span>
+            <span className="text-zinc-600">|</span>
+            <span>{Math.round(cursorPosPreview.y)}%</span>
+          </div>
         </div>
       </div>
 
-      {/* Main Touch Area */}
+      {/* Main Touch Area - Pure Touch + Pointer Hybrid with Hardware Non-Passive Hooks */}
       <div
         ref={padRef}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-        onTouchCancel={handleTouchEnd}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
@@ -312,6 +334,7 @@ export const TouchpadSurface: React.FC<TouchpadSurfaceProps> = ({
             : 'bg-[#121417] border-white/10'
         }`}
         style={{
+          touchAction: 'none',
           backgroundImage:
             'radial-gradient(rgba(255, 255, 255, 0.12) 1.5px, transparent 1.5px)',
           backgroundSize: '20px 20px',

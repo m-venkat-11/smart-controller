@@ -37,26 +37,57 @@ const primaryIp = networkList[0].address;
 // ==========================================
 let winInjector = null;
 
-if (CURRENT_OS === 'win32') {
-  // Windows: C# Native Win32 Injector (SendInput)
+function startWindowsInjector() {
+  const psExe = path.join(
+    process.env.SystemRoot || 'C:\\Windows',
+    'System32',
+    'WindowsPowerShell',
+    'v1.0',
+    'powershell.exe'
+  );
+  const psScript = path.join(__dirname, 'injector.ps1');
+
   try {
-    winInjector = spawn('injector.exe', [], {
-      cwd: __dirname,
-      shell: true,
-      stdio: ['pipe', 'pipe', 'pipe'],
-      windowsHide: true,
+    console.log('[GlyphPad] Starting Native Win32 Input Injector via PowerShell...');
+    winInjector = spawn(
+      psExe,
+      ['-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-File', psScript],
+      {
+        cwd: __dirname,
+        stdio: ['pipe', 'pipe', 'pipe'],
+        windowsHide: true,
+      }
+    );
+
+    winInjector.stdout.on('data', (data) => {
+      const msg = data.toString().trim();
+      if (msg.includes('INJECTOR_READY')) {
+        console.log('[GlyphPad] ✓ Native Win32 Input Injector is READY and ACTIVE.');
+      }
     });
 
-    winInjector.on('spawn', () => {
-      console.log('[GlyphPad] C# Native Win32 Input Injector attached.');
+    winInjector.stderr.on('data', (data) => {
+      const msg = data.toString().trim();
+      if (msg) console.warn('[GlyphPad] Injector notice:', msg);
     });
 
     winInjector.on('error', (err) => {
       console.warn('[GlyphPad] Injector process warning:', err.message);
     });
+
+    winInjector.on('close', (code) => {
+      if (code !== 0 && code !== null) {
+        console.warn(`[GlyphPad] Injector stopped with code ${code}. Auto-restarting in 1s...`);
+        setTimeout(startWindowsInjector, 1000);
+      }
+    });
   } catch (e) {
-    console.warn('[GlyphPad] Could not spawn injector.exe:', e.message);
+    console.warn('[GlyphPad] Could not spawn injector.ps1:', e.message);
   }
+}
+
+if (CURRENT_OS === 'win32') {
+  startWindowsInjector();
 } else if (CURRENT_OS === 'darwin') {
   console.log('[GlyphPad] Running on macOS. Initializing AppleScript/Quartz adapter.');
 } else {
@@ -68,7 +99,9 @@ function sendNativeCommand(cmd, payload = {}) {
     if (winInjector && winInjector.stdin && winInjector.stdin.writable) {
       try {
         winInjector.stdin.write(cmd + '\n');
-      } catch (_) {}
+      } catch (err) {
+        console.warn('[GlyphPad] Failed writing to injector:', err.message);
+      }
     }
   } else if (CURRENT_OS === 'darwin') {
     // macOS AppleScript / osascript dispatching
@@ -338,6 +371,9 @@ wss.on('connection', (ws, req) => {
     })
   );
 
+  let subpixelX = 0;
+  let subpixelY = 0;
+
   ws.on('message', (message) => {
     try {
       const data = JSON.parse(message);
@@ -358,20 +394,42 @@ wss.on('connection', (ws, req) => {
           break;
 
         case 'MOVE':
-        case 'POINTER_MOVE':
-          sendNativeCommand(`M ${Math.round(payload.dx || 0)} ${Math.round(payload.dy || 0)}`);
-          break;
+        case 'POINTER_MOVE': {
+          const rawDx = Number(payload.dx) || 0;
+          const rawDy = Number(payload.dy) || 0;
+          subpixelX += rawDx;
+          subpixelY += rawDy;
 
-        case 'CLICK':
-        case 'BUTTON_STATE':
-          if (payload.button === 'RIGHT') {
-            sendNativeCommand('RC');
-          } else if (payload.button === 'MIDDLE') {
-            sendNativeCommand('MC');
-          } else {
-            sendNativeCommand('LC');
+          const stepX = Math.trunc(subpixelX);
+          const stepY = Math.trunc(subpixelY);
+
+          if (stepX !== 0 || stepY !== 0) {
+            subpixelX -= stepX;
+            subpixelY -= stepY;
+            sendNativeCommand(`M ${stepX} ${stepY}`);
           }
           break;
+        }
+
+        case 'CLICK':
+        case 'BUTTON_STATE': {
+          const btn = (payload.button || 'LEFT').toUpperCase();
+          const act = (payload.action || 'CLICK').toUpperCase();
+          if (act === 'DOWN') {
+            if (btn === 'RIGHT') sendNativeCommand('RD');
+            else if (btn === 'MIDDLE') sendNativeCommand('MD');
+            else sendNativeCommand('LD');
+          } else if (act === 'UP') {
+            if (btn === 'RIGHT') sendNativeCommand('RU');
+            else if (btn === 'MIDDLE') sendNativeCommand('MU');
+            else sendNativeCommand('LU');
+          } else {
+            if (btn === 'RIGHT') sendNativeCommand('RC');
+            else if (btn === 'MIDDLE') sendNativeCommand('MC');
+            else sendNativeCommand('LC');
+          }
+          break;
+        }
 
         case 'DOUBLE_CLICK':
           sendNativeCommand('LDC');

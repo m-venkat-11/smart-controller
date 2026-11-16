@@ -56,6 +56,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
   const wsRef = useRef<WebSocket | null>(null);
   const wakeLockRef = useRef<any>(null);
   const pingIntervalRef = useRef<any>(null);
+  const lastPacketLogRef = useRef<number>(0);
 
   // Auto-connect on initial load
   useEffect(() => {
@@ -179,13 +180,18 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
     setConnectionState('DISCONNECTED');
   };
 
-  // Dispatch Packet to Receiver & Record Telemetry
+  // Dispatch Packet to Receiver & Record Telemetry (Zero-lag socket transmission)
   const dispatchEnvelope = (type: any, payload: any) => {
-    const envelope = createUCPEnvelope(type, 'sess_live_99x8', payload);
-    setPackets((prev) => [envelope, ...prev.slice(0, 19)]);
-
     if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
       wsRef.current.send(JSON.stringify({ type, payload }));
+    }
+
+    // Only update diagnostics state for non-pointer events, or throttled to keep 60fps
+    const now = Date.now();
+    if (type !== 'POINTER_MOVE' || now - lastPacketLogRef.current > 200) {
+      lastPacketLogRef.current = now;
+      const envelope = createUCPEnvelope(type, 'sess_live_99x8', payload);
+      setPackets((prev) => [envelope, ...prev.slice(0, 19)]);
     }
   };
 

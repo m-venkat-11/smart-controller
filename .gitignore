@@ -16,6 +16,9 @@ out/
 .env.production.local
 
 # Vercel
+# Binaries
+*.exe
+
 .vercel/
 
 # Logs
@@ -35,5 +38,8 @@ Thumbs.db
 *.njsproj
 *.sln
 *.sw?
+
+# Binaries
+*.exe
 
 .vercel
