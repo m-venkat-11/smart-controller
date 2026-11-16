@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { Send, CornerDownLeft, Delete, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, Sparkles, Key } from 'lucide-react';
+import { PlatformType, PLATFORM_INFO } from '../core/protocol/dynamicActions';
 
 interface VirtualKeyboardProps {
   onTypeText: (text: string) => void;
   onSendKey: (key: string) => void;
   onAction: (action: string) => void;
   hapticEnabled: boolean;
+  activePlatform: PlatformType;
 }
 
 export const VirtualKeyboard: React.FC<VirtualKeyboardProps> = ({
@@ -13,6 +15,7 @@ export const VirtualKeyboard: React.FC<VirtualKeyboardProps> = ({
   onSendKey,
   onAction,
   hapticEnabled,
+  activePlatform,
 }) => {
   const [inputText, setInputText] = useState('');
   const [lastDispatched, setLastDispatched] = useState<string | null>(null);
@@ -40,9 +43,11 @@ export const VirtualKeyboard: React.FC<VirtualKeyboardProps> = ({
     setTimeout(() => setLastDispatched(null), 1000);
   };
 
+  const platformInfo = PLATFORM_INFO[activePlatform];
+
   return (
-    <div className="max-w-4xl mx-auto p-3 sm:p-6 space-y-6">
-      {/* Live Text-to-PC Transmitter Form */}
+    <div className="max-w-4xl mx-auto p-2 sm:p-6 space-y-6">
+      {/* Live Text Transmitter Form */}
       <div className="card-radiant-blue rounded-[32px] p-6 space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -57,7 +62,7 @@ export const VirtualKeyboard: React.FC<VirtualKeyboardProps> = ({
         </div>
 
         <p className="text-xs text-blue-200/70 font-sans">
-          Type any sentence, command, or link below and hit Send to inject direct keystrokes to your Windows PC.
+          Type text on your phone and press Send to inject real keystrokes directly into active applications on {platformInfo.name}.
         </p>
 
         <form onSubmit={handleSendText} className="flex gap-2">
@@ -65,7 +70,7 @@ export const VirtualKeyboard: React.FC<VirtualKeyboardProps> = ({
             type="text"
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
-            placeholder="Type text to send directly to PC..."
+            placeholder={`Type text to inject to ${activePlatform.toUpperCase()}...`}
             className="flex-1 bg-black/50 border border-white/20 focus:border-blue-400 rounded-2xl px-4 py-3 text-white placeholder-zinc-500 font-mono text-sm outline-none transition-all"
           />
           <button
@@ -81,45 +86,50 @@ export const VirtualKeyboard: React.FC<VirtualKeyboardProps> = ({
       {/* Tactile Modifier & System Keys */}
       <div className="rounded-[32px] bg-[#111315] border border-white/10 p-6 space-y-6">
         <div className="flex items-center justify-between">
-          <span className="font-dot text-xs text-zinc-400 tracking-wider">TACTILE MODIFIER ROW</span>
-          <span className="font-mono text-[10px] text-zinc-500">WIN32 VIRTUAL KEYS</span>
+          <span className="font-dot text-xs text-zinc-400 tracking-wider">
+            {activePlatform.toUpperCase()} MODIFIER ROW
+          </span>
+          <span className="font-mono text-[10px] text-zinc-500">{platformInfo.description}</span>
         </div>
 
         {/* Essential Modifiers */}
-        <div className="grid grid-cols-4 sm:grid-cols-6 gap-2.5">
+        <div className="grid grid-cols-3 sm:grid-cols-6 gap-2.5">
           <button
             onClick={() => handleKeyClick('ESC')}
-            className="py-3.5 rounded-2xl bg-[#1c2024] hover:bg-[#252a30] active:bg-[#eb0029] active:text-white text-zinc-200 border border-white/10 font-mono text-xs font-bold transition-all active:scale-95 shadow-sm"
+            className="py-3.5 rounded-2xl bg-[#1c2024] hover:bg-[#252a30] active:bg-[#eb0029] active:text-white text-zinc-200 border border-white/10 font-mono text-xs font-bold transition-all active:scale-95 shadow-sm text-center"
           >
             ESC
           </button>
 
           <button
             onClick={() => handleKeyClick('TAB')}
-            className="py-3.5 rounded-2xl bg-[#1c2024] hover:bg-[#252a30] active:bg-[#eb0029] active:text-white text-zinc-200 border border-white/10 font-mono text-xs font-bold transition-all active:scale-95 shadow-sm"
+            className="py-3.5 rounded-2xl bg-[#1c2024] hover:bg-[#252a30] active:bg-[#eb0029] active:text-white text-zinc-200 border border-white/10 font-mono text-xs font-bold transition-all active:scale-95 shadow-sm text-center"
           >
             TAB
           </button>
 
+          {/* Dynamic Meta / Command / Super key */}
           <button
             onClick={() => onAction('SHOW_DESKTOP')}
-            className="py-3.5 rounded-2xl bg-[#1c2024] hover:bg-[#252a30] active:bg-[#eb0029] active:text-white text-zinc-200 border border-white/10 font-mono text-xs font-bold transition-all active:scale-95 shadow-sm"
+            className="py-3.5 rounded-2xl bg-[#1c2024] hover:bg-[#252a30] active:bg-[#eb0029] active:text-white text-zinc-200 border border-white/10 font-mono text-xs font-bold transition-all active:scale-95 shadow-sm text-center"
           >
-            WIN
+            {platformInfo.defaultKeyModifiers.meta}
           </button>
 
+          {/* Dynamic Ctrl key */}
           <button
             onClick={() => onAction('TASK_MANAGER')}
-            className="py-3.5 rounded-2xl bg-[#1c2024] hover:bg-[#252a30] active:bg-[#eb0029] active:text-white text-zinc-200 border border-white/10 font-mono text-xs font-bold transition-all active:scale-95 shadow-sm"
+            className="py-3.5 rounded-2xl bg-[#1c2024] hover:bg-[#252a30] active:bg-[#eb0029] active:text-white text-zinc-200 border border-white/10 font-mono text-xs font-bold transition-all active:scale-95 shadow-sm text-center"
           >
-            CTRL
+            {platformInfo.defaultKeyModifiers.ctrl}
           </button>
 
+          {/* Dynamic Alt / Opt key */}
           <button
             onClick={() => onAction('ALT_TAB')}
-            className="py-3.5 rounded-2xl bg-[#1c2024] hover:bg-[#252a30] active:bg-[#eb0029] active:text-white text-zinc-200 border border-white/10 font-mono text-xs font-bold transition-all active:scale-95 shadow-sm"
+            className="py-3.5 rounded-2xl bg-[#1c2024] hover:bg-[#252a30] active:bg-[#eb0029] active:text-white text-zinc-200 border border-white/10 font-mono text-xs font-bold transition-all active:scale-95 shadow-sm text-center"
           >
-            ALT
+            {platformInfo.defaultKeyModifiers.alt}
           </button>
 
           <button
@@ -127,7 +137,7 @@ export const VirtualKeyboard: React.FC<VirtualKeyboardProps> = ({
             className="py-3.5 rounded-2xl bg-[#1c2024] hover:bg-[#252a30] active:bg-[#eb0029] active:text-white text-zinc-200 border border-white/10 font-mono text-xs font-bold transition-all active:scale-95 shadow-sm flex items-center justify-center gap-1"
           >
             <Delete className="w-3.5 h-3.5" />
-            <span>BKSP</span>
+            <span>{activePlatform === 'macos' ? 'DELETE' : 'BKSP'}</span>
           </button>
         </div>
 
@@ -143,11 +153,11 @@ export const VirtualKeyboard: React.FC<VirtualKeyboardProps> = ({
             </button>
 
             <button
-              onClick={() => handleKeyClick('ENTER', 'ENTER ↵')}
+              onClick={() => handleKeyClick('ENTER', activePlatform === 'macos' ? 'RETURN ↵' : 'ENTER ↵')}
               className="py-4 rounded-2xl bg-blue-600 hover:bg-blue-500 active:scale-95 text-white font-dot text-xs font-bold transition-all shadow-[0_0_15px_rgba(37,99,235,0.4)] flex items-center justify-center gap-2"
             >
               <CornerDownLeft className="w-4 h-4" />
-              <span>ENTER KEY</span>
+              <span>{activePlatform === 'macos' ? 'RETURN KEY' : 'ENTER KEY'}</span>
             </button>
           </div>
 
@@ -193,7 +203,7 @@ export const VirtualKeyboard: React.FC<VirtualKeyboardProps> = ({
               <button
                 key={f}
                 onClick={() => {
-                  if (f === 5) onAction('FULLSCREEN');
+                  if (f === 5) onAction('START_SLIDES');
                   else handleKeyClick(`F${f}`);
                 }}
                 className="py-2 rounded-xl bg-white/5 hover:bg-white/10 active:bg-white active:text-black text-zinc-300 font-mono text-[11px] transition-all border border-white/5 active:scale-95 text-center"

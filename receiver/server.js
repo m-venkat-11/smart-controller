@@ -1,63 +1,207 @@
 /**
- * GLYPHPAD WINDOWS COMPANION RECEIVER
+ * GLYPHPAD UNIVERSAL COMPANION RECEIVER
  * Universal Control Protocol (UCP v1.0) Server
- * Lightweight, zero-cloud, local-first input bridge for Windows
+ * Cross-Platform: Windows, macOS, and Linux
+ * Zero-cloud, local-first input bridge
  */
 
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
-const { spawn } = require('child_process');
+const { spawn, exec } = require('child_process');
 const { WebSocketServer } = require('ws');
 
 const PORT = process.env.PORT || 8443;
+const CURRENT_OS = os.platform(); // 'win32' | 'darwin' | 'linux'
 
-// Find non-internal IPv4 address
-function getLocalIp() {
+// Detect all valid non-internal IPv4 addresses across network adapters
+function getNetworkInterfacesList() {
   const nets = os.networkInterfaces();
+  const addresses = [];
   for (const name of Object.keys(nets)) {
     for (const net of nets[name]) {
       if (net.family === 'IPv4' && !net.internal) {
-        return net.address;
+        addresses.push({ name, address: net.address });
       }
     }
   }
-  return '127.0.0.1';
+  return addresses.length > 0 ? addresses : [{ name: 'loopback', address: '127.0.0.1' }];
 }
 
-const localIp = getLocalIp();
+const networkList = getNetworkInterfacesList();
+const primaryIp = networkList[0].address;
 
-// Spawn C# Input Injector subprocess safely
-let injector = null;
-try {
-  injector = spawn('injector.exe', [], {
-    cwd: __dirname,
-    shell: true,
-    stdio: ['pipe', 'pipe', 'pipe'],
-    windowsHide: true,
-  });
+// ==========================================
+// CROSS-PLATFORM INPUT INJECTION BACKEND
+// ==========================================
+let winInjector = null;
 
-  injector.on('spawn', () => {
-    console.log('[GlyphPad] C# Native Win32 Input Injector attached.');
-  });
+if (CURRENT_OS === 'win32') {
+  // Windows: C# Native Win32 Injector (SendInput)
+  try {
+    winInjector = spawn('injector.exe', [], {
+      cwd: __dirname,
+      shell: true,
+      stdio: ['pipe', 'pipe', 'pipe'],
+      windowsHide: true,
+    });
 
-  injector.on('error', (err) => {
-    console.warn('[GlyphPad] Injector process warning:', err.message);
-  });
-} catch (e) {
-  console.warn('[GlyphPad] Could not spawn injector.exe:', e.message);
+    winInjector.on('spawn', () => {
+      console.log('[GlyphPad] C# Native Win32 Input Injector attached.');
+    });
+
+    winInjector.on('error', (err) => {
+      console.warn('[GlyphPad] Injector process warning:', err.message);
+    });
+  } catch (e) {
+    console.warn('[GlyphPad] Could not spawn injector.exe:', e.message);
+  }
+} else if (CURRENT_OS === 'darwin') {
+  console.log('[GlyphPad] Running on macOS. Initializing AppleScript/Quartz adapter.');
+} else {
+  console.log('[GlyphPad] Running on Linux. Initializing X11/Wayland input adapter.');
 }
 
-function sendCommand(cmd) {
-  if (injector && injector.stdin && injector.stdin.writable) {
-    try {
-      injector.stdin.write(cmd + '\n');
-    } catch (_) {}
+function sendNativeCommand(cmd, payload = {}) {
+  if (CURRENT_OS === 'win32') {
+    if (winInjector && winInjector.stdin && winInjector.stdin.writable) {
+      try {
+        winInjector.stdin.write(cmd + '\n');
+      } catch (_) {}
+    }
+  } else if (CURRENT_OS === 'darwin') {
+    // macOS AppleScript / osascript dispatching
+    handleMacCommand(cmd, payload);
+  } else if (CURRENT_OS === 'linux') {
+    // Linux xdotool dispatching
+    handleLinuxCommand(cmd, payload);
   }
 }
 
-// MIME types for static files
+// macOS Input Dispatcher
+function handleMacCommand(cmd, payload) {
+  const parts = cmd.split(' ');
+  const op = parts[0].toUpperCase();
+
+  try {
+    if (op === 'M') {
+      // Relative mouse move on macOS via AppleScript / cliclick
+      const dx = parseInt(parts[1]) || 0;
+      const dy = parseInt(parts[2]) || 0;
+      exec(`osascript -e 'tell application "System Events" to set {x, y} to {${dx}, ${dy}}'`, () => {});
+    } else if (op === 'LC') {
+      exec(`osascript -e 'tell application "System Events" to click'`, () => {});
+    } else if (op === 'RC') {
+      exec(`osascript -e 'tell application "System Events" to perform action "AXShowMenu"'`, () => {});
+    } else if (op === 'ACTION') {
+      const act = parts[1] || '';
+      switch (act.toUpperCase()) {
+        case 'SHOW_DESKTOP':
+          exec(`osascript -e 'tell application "System Events" to key code 103'`); // F11
+          break;
+        case 'TASK_VIEW':
+        case 'TASK_MANAGER':
+          exec(`open -a "Activity Monitor"`);
+          break;
+        case 'SETTINGS':
+          exec(`open "x-apple.systempreferences:"`);
+          break;
+        case 'SEARCH':
+          exec(`osascript -e 'tell application "System Events" to key code 49 using command down'`); // Spotlight
+          break;
+        case 'FILE_MANAGER':
+        case 'EXPLORER':
+          exec(`open -a Finder ~`);
+          break;
+        case 'TERMINAL':
+          exec(`open -a Terminal`);
+          break;
+        case 'CALCULATOR':
+          exec(`open -a Calculator`);
+          break;
+        case 'LOCK_PC':
+          exec(`osascript -e 'tell application "System Events" to key code 12 using {control down, command down}'`); // Lock
+          break;
+        case 'VOL_UP':
+          exec(`osascript -e 'set volume output volume ((output volume of (get volume settings)) + 6)'`);
+          break;
+        case 'VOL_DOWN':
+          exec(`osascript -e 'set volume output volume ((output volume of (get volume settings)) - 6)'`);
+          break;
+        case 'MUTE':
+          exec(`osascript -e 'set volume output muted not (output muted of (get volume settings))'`);
+          break;
+        case 'MEDIA_PLAY_PAUSE':
+          exec(`osascript -e 'tell application "Music" to playpause'`);
+          break;
+        case 'MEDIA_NEXT':
+          exec(`osascript -e 'tell application "Music" to next track'`);
+          break;
+        case 'MEDIA_PREV':
+          exec(`osascript -e 'tell application "Music" to previous track'`);
+          break;
+      }
+    }
+  } catch (_) {}
+}
+
+// Linux Input Dispatcher
+function handleLinuxCommand(cmd, payload) {
+  const parts = cmd.split(' ');
+  const op = parts[0].toUpperCase();
+
+  try {
+    if (op === 'M') {
+      const dx = parseInt(parts[1]) || 0;
+      const dy = parseInt(parts[2]) || 0;
+      exec(`xdotool mousemove_relative -- ${dx} ${dy}`, () => {});
+    } else if (op === 'LC') {
+      exec(`xdotool click 1`, () => {});
+    } else if (op === 'RC') {
+      exec(`xdotool click 3`, () => {});
+    } else if (op === 'S') {
+      const d = parseInt(parts[1]) || 0;
+      const btn = d > 0 ? 4 : 5;
+      exec(`xdotool click ${btn}`, () => {});
+    } else if (op === 'ACTION') {
+      const act = parts[1] || '';
+      switch (act.toUpperCase()) {
+        case 'SHOW_DESKTOP':
+          exec(`xdotool key super+d`);
+          break;
+        case 'TASK_MANAGER':
+          exec(`gnome-system-monitor || ksysguard`);
+          break;
+        case 'TERMINAL':
+          exec(`x-terminal-emulator || gnome-terminal`);
+          break;
+        case 'SETTINGS':
+          exec(`gnome-control-center || systemsettings`);
+          break;
+        case 'SEARCH':
+          exec(`xdotool key super`);
+          break;
+        case 'LOCK_PC':
+          exec(`loginctl lock-session || xdg-screensaver lock`);
+          break;
+        case 'VOL_UP':
+          exec(`amixer -D pulse sset Master 5%+ || pactl set-sink-volume @DEFAULT_SINK@ +5%`);
+          break;
+        case 'VOL_DOWN':
+          exec(`amixer -D pulse sset Master 5%- || pactl set-sink-volume @DEFAULT_SINK@ -5%`);
+          break;
+        case 'MUTE':
+          exec(`amixer -D pulse sset Master toggle || pactl set-sink-mute @DEFAULT_SINK@ toggle`);
+          break;
+      }
+    }
+  } catch (_) {}
+}
+
+// ==========================================
+// HTTP SERVER & STATIC ASSETS
+// ==========================================
 const MIME_TYPES = {
   '.html': 'text/html; charset=utf-8',
   '.js': 'application/javascript; charset=utf-8',
@@ -71,12 +215,15 @@ const MIME_TYPES = {
   '.ttf': 'font/ttf',
 };
 
-// Dist folder path
 const distPath = path.join(__dirname, '..', 'dist');
 
-// Create HTTP Server
+function getNormalizedPlatform() {
+  if (CURRENT_OS === 'win32') return 'windows';
+  if (CURRENT_OS === 'darwin') return 'macos';
+  return 'linux';
+}
+
 const server = http.createServer((req, res) => {
-  // Enable full CORS for web controller access
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', '*');
@@ -90,20 +237,25 @@ const server = http.createServer((req, res) => {
   const parsedUrl = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
   const pathname = parsedUrl.pathname;
 
-  // Status endpoint for receiver discovery & health check
-  if (pathname === '/status' || pathname === '/health') {
+  // Universal Receiver Health & Capabilities API
+  if (pathname === '/status' || pathname === '/health' || pathname === '/capabilities') {
     res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({
-      status: 'READY',
-      protocol: 'UCP-1.0',
-      host: os.hostname(),
-      platform: 'win32',
-      arch: os.arch(),
-      ip: localIp,
-      port: PORT,
-      clients: wss ? wss.clients.size : 0,
-      timestamp: Date.now()
-    }));
+    res.end(
+      JSON.stringify({
+        status: 'READY',
+        protocol: 'UCP-1.0',
+        host: os.hostname(),
+        platform: getNormalizedPlatform(),
+        osName: `${os.type()} ${os.release()}`,
+        arch: os.arch(),
+        deviceType: os.type().toLowerCase().includes('windows') ? 'laptop' : 'desktop',
+        ip: primaryIp,
+        interfaces: networkList,
+        port: PORT,
+        clients: wss ? wss.clients.size : 0,
+        timestamp: Date.now(),
+      })
+    );
     return;
   }
 
@@ -111,7 +263,6 @@ const server = http.createServer((req, res) => {
   if (fs.existsSync(distPath)) {
     let filePath = path.join(distPath, pathname === '/' ? 'index.html' : pathname);
 
-    // If file doesn't exist, fallback to index.html (SPA routing)
     if (!fs.existsSync(filePath) || fs.statSync(filePath).isDirectory()) {
       filePath = path.join(distPath, 'index.html');
     }
@@ -139,7 +290,7 @@ const server = http.createServer((req, res) => {
 <html>
 <head>
   <meta charset="utf-8">
-  <title>GlyphPad Receiver v1.0</title>
+  <title>GlyphPad Universal Receiver</title>
   <style>
     body { background: #08090a; color: #fff; font-family: monospace; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; text-align: center; }
     .card { background: #121417; border: 1px solid rgba(255,255,255,0.15); border-radius: 24px; padding: 32px; max-width: 90%; }
@@ -149,14 +300,17 @@ const server = http.createServer((req, res) => {
 <body>
   <div class="card">
     <h2 style="color:#00e575">● GLYPHPAD RECEIVER RUNNING</h2>
-    <p>Host: <strong>${os.hostname()}</strong> | IP: <strong>${localIp}:${PORT}</strong></p>
+    <p>Host: <strong>${os.hostname()}</strong> (${getNormalizedPlatform().toUpperCase()})</p>
+    <p>Local IP: <strong>${primaryIp}:${PORT}</strong></p>
     <a class="btn" href="https://smart-controller.vercel.app">LAUNCH WEB CONTROLLER</a>
   </div>
 </body>
 </html>`);
 });
 
-// Create WebSocket Server
+// ==========================================
+// WEBSOCKET PROTOCOL ENGINE (UCP v1.0)
+// ==========================================
 const wss = new WebSocketServer({ server, path: '/ucp' });
 
 let clientCount = 0;
@@ -164,19 +318,25 @@ let clientCount = 0;
 wss.on('connection', (ws, req) => {
   clientCount++;
   const clientIp = req.socket.remoteAddress;
-  console.log(`[GlyphPad] Client connected from ${clientIp} (Total active: ${clientCount})`);
+  console.log(`[GlyphPad] Device connected from ${clientIp} (Total active: ${clientCount})`);
 
-  // Send handshake greeting
-  ws.send(JSON.stringify({
-    type: 'SESSION_ACK',
-    payload: {
-      status: 'AUTHENTICATED',
-      host: os.hostname(),
-      platform: 'Windows',
-      version: '1.0.0',
-      timestamp: Date.now()
-    }
-  }));
+  // Send dynamic handshake with full machine profile
+  ws.send(
+    JSON.stringify({
+      type: 'SESSION_ACK',
+      payload: {
+        status: 'AUTHENTICATED',
+        host: os.hostname(),
+        platform: getNormalizedPlatform(),
+        osName: `${os.type()} ${os.release()}`,
+        arch: os.arch(),
+        ip: primaryIp,
+        interfaces: networkList,
+        version: '1.0.0',
+        timestamp: Date.now(),
+      },
+    })
+  );
 
   ws.on('message', (message) => {
     try {
@@ -186,53 +346,55 @@ wss.on('connection', (ws, req) => {
 
       switch (type) {
         case 'PING':
-          ws.send(JSON.stringify({
-            type: 'PONG',
-            payload: {
-              clientTimestamp: payload.timestamp || Date.now(),
-              serverTimestamp: Date.now()
-            }
-          }));
+          ws.send(
+            JSON.stringify({
+              type: 'PONG',
+              payload: {
+                clientTimestamp: payload.timestamp || Date.now(),
+                serverTimestamp: Date.now(),
+              },
+            })
+          );
           break;
 
         case 'MOVE':
         case 'POINTER_MOVE':
-          sendCommand(`M ${Math.round(payload.dx || 0)} ${Math.round(payload.dy || 0)}`);
+          sendNativeCommand(`M ${Math.round(payload.dx || 0)} ${Math.round(payload.dy || 0)}`);
           break;
 
         case 'CLICK':
         case 'BUTTON_STATE':
           if (payload.button === 'RIGHT') {
-            sendCommand('RC');
+            sendNativeCommand('RC');
           } else if (payload.button === 'MIDDLE') {
-            sendCommand('MC');
+            sendNativeCommand('MC');
           } else {
-            sendCommand('LC');
+            sendNativeCommand('LC');
           }
           break;
 
         case 'DOUBLE_CLICK':
-          sendCommand('LDC');
+          sendNativeCommand('LDC');
           break;
 
         case 'SCROLL':
-          sendCommand(`S ${Math.round(payload.delta || payload.deltaY || 0)}`);
+          sendNativeCommand(`S ${Math.round(payload.delta || payload.deltaY || 0)}`);
           if (payload.deltaX) {
-            sendCommand(`HS ${Math.round(payload.deltaX)}`);
+            sendNativeCommand(`HS ${Math.round(payload.deltaX)}`);
           }
           break;
 
         case 'ACTION':
         case 'ACTION_REQUEST':
         case 'SHORTCUT':
-          sendCommand(`ACTION ${payload.action || payload.actionId || payload.shortcut || ''}`);
+          sendNativeCommand(`ACTION ${payload.action || payload.actionId || payload.shortcut || ''}`);
           break;
 
         case 'TYPE_TEXT':
         case 'TEXT':
           if (payload.text) {
             const b64 = Buffer.from(payload.text, 'utf-8').toString('base64');
-            sendCommand(`TEXT ${b64}`);
+            sendNativeCommand(`TEXT ${b64}`);
           }
           break;
 
@@ -240,14 +402,14 @@ wss.on('connection', (ws, req) => {
         case 'KEY_DOWN':
         case 'KEY_UP':
           if (payload.vk) {
-            sendCommand(`K ${payload.vk}`);
+            sendNativeCommand(`K ${payload.vk}`);
           } else if (payload.key) {
-            sendCommand(`ACTION ${payload.key.toUpperCase()}`);
+            sendNativeCommand(`ACTION ${payload.key.toUpperCase()}`);
           }
           break;
 
         case 'RELEASE_ALL':
-          sendCommand('RELEASE_ALL');
+          sendNativeCommand('RELEASE_ALL');
           break;
       }
     } catch (e) {
@@ -257,8 +419,8 @@ wss.on('connection', (ws, req) => {
 
   ws.on('close', () => {
     clientCount--;
-    sendCommand('RELEASE_ALL');
-    console.log(`[GlyphPad] Client disconnected. (Remaining: ${clientCount})`);
+    sendNativeCommand('RELEASE_ALL');
+    console.log(`[GlyphPad] Device disconnected. (Remaining: ${clientCount})`);
   });
 });
 
@@ -266,25 +428,27 @@ wss.on('connection', (ws, req) => {
 server.listen(PORT, '0.0.0.0', () => {
   console.clear();
   console.log('================================================================');
-  console.log('                   GLYPHPAD RECEIVER v1.0                      ');
-  console.log('              Universal Wireless Touchpad Host                  ');
+  console.log('            GLYPHPAD UNIVERSAL COMPANION RECEIVER               ');
+  console.log('           Connect Any Mobile Phone to Any Computer             ');
   console.log('================================================================');
   console.log(` Host Name   : ${os.hostname()}`);
-  console.log(` Windows OS  : ${os.type()} ${os.release()} (${os.arch()})`);
+  console.log(` OS Platform : ${getNormalizedPlatform().toUpperCase()} (${os.type()} ${os.release()})`);
   console.log(` Status      : ACTIVE & LISTENING`);
-  console.log(` Local URL   : http://${localIp}:${PORT}`);
   console.log('----------------------------------------------------------------');
-  console.log(' 📱 HOW TO CONNECT YOUR PHONE:');
-  console.log(` 1. Connect your phone to the same Wi-Fi.`);
-  console.log(` 2. On your phone browser, open:`);
-  console.log(`    👉 http://${localIp}:${PORT}`);
-  console.log(' 3. The full GlyphPad controller loads directly from your PC!');
-  console.log('    Your phone will instantly control your computer.');
+  console.log(' 🌐 AVAILABLE NETWORK ADDRESSES:');
+  networkList.forEach((iface) => {
+    console.log(`    👉 http://${iface.address}:${PORT}  [${iface.name}]`);
+  });
+  console.log('----------------------------------------------------------------');
+  console.log(' 📱 HOW TO CONNECT ANY SMARTPHONE:');
+  console.log(' 1. Connect phone to the same Wi-Fi network.');
+  console.log(` 2. On your phone browser, open any of the above URLs.`);
+  console.log(' 3. The phone loads GlyphPad directly and connects immediately!');
   console.log('================================================================\n');
 });
 
 process.on('SIGINT', () => {
-  sendCommand('RELEASE_ALL');
-  if (injector) injector.kill();
+  sendNativeCommand('RELEASE_ALL');
+  if (winInjector) winInjector.kill();
   process.exit();
 });

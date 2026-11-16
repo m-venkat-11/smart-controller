@@ -6,10 +6,11 @@ import { VirtualKeyboard } from '../components/VirtualKeyboard';
 import { NothingGamepad } from '../components/NothingGamepad';
 import { DiagnosticsPanel } from '../components/DiagnosticsPanel';
 import { SettingsPanel } from '../components/SettingsPanel';
-import { ReceiverModal } from '../components/ReceiverModal';
+import { DeviceHubModal } from '../components/DeviceHubModal';
 import { ConnectionStateMachine } from '../core/protocol/stateMachine';
 import { createUCPEnvelope } from '../core/protocol/serializer';
 import { ConnectionState, UCPEnvelope } from '../core/protocol/types';
+import { PlatformType, PLATFORM_INFO } from '../core/protocol/dynamicActions';
 import { Sparkles, Terminal, Download, ShieldCheck, ChevronDown, ChevronUp } from 'lucide-react';
 
 interface HomePageProps {
@@ -21,6 +22,11 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
   const [activeTab, setActiveTab] = useState<'touchpad' | 'actions' | 'keyboard' | 'gamepad' | 'diagnostics' | 'settings'>('touchpad');
   const [isConnectModalOpen, setIsConnectModalOpen] = useState(false);
   const [showDocsAccordion, setShowDocsAccordion] = useState(false);
+
+  // Dynamic Machine & OS State (PRD Universal Device Target)
+  const [activePlatform, setActivePlatform] = useState<PlatformType>('windows');
+  const [connectedHost, setConnectedHost] = useState<string>('Universal Host');
+  const [connectedOsName, setConnectedOsName] = useState<string>('Windows 11 / macOS / Linux');
 
   // Connection & WebSocket state
   const [receiverAddress, setReceiverAddress] = useState<string>(() => {
@@ -81,11 +87,13 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
   };
 
   // Connect to PC Receiver via WebSocket
-  const connectToReceiver = () => {
+  const connectToReceiver = (customAddress?: string) => {
     disconnectFromReceiver();
 
+    const targetAddr = customAddress || receiverAddress;
+
     try {
-      let cleanAddr = receiverAddress
+      let cleanAddr = targetAddr
         .replace('http://', '')
         .replace('https://', '')
         .replace('ws://', '')
@@ -121,6 +129,24 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
       ws.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data);
+
+          // Dynamic Platform & Device Profile Negotiation Handshake
+          if (data.type === 'SESSION_ACK' && data.payload) {
+            const payload = data.payload;
+            if (payload.host) setConnectedHost(payload.host);
+            if (payload.osName) setConnectedOsName(payload.osName);
+            if (payload.platform) {
+              const p = payload.platform.toLowerCase();
+              if (p.includes('mac') || p === 'darwin') {
+                setActivePlatform('macos');
+              } else if (p.includes('linux')) {
+                setActivePlatform('linux');
+              } else {
+                setActivePlatform('windows');
+              }
+            }
+          }
+
           if (data.type === 'PONG') {
             const rtt = Date.now() - (data.payload?.clientTimestamp || Date.now());
             setLatency(Math.max(4, rtt));
@@ -204,12 +230,14 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#08090a] text-[#f5f6f8]">
-      {/* Top Header & Connection Bar */}
+      {/* Top Header & Connection Bar with Dynamic OS State */}
       <ConsoleHeader
         connectionState={connectionState}
         latency={latency}
-        receiverHost={receiverAddress}
+        receiverHost={isRealConnected ? connectedHost : receiverAddress}
         isRealConnected={isRealConnected}
+        activePlatform={activePlatform}
+        setActivePlatform={setActivePlatform}
         onOpenConnectModal={() => setIsConnectModalOpen(true)}
         activeTab={activeTab}
         setActiveTab={setActiveTab}
@@ -231,16 +259,23 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
           />
         )}
 
+        {/* Dynamic Quick Actions according to connected PC */}
         {activeTab === 'actions' && (
-          <QuickActionsGrid onAction={handleAction} hapticEnabled={hapticEnabled} />
+          <QuickActionsGrid
+            onAction={handleAction}
+            hapticEnabled={hapticEnabled}
+            activePlatform={activePlatform}
+          />
         )}
 
+        {/* Dynamic Virtual Keyboard with OS-appropriate modifiers */}
         {activeTab === 'keyboard' && (
           <VirtualKeyboard
             onTypeText={handleTypeText}
             onSendKey={handleSendKey}
             onAction={handleAction}
             hapticEnabled={hapticEnabled}
+            activePlatform={activePlatform}
           />
         )}
 
@@ -257,7 +292,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
             latency={latency}
             packets={packets}
             isRealConnected={isRealConnected}
-            receiverHost={receiverAddress}
+            receiverHost={isRealConnected ? `${connectedHost} (${activePlatform.toUpperCase()})` : receiverAddress}
             onRunPingTest={() => {
               if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
                 const start = Date.now();
@@ -285,14 +320,14 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
         )}
       </main>
 
-      {/* Collapsible Receiver Setup & Documentation Drawer (Keeps the product clean while providing necessary guidance) */}
+      {/* Collapsible Architecture & Multi-Platform Guide */}
       <footer className="border-t border-white/10 bg-[#0d0f11] py-4 px-4 sm:px-8">
         <div className="max-w-7xl mx-auto space-y-4">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-xs font-mono text-zinc-400">
             <div className="flex items-center gap-3">
               <span className="flex items-center gap-1.5 text-zinc-300">
                 <span className="w-2 h-2 rounded-full bg-[#00e575]"></span>
-                <span>ZERO CLOUD • LOCAL-FIRST INPUT BRIDGE</span>
+                <span className="uppercase">UNIVERSAL CROSS-PLATFORM • {activePlatform} ACTIVE</span>
               </span>
               <span>•</span>
               <span>UCP v1.0 PROTOCOL</span>
@@ -303,40 +338,39 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                 onClick={() => setIsConnectModalOpen(true)}
                 className="hover:text-white transition-colors underline"
               >
-                Receiver Status: {isRealConnected ? 'Connected' : 'Offline'}
+                Receiver: {isRealConnected ? `${connectedHost} (Connected)` : 'Offline / Standby'}
               </button>
 
               <button
                 onClick={() => setShowDocsAccordion(!showDocsAccordion)}
                 className="flex items-center gap-1 text-zinc-300 hover:text-white px-3 py-1 rounded-lg bg-white/5 border border-white/10 transition-colors"
               >
-                <span>Setup & Technical Specs</span>
+                <span>Universal Multi-PC Guide</span>
                 {showDocsAccordion ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
               </button>
             </div>
           </div>
 
-          {/* Collapsible Architecture & Setup Guide */}
           {showDocsAccordion && (
             <div className="pt-4 border-t border-white/10 grid grid-cols-1 md:grid-cols-3 gap-6 font-sans text-xs text-zinc-300 animate-fadeIn">
               <div className="space-y-2 p-4 rounded-2xl bg-black/40 border border-white/5">
-                <div className="font-dot text-white font-bold tracking-wider">1. QUICK RECEIVER STARTUP</div>
+                <div className="font-dot text-white font-bold tracking-wider">🪟 WINDOWS PC / LAPTOP</div>
                 <p className="text-zinc-400">
-                  Run <code className="text-zinc-200 bg-white/10 px-1 py-0.5 rounded">start-receiver.bat</code> on your PC. It activates the lightweight C# Win32 injector (<code className="text-zinc-200">injector.exe</code>) and starts the local WebSocket server on port 8443.
+                  Run <code className="text-zinc-200 bg-white/10 px-1 py-0.5 rounded">start-receiver.bat</code>. Implements native Win32 SendInput with zero driver installations. Dynamic Windows actions (Task Manager, Snipping Tool, Win+D, Virtual Desktops).
                 </p>
               </div>
 
               <div className="space-y-2 p-4 rounded-2xl bg-black/40 border border-white/5">
-                <div className="font-dot text-white font-bold tracking-wider">2. CONNECT ANY PHONE OR TABLET</div>
+                <div className="font-dot text-white font-bold tracking-wider">🍏 APPLE MACBOOK / MAC DESKTOP</div>
                 <p className="text-zinc-400">
-                  Open this page on your phone browser. Click the red status pill at the top, enter your PC's local IP address (e.g. 192.168.1.x:8443), and tap Connect. Your phone immediately acts as a high-precision wireless touchpad!
+                  Run <code className="text-zinc-200 bg-white/10 px-1 py-0.5 rounded">node receiver/server.js</code> on macOS. Automatically activates Quartz / AppleScript adapter with Mac shortcuts (Spotlight, Mission Control, Command ⌘ keys, Spaces).
                 </p>
               </div>
 
               <div className="space-y-2 p-4 rounded-2xl bg-black/40 border border-white/5">
-                <div className="font-dot text-white font-bold tracking-wider">3. PROTOCOL & SECURITY</div>
+                <div className="font-dot text-white font-bold tracking-wider">🐧 LINUX (UBUNTU / FEDORA / ARCH)</div>
                 <p className="text-zinc-400">
-                  All communication is strictly local-first over encrypted or direct local WebSocket frames. No keystroke logging, no cloud relay, sub-15ms pointer latency with automatic reconnection watchdog.
+                  Run <code className="text-zinc-200 bg-white/10 px-1 py-0.5 rounded">node receiver/server.js</code> on Linux. Dynamically binds X11 / Wayland uinput for seamless touchpad movement, Super key navigation, and desktop controls.
                 </p>
               </div>
             </div>
@@ -344,16 +378,22 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
         </div>
       </footer>
 
-      {/* Receiver Connection & Pairing Modal */}
-      <ReceiverModal
+      {/* Universal Device Connectivity Hub Modal */}
+      <DeviceHubModal
         isOpen={isConnectModalOpen}
         onClose={() => setIsConnectModalOpen(false)}
+        activePlatform={activePlatform}
+        setActivePlatform={setActivePlatform}
+        connectedHost={connectedHost}
+        isRealConnected={isRealConnected}
         receiverAddress={receiverAddress}
         setReceiverAddress={setReceiverAddress}
-        isRealConnected={isRealConnected}
-        onConnect={() => {
-          connectToReceiver();
-          setIsConnectModalOpen(false);
+        onConnect={(target) => {
+          if (target) {
+            connectToReceiver(target);
+          } else {
+            connectToReceiver();
+          }
         }}
         onDisconnect={disconnectFromReceiver}
         pinCode={pinCode}

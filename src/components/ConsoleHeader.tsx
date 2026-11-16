@@ -1,13 +1,30 @@
 import React, { useState } from 'react';
-import { Wifi, WifiOff, Laptop, Settings, Terminal, Shield, RefreshCw, Maximize2, Minimize2, Sparkles, Smartphone, Download, BookOpen } from 'lucide-react';
+import {
+  Wifi,
+  WifiOff,
+  Laptop,
+  Settings,
+  Terminal,
+  Shield,
+  RefreshCw,
+  Maximize2,
+  Minimize2,
+  Sparkles,
+  Smartphone,
+  Download,
+  BookOpen,
+} from 'lucide-react';
 import { DotMatrixDisplay } from './DotMatrixDisplay';
 import { ConnectionState } from '../core/protocol/types';
+import { PlatformType, PLATFORM_INFO } from '../core/protocol/dynamicActions';
 
 interface ConsoleHeaderProps {
   connectionState: ConnectionState;
   latency: number;
   receiverHost: string;
   isRealConnected: boolean;
+  activePlatform: PlatformType;
+  setActivePlatform: (p: PlatformType) => void;
   onOpenConnectModal: () => void;
   activeTab: 'touchpad' | 'actions' | 'keyboard' | 'gamepad' | 'diagnostics' | 'settings';
   setActiveTab: (tab: 'touchpad' | 'actions' | 'keyboard' | 'gamepad' | 'diagnostics' | 'settings') => void;
@@ -18,6 +35,8 @@ export const ConsoleHeader: React.FC<ConsoleHeaderProps> = ({
   latency,
   receiverHost,
   isRealConnected,
+  activePlatform,
+  setActivePlatform,
   onOpenConnectModal,
   activeTab,
   setActiveTab,
@@ -30,6 +49,12 @@ export const ConsoleHeader: React.FC<ConsoleHeaderProps> = ({
     } else {
       document.exitFullscreen().then(() => setIsFullscreen(false)).catch(() => {});
     }
+  };
+
+  const getPlatformIcon = () => {
+    if (activePlatform === 'windows') return '🪟';
+    if (activePlatform === 'macos') return '🍏';
+    return '🐧';
   };
 
   return (
@@ -45,19 +70,30 @@ export const ConsoleHeader: React.FC<ConsoleHeaderProps> = ({
                 <span className="absolute w-5 h-5 rounded-full bg-[#00e575] opacity-50 animate-ping"></span>
               )}
             </div>
-            
+
             <div className="flex flex-col">
               <div className="flex items-center gap-1.5">
                 <span className="font-dot text-sm sm:text-base font-bold tracking-wider text-white">GLYPHPAD</span>
-                <span className="font-mono text-[10px] px-1.5 py-0.5 rounded bg-white/10 text-white/70">v1.0</span>
+                <span className="font-mono text-[10px] px-1.5 py-0.5 rounded bg-white/10 text-white/70">UCP 1.0</span>
+
+                {/* Dynamic OS Badge */}
+                <button
+                  onClick={onOpenConnectModal}
+                  className="font-mono text-[10px] px-2 py-0.5 rounded-full bg-white/10 hover:bg-white/20 border border-white/15 text-zinc-200 flex items-center gap-1 transition-colors"
+                  title="Click to switch or discover computers"
+                >
+                  <span>{getPlatformIcon()}</span>
+                  <span className="uppercase">{activePlatform}</span>
+                </button>
               </div>
+
               <span className="text-[10px] font-mono text-zinc-400 hidden sm:inline">
-                {isRealConnected ? `Connected to ${receiverHost}` : 'Local-First Wireless Touchpad'}
+                {isRealConnected ? `Connected to ${receiverHost}` : 'Universal Touchpad Engine'}
               </span>
             </div>
           </div>
 
-          {/* Nothing OS Red Pill Widget (Exact match to Reference 1: "89%" / Latency badge) */}
+          {/* Nothing OS Red Pill Widget (Reference 1 Latency badge) */}
           <div className="flex items-center gap-2">
             <button
               onClick={onOpenConnectModal}
@@ -77,7 +113,7 @@ export const ConsoleHeader: React.FC<ConsoleHeaderProps> = ({
               ) : (
                 <>
                   <WifiOff className="w-3.5 h-3.5 text-white" />
-                  <span className="font-dot text-xs font-bold tracking-wider">OFFLINE</span>
+                  <span className="font-dot text-xs font-bold tracking-wider">CONNECT</span>
                   <span className="text-[10px] font-mono bg-black/30 px-1.5 py-0.2 rounded text-zinc-200">PAIR</span>
                 </>
               )}
@@ -87,7 +123,7 @@ export const ConsoleHeader: React.FC<ConsoleHeaderProps> = ({
             <a
               href="#/download"
               className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-zinc-300 transition-colors hidden sm:flex items-center gap-1 font-mono text-[10px]"
-              title="Download Windows Receiver"
+              title="Download Companion Receiver"
             >
               <Download className="w-3.5 h-3.5" />
               <span>GET RECEIVER</span>
@@ -125,7 +161,7 @@ export const ConsoleHeader: React.FC<ConsoleHeaderProps> = ({
                 : 'text-zinc-400 hover:text-white hover:bg-white/5'
             }`}
           >
-            <span>QUICK ACTIONS</span>
+            <span>ACTIONS ({activePlatform.toUpperCase()})</span>
           </button>
 
           <button
