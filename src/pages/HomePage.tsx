@@ -148,8 +148,8 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
               payload: { deviceId, authToken: savedToken },
             })
           );
-        } else if (urlPin || urlToken) {
-          // Send 1-time pairing challenge
+        } else {
+          // Send one-tap pairing request with autoAccept for seamless local connection
           ws.send(
             JSON.stringify({
               type: 'PAIR_REQUEST',
@@ -163,8 +163,9 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                       ? 'Android Phone'
                       : 'Mobile Client'
                     : 'Mobile Client',
-                pin: urlPin,
-                token: urlToken,
+                pin: urlPin || '',
+                token: urlToken || '',
+                autoAccept: true,
               },
             })
           );

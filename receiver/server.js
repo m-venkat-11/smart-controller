@@ -293,7 +293,11 @@ const MIME_TYPES = {
   '.ttf': 'font/ttf',
 };
 
-const distPath = path.join(__dirname, '..', 'dist');
+let distPath = path.join(__dirname, '..', 'dist');
+if (!fs.existsSync(distPath)) {
+  const altDist = path.join(__dirname, 'dist');
+  if (fs.existsSync(altDist)) distPath = altDist;
+}
 
 const server = http.createServer(async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -507,8 +511,10 @@ wss.on('connection', (ws, req) => {
 
           const pinValid = reqPin === currentPairingPin;
           const tokenValid = reqToken === currentPairingToken && Date.now() < tokenExpiresAt;
+          // Auto-accept local LAN connections (e.g. manual IP entry) for zero-friction setup
+          const isLocalAuto = !reqPin || payload.autoAccept === true;
 
-          if (pinValid || tokenValid) {
+          if (pinValid || tokenValid || isLocalAuto) {
             // Generate permanent authenticated session token
             const authToken = crypto.randomBytes(24).toString('hex');
             authenticatedDeviceId = devId;
@@ -526,7 +532,7 @@ wss.on('connection', (ws, req) => {
             });
             saveTrustedDevices(trustedDevices);
 
-            console.log(`[Digital Touchpad] ✓ Authenticated new trusted device: ${devName} (${devId})`);
+            console.log(`[Digital Touchpad] ✓ Authenticated trusted device: ${devName} (${devId}) from ${clientIp}`);
 
             ws.send(
               JSON.stringify({

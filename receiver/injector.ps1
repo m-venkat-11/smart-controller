@@ -150,6 +150,12 @@ namespace GlyphPad {
             SendInput(1, inputs, InputSize);
         }
 
+        public static void ReleaseAll() {
+            MouseUp(MOUSEEVENTF_LEFTUP);
+            MouseUp(MOUSEEVENTF_RIGHTUP);
+            MouseUp(MOUSEEVENTF_MIDDLEUP);
+        }
+
         public static void TapKey(ushort vk) {
             INPUT[] inputs = new INPUT[2];
             inputs[0].type = INPUT_KEYBOARD; inputs[0].ki.wVk = vk;

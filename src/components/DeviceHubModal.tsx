@@ -14,6 +14,7 @@ import {
   Camera,
   Edit2,
   Download,
+  ExternalLink,
 } from 'lucide-react';
 import { PlatformType } from '../core/protocol/dynamicActions';
 import { QRScannerModal } from './QRScannerModal';
@@ -255,6 +256,18 @@ export const DeviceHubModal: React.FC<DeviceHubModalProps> = ({
     onClose();
   };
 
+  const handleDirectConnect = () => {
+    let clean = (receiverAddress || '').trim();
+    if (!clean) return;
+    clean = clean.replace('http://', '').replace('https://', '').replace('ws://', '').replace('wss://', '').trim();
+    if (!clean.includes(':')) {
+      clean = `${clean}:8443`;
+    }
+    setReceiverAddress(clean);
+    onConnect(clean);
+    onClose();
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -318,6 +331,50 @@ export const DeviceHubModal: React.FC<DeviceHubModalProps> = ({
                 DISCONNECT
               </button>
             )}
+          </div>
+
+          {/* Quick Direct IP Entry Card (Always visible for instantaneous zero-friction connection) */}
+          <div className="p-4 rounded-2xl bg-black/60 border border-white/20 space-y-3 shadow-lg">
+            <div className="flex items-center justify-between">
+              <label className="font-dot text-xs font-bold text-white tracking-wider flex items-center gap-1.5">
+                <span>CONNECT BY LAPTOP IP</span>
+              </label>
+              <span className="font-mono text-[10px] text-zinc-400">Default port: 8443</span>
+            </div>
+
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={receiverAddress}
+                onChange={(e) => setReceiverAddress(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleDirectConnect();
+                }}
+                placeholder="e.g. 192.168.1.4:8443"
+                className="flex-1 bg-white/5 border border-white/20 focus:border-[#eb0029] rounded-xl px-3.5 py-2.5 font-mono text-sm text-white placeholder-zinc-500 outline-none transition-all"
+              />
+              <button
+                onClick={handleDirectConnect}
+                className="px-5 py-2.5 rounded-xl bg-[#eb0029] hover:bg-[#ff1a40] active:scale-95 text-white font-dot text-xs font-bold tracking-wider transition-all shadow-[0_0_15px_rgba(235,0,41,0.4)] whitespace-nowrap"
+              >
+                CONNECT
+              </button>
+            </div>
+
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-[11px] font-mono text-zinc-400 pt-0.5">
+              <span>Type your laptop IP (e.g. from receiver terminal) and click Connect.</span>
+              {receiverAddress && (
+                <a
+                  href={`http://${receiverAddress.replace('http://', '').replace('https://', '')}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-emerald-400 hover:underline flex items-center gap-1 self-start sm:self-auto"
+                >
+                  <span>Open via HTTP</span>
+                  <ExternalLink className="w-3 h-3" />
+                </a>
+              )}
+            </div>
           </div>
 
           {/* Fast QR Code Pairing Banner Button */}
