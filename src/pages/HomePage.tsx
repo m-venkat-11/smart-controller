@@ -309,8 +309,8 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
         setActiveTab={setActiveTab}
       />
 
-      {/* Main Working Interface */}
-      <main className="flex-1 flex flex-col p-2 sm:p-4 max-w-7xl mx-auto w-full">
+      {/* Main Working Interface with clean breathing space below header */}
+      <main className="flex-1 flex flex-col p-2 sm:p-4 mt-3 sm:mt-5 max-w-7xl mx-auto w-full">
         {activeTab === 'touchpad' && (
           <TouchpadSurface
             onPointerMove={handlePointerMove}

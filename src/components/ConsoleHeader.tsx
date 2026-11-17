@@ -58,36 +58,35 @@ export const ConsoleHeader: React.FC<ConsoleHeaderProps> = ({
   };
 
   return (
-    <header className="sticky top-0 z-40 px-2 sm:px-4 pt-2 pb-1 pointer-events-none">
-      {/* Floating Island Command Capsule */}
-      <div className="pointer-events-auto max-w-7xl mx-auto rounded-2xl bg-gradient-to-r from-[#0c1015]/95 via-[#131922]/95 to-[#0c1015]/95 backdrop-blur-2xl border border-white/[0.14] shadow-[0_8px_32px_rgba(0,0,0,0.7),inset_0_1px_1px_rgba(255,255,255,0.15)] flex flex-wrap lg:flex-nowrap items-center justify-between gap-2.5 px-3 sm:px-4 py-2 transition-all">
-        {/* LEFT: Compact Brand & Device Status */}
-        <div className="flex items-center gap-2.5">
-          {/* Glowing Nothing Hardware Jewel */}
-          <div className="relative flex items-center justify-center w-7 h-7 rounded-lg bg-black/60 border border-white/20 shadow-inner">
+    <header className="sticky top-0 z-50 w-full bg-[#151922]/98 backdrop-blur-3xl border-b-2 border-[#eb0029] shadow-[0_8px_30px_rgba(0,0,0,0.8),0_4px_20px_rgba(235,0,41,0.35)] transition-all">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 py-2.5 flex flex-wrap lg:flex-nowrap items-center justify-between gap-3">
+        {/* LEFT: Distinct Brand & OS Target Lockup */}
+        <div className="flex items-center gap-3">
+          {/* Glowing Nothing Hardware Module */}
+          <div className="relative flex items-center justify-center w-8 h-8 rounded-xl bg-black/80 border border-white/20 shadow-[inset_0_1px_2px_rgba(255,255,255,0.25)]">
             <span
-              className={`w-2 h-2 rounded-full ${
+              className={`w-2.5 h-2.5 rounded-full ${
                 isRealConnected
-                  ? 'bg-[#00e575] shadow-[0_0_8px_#00e575]'
-                  : 'bg-[#eb0029] shadow-[0_0_8px_#eb0029]'
+                  ? 'bg-[#00e575] shadow-[0_0_10px_#00e575]'
+                  : 'bg-[#eb0029] shadow-[0_0_10px_#eb0029]'
               } transition-all duration-300`}
             />
             {isRealConnected && (
-              <span className="absolute w-4 h-4 rounded-full border border-emerald-400/50 animate-ping" />
+              <span className="absolute w-5 h-5 rounded-full border border-emerald-400/50 animate-ping" />
             )}
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="font-dot text-sm font-bold tracking-wider text-white flex items-center gap-1 uppercase">
+            <span className="font-dot text-base sm:text-lg font-bold tracking-widest text-white flex items-center gap-1 uppercase">
               <span>GLYPHPAD</span>
-              <span className="text-[#eb0029] font-silk text-xs">/</span>
-              <span className="text-[10px] font-mono text-zinc-400 font-bold">(1)</span>
+              <span className="text-[#eb0029] font-silk">/</span>
+              <span className="text-zinc-400 font-sans text-xs font-bold tracking-normal">(1)</span>
             </span>
 
             {/* Platform Selector Pill */}
             <button
               onClick={onOpenConnectModal}
-              className="font-mono text-[9px] px-2 py-0.5 rounded-full bg-white/[0.08] hover:bg-white/[0.16] border border-white/15 text-zinc-200 flex items-center gap-1 transition-all active:scale-95 shadow-sm"
+              className="font-mono text-[9px] px-2.5 py-0.5 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 text-white flex items-center gap-1.5 transition-all active:scale-95 shadow-sm"
               title="Click to switch or discover computers"
             >
               <span className="text-xs">{getPlatformIcon()}</span>
@@ -96,14 +95,14 @@ export const ConsoleHeader: React.FC<ConsoleHeaderProps> = ({
           </div>
         </div>
 
-        {/* CENTER: Slim Tactical Mode Switcher (All 6 options visible, no cutoff) */}
-        <nav className="flex items-center gap-1 p-0.5 rounded-xl bg-black/60 border border-white/10 overflow-x-auto scrollbar-none shadow-inner mx-auto lg:mx-0">
+        {/* CENTER: Slim High-Contrast Mode Dock (All 6 options visible, no cutoff) */}
+        <nav className="flex items-center gap-1 p-1 rounded-xl bg-black/70 border border-white/15 overflow-x-auto scrollbar-none shadow-inner mx-auto lg:mx-0">
           <button
             onClick={() => setActiveTab('touchpad')}
             className={`px-3 py-1 rounded-lg font-dot text-xs font-bold transition-all whitespace-nowrap ${
               activeTab === 'touchpad'
-                ? 'bg-white text-black shadow-[0_0_12px_rgba(255,255,255,0.4)] scale-100'
-                : 'text-zinc-400 hover:text-white hover:bg-white/[0.06]'
+                ? 'bg-white text-black shadow-[0_0_14px_rgba(255,255,255,0.45)] scale-100'
+                : 'text-zinc-300 hover:text-white hover:bg-white/10'
             }`}
           >
             <span>TOUCHPAD</span>
@@ -113,8 +112,8 @@ export const ConsoleHeader: React.FC<ConsoleHeaderProps> = ({
             onClick={() => setActiveTab('actions')}
             className={`px-3 py-1 rounded-lg font-dot text-xs font-bold transition-all whitespace-nowrap ${
               activeTab === 'actions'
-                ? 'bg-[#eb0029] text-white shadow-[0_0_12px_rgba(235,0,41,0.5)]'
-                : 'text-zinc-400 hover:text-white hover:bg-white/[0.06]'
+                ? 'bg-[#eb0029] text-white shadow-[0_0_14px_rgba(235,0,41,0.5)]'
+                : 'text-zinc-300 hover:text-white hover:bg-white/10'
             }`}
           >
             <span>ACTIONS</span>
@@ -124,8 +123,8 @@ export const ConsoleHeader: React.FC<ConsoleHeaderProps> = ({
             onClick={() => setActiveTab('keyboard')}
             className={`px-3 py-1 rounded-lg font-dot text-xs font-bold transition-all whitespace-nowrap ${
               activeTab === 'keyboard'
-                ? 'bg-sky-500 text-black shadow-[0_0_12px_rgba(14,165,233,0.45)]'
-                : 'text-zinc-400 hover:text-white hover:bg-white/[0.06]'
+                ? 'bg-sky-500 text-black shadow-[0_0_14px_rgba(14,165,233,0.45)]'
+                : 'text-zinc-300 hover:text-white hover:bg-white/10'
             }`}
           >
             <span>KEYS</span>
@@ -135,8 +134,8 @@ export const ConsoleHeader: React.FC<ConsoleHeaderProps> = ({
             onClick={() => setActiveTab('gamepad')}
             className={`px-3 py-1 rounded-lg font-dot text-xs font-bold transition-all whitespace-nowrap ${
               activeTab === 'gamepad'
-                ? 'bg-purple-500 text-white shadow-[0_0_12px_rgba(168,85,247,0.45)]'
-                : 'text-zinc-400 hover:text-white hover:bg-white/[0.06]'
+                ? 'bg-purple-500 text-white shadow-[0_0_14px_rgba(168,85,247,0.45)]'
+                : 'text-zinc-300 hover:text-white hover:bg-white/10'
             }`}
           >
             <span>D-PAD</span>
@@ -146,23 +145,24 @@ export const ConsoleHeader: React.FC<ConsoleHeaderProps> = ({
             onClick={() => setActiveTab('diagnostics')}
             className={`px-3 py-1 rounded-lg font-dot text-xs font-bold transition-all whitespace-nowrap ${
               activeTab === 'diagnostics'
-                ? 'bg-emerald-500 text-black shadow-[0_0_12px_rgba(16,185,129,0.45)]'
-                : 'text-zinc-400 hover:text-white hover:bg-white/[0.06]'
+                ? 'bg-emerald-500 text-black shadow-[0_0_14px_rgba(16,185,129,0.45)]'
+                : 'text-zinc-300 hover:text-white hover:bg-white/10'
             }`}
           >
             <span>STATS</span>
           </button>
 
+          {/* Prominent SETTINGS tab with clear amber highlight and icon */}
           <button
             onClick={() => setActiveTab('settings')}
-            className={`px-3 py-1 rounded-lg font-dot text-xs font-bold flex items-center gap-1 transition-all whitespace-nowrap ${
+            className={`px-3 py-1 rounded-lg font-dot text-xs font-bold flex items-center gap-1.5 transition-all whitespace-nowrap ${
               activeTab === 'settings'
-                ? 'bg-amber-400 text-black shadow-[0_0_14px_rgba(251,191,36,0.55)] font-bold'
-                : 'text-amber-400/90 hover:text-amber-300 hover:bg-amber-400/10'
+                ? 'bg-amber-400 text-black shadow-[0_0_14px_rgba(251,191,36,0.6)] font-bold'
+                : 'text-amber-400 hover:text-amber-300 hover:bg-amber-400/15'
             }`}
             title="User Customization & Touchpad Settings"
           >
-            <Settings className="w-3 h-3" />
+            <Settings className="w-3.5 h-3.5" />
             <span>SETTINGS</span>
           </button>
         </nav>
@@ -174,8 +174,8 @@ export const ConsoleHeader: React.FC<ConsoleHeaderProps> = ({
             onClick={onOpenConnectModal}
             className={`flex items-center gap-1.5 px-3 py-1 rounded-full border transition-all active:scale-95 text-xs font-dot font-bold ${
               isRealConnected
-                ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300 shadow-[0_0_12px_rgba(16,185,129,0.25)]'
-                : 'bg-[#eb0029]/25 hover:bg-[#eb0029]/35 border-[#eb0029] text-white shadow-[0_0_12px_rgba(235,0,41,0.3)]'
+                ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-300 shadow-[0_0_14px_rgba(16,185,129,0.3)]'
+                : 'bg-gradient-to-r from-[#eb0029] to-[#b3001e] hover:from-[#ff1a40] hover:to-[#eb0029] border-[#eb0029] text-white shadow-[0_0_14px_rgba(235,0,41,0.4)]'
             }`}
           >
             {isRealConnected ? (
@@ -185,7 +185,7 @@ export const ConsoleHeader: React.FC<ConsoleHeaderProps> = ({
               </>
             ) : (
               <>
-                <WifiOff className="w-3 h-3 text-[#eb0029]" />
+                <WifiOff className="w-3 h-3 text-white" />
                 <span>PAIR PC</span>
               </>
             )}
@@ -195,7 +195,7 @@ export const ConsoleHeader: React.FC<ConsoleHeaderProps> = ({
           <a
             href="/DigitalTouchpad-Receiver.zip"
             download="DigitalTouchpad-Receiver.zip"
-            className="px-2.5 py-1 rounded-full bg-white/[0.08] hover:bg-white/[0.15] border border-white/15 text-zinc-300 hover:text-white transition-all hidden sm:flex items-center gap-1 font-mono text-[10px]"
+            className="px-2.5 py-1 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 text-zinc-200 hover:text-white transition-all hidden sm:flex items-center gap-1 font-mono text-[10px]"
             title="Download 1-Click Desktop Receiver for Windows (75 KB, Zero Terminal)"
           >
             <Download className="w-3 h-3 text-[#00e575]" />
@@ -205,7 +205,7 @@ export const ConsoleHeader: React.FC<ConsoleHeaderProps> = ({
           {/* Fullscreen Toggle */}
           <button
             onClick={toggleFullscreen}
-            className="p-1 rounded-lg bg-white/[0.06] hover:bg-white/[0.12] border border-white/10 text-zinc-400 hover:text-white transition-colors hidden sm:flex"
+            className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 border border-white/15 text-zinc-300 hover:text-white transition-colors hidden sm:flex"
             title="Toggle Fullscreen"
           >
             {isFullscreen ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
