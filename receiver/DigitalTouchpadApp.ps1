@@ -1,4 +1,4 @@
-﻿# ==============================================================================
+# ==============================================================================
 # DIGITAL TOUCHPAD — NATIVE WINDOWS DESKTOP RECEIVER & TRAY CONSOLE
 # Pure .NET Windows Forms Application — Zero Terminal, Zero External Runtimes
 # Nothing OS Aesthetic • System Tray Background Service • Live QR Pairing
