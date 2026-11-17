@@ -94,7 +94,7 @@ export const DiagnosticsPanel: React.FC<DiagnosticsPanelProps> = ({
           <div className="bg-black/40 rounded-2xl p-4 border border-white/10 space-y-2">
             <span className="font-mono text-[11px] text-zinc-400 uppercase">RECEIVER HOST</span>
             <div className="font-mono text-sm font-bold text-white truncate">
-              {isRealConnected ? receiverHost : '127.0.0.1:8443'}
+              {isRealConnected ? receiverHost : 'NOT CONNECTED'}
             </div>
             <div className="text-[10px] font-mono text-zinc-400">
               {isRealConnected ? '● CONNECTED' : '○ SIMULATED / STANDBY'}

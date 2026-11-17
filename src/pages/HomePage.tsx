@@ -296,17 +296,6 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#08090a] text-[#f5f6f8]">
-      {/* Mobile HTTPS Mixed-Content Guidance Pill (only when target receiver is known) */}
-      {typeof window !== 'undefined' && window.location.protocol === 'https:' && !isRealConnected && receiverAddress && (
-        <div className="bg-[#14171a] border-b border-[#eb0029]/40 px-3 py-2 text-center text-xs font-mono text-zinc-300 flex items-center justify-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-[#eb0029] animate-pulse"></span>
-          <span>
-            Mobile Wi-Fi Notice: If connecting from mobile, open{' '}
-            <strong className="text-[#00e575]">http://{receiverAddress}</strong> directly in your phone browser to bypass HTTPS network restrictions.
-          </span>
-        </div>
-      )}
-
       {/* Top Header & Connection Bar with Dynamic OS State */}
       <ConsoleHeader
         connectionState={connectionState}
