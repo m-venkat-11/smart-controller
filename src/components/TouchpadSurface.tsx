@@ -282,9 +282,9 @@ export const TouchpadSurface: React.FC<TouchpadSurfaceProps> = ({
   };
 
   return (
-    <div className="flex flex-col h-full w-full max-w-4xl mx-auto space-y-3 p-2 sm:p-4 select-none">
+    <div className="flex flex-col h-full w-full max-w-4xl mx-auto space-y-2 sm:space-y-3 p-1 sm:p-4 select-none">
       {/* HUD Bar above Touchpad */}
-      <div className="flex items-center justify-between px-3 py-2 rounded-2xl bg-[#111315]/80 border border-white/10 backdrop-blur-md">
+      <div className="flex items-center justify-between px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-xl sm:rounded-2xl bg-[#111315]/80 border border-white/10 backdrop-blur-md">
         <div className="flex items-center gap-2">
           <div className="w-2 h-2 rounded-full bg-[#eb0029] animate-pulse"></div>
           <span className="font-dot text-xs font-bold text-white tracking-widest uppercase">
@@ -375,14 +375,14 @@ export const TouchpadSurface: React.FC<TouchpadSurfaceProps> = ({
       </div>
 
       {/* Tactile Bottom Mouse Click Bar (Nothing OS Aesthetic) */}
-      <div className="grid grid-cols-4 gap-2.5 pt-1">
+      <div className="grid grid-cols-4 gap-2 sm:gap-2.5 pt-0.5 sm:pt-1">
         <button
           onClick={() => {
             onClick('LEFT');
             setCurrentGesture('LEFT CLICK');
             vibrate(20);
           }}
-          className="col-span-2 py-4 rounded-2xl bg-[#1c2024] hover:bg-[#252a30] active:bg-[#eb0029] text-white border border-white/10 active:border-[#eb0029] font-dot text-sm font-bold tracking-wider transition-all shadow-md active:scale-95 flex items-center justify-center gap-2"
+          className="col-span-2 py-2.5 sm:py-4 rounded-xl sm:rounded-2xl bg-[#1c2024] hover:bg-[#252a30] active:bg-[#eb0029] text-white border border-white/10 active:border-[#eb0029] font-dot text-xs sm:text-sm font-bold tracking-wider transition-all shadow-md active:scale-95 flex items-center justify-center gap-2"
         >
           <span>LEFT CLICK</span>
         </button>
@@ -393,7 +393,7 @@ export const TouchpadSurface: React.FC<TouchpadSurfaceProps> = ({
             setCurrentGesture('MIDDLE CLICK');
             vibrate(20);
           }}
-          className="col-span-1 py-4 rounded-2xl bg-[#14171a] hover:bg-[#1c2024] active:bg-white active:text-black text-zinc-300 border border-white/10 font-dot text-xs font-bold tracking-wider transition-all shadow-md active:scale-95 flex items-center justify-center"
+          className="col-span-1 py-2.5 sm:py-4 rounded-xl sm:rounded-2xl bg-[#14171a] hover:bg-[#1c2024] active:bg-white active:text-black text-zinc-300 border border-white/10 font-dot text-[11px] sm:text-xs font-bold tracking-wider transition-all shadow-md active:scale-95 flex items-center justify-center"
         >
           <span>MIDDLE</span>
         </button>
@@ -404,7 +404,7 @@ export const TouchpadSurface: React.FC<TouchpadSurfaceProps> = ({
             setCurrentGesture('RIGHT CLICK');
             vibrate(25);
           }}
-          className="col-span-1 py-4 rounded-2xl bg-[#1c2024] hover:bg-[#252a30] active:bg-[#eb0029] text-white border border-white/10 active:border-[#eb0029] font-dot text-sm font-bold tracking-wider transition-all shadow-md active:scale-95 flex items-center justify-center"
+          className="col-span-1 py-2.5 sm:py-4 rounded-xl sm:rounded-2xl bg-[#1c2024] hover:bg-[#252a30] active:bg-[#eb0029] text-white border border-white/10 active:border-[#eb0029] font-dot text-xs sm:text-sm font-bold tracking-wider transition-all shadow-md active:scale-95 flex items-center justify-center"
         >
           <span>RIGHT</span>
         </button>
