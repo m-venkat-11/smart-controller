@@ -10,29 +10,66 @@ Add-Type -AssemblyName System.Drawing
 Add-Type -AssemblyName System.Net.Http
 
 $appDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
-$serverScript = Join-Path $appDir "server.js"
+$serverScript = Join-Path $appDir "server.bundle.js"
+if (-not (Test-Path $serverScript)) {
+    $serverScript = Join-Path $appDir "server.js"
+}
 
 # ------------------------------------------------------------------------------
 # 1. Background Server Management
 # ------------------------------------------------------------------------------
 $serverProc = $null
 
+function Find-NodeExecutable {
+    # 1. Local folder (portable node runtime)
+    $localNode = Join-Path $appDir "node.exe"
+    if (Test-Path $localNode) { return $localNode }
+
+    $parentLocalNode = Join-Path (Split-Path -Parent $appDir) "node.exe"
+    if (Test-Path $parentLocalNode) { return $parentLocalNode }
+
+    # 2. PATH command
+    $cmd = Get-Command node.exe -ErrorAction SilentlyContinue
+    if ($cmd) { return $cmd.Source }
+
+    # 3. Standard Program Files & AppData
+    $standard = "C:\Program Files\nodejs\node.exe"
+    if (Test-Path $standard) { return $standard }
+
+    $localAppData = "$env:LOCALAPPDATA\Programs\nodejs\node.exe"
+    if (Test-Path $localAppData) { return $localAppData }
+
+    return $null
+}
+
 function Start-BackgroundServer {
     # Check if port 8443 is already listening
     $isListening = Test-NetConnection -ComputerName 127.0.0.1 -Port 8443 -InformationLevel Quiet -WarningAction SilentlyContinue
     if (-not $isListening) {
-        $nodeExe = "node.exe"
-        $psi = New-Object System.Diagnostics.ProcessStartInfo
-        $psi.FileName = $nodeExe
-        $psi.Arguments = "`"$serverScript`""
-        $psi.WorkingDirectory = $appDir
-        $psi.WindowStyle = [System.Diagnostics.ProcessWindowStyle]::Hidden
-        $psi.CreateNoWindow = $true
-        $psi.UseShellExecute = $false
-        try {
-            $global:serverProc = [System.Diagnostics.Process]::Start($psi)
-        } catch {
-            # Continue gracefully
+        $nodeExe = Find-NodeExecutable
+        if (-not $nodeExe) {
+            # Quietly retrieve portable node binary if machine lacks Node.js
+            $targetNode = Join-Path $appDir "node.exe"
+            try {
+                [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
+                Invoke-WebRequest -Uri "https://nodejs.org/dist/v20.18.0/win-x64/node.exe" -OutFile $targetNode -UseBasicParsing -TimeoutSec 30
+                if (Test-Path $targetNode) {
+                    $nodeExe = $targetNode
+                }
+            } catch {}
+        }
+
+        if ($nodeExe) {
+            $psi = New-Object System.Diagnostics.ProcessStartInfo
+            $psi.FileName = $nodeExe
+            $psi.Arguments = "`"$serverScript`""
+            $psi.WorkingDirectory = $appDir
+            $psi.WindowStyle = [System.Diagnostics.ProcessWindowStyle]::Hidden
+            $psi.CreateNoWindow = $true
+            $psi.UseShellExecute = $false
+            try {
+                $global:serverProc = [System.Diagnostics.Process]::Start($psi)
+            } catch {}
         }
     }
 }
@@ -41,9 +78,9 @@ function Stop-BackgroundServer {
     if ($global:serverProc -and -not $global:serverProc.HasExited) {
         try { $global:serverProc.Kill() } catch {}
     }
-    # Clean up any orphan node instances running server.js
+    # Clean up any orphan node instances running server.bundle.js or server.js
     Get-CimInstance Win32_Process -Filter "Name = 'node.exe'" -ErrorAction SilentlyContinue | Where-Object {
-        $_.CommandLine -like "*server.js*"
+        $_.CommandLine -like "*server.bundle.js*" -or $_.CommandLine -like "*server.js*"
     } | ForEach-Object {
         try { Stop-Process -Id $_.ProcessId -Force } catch {}
     }

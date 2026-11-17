@@ -84,7 +84,7 @@ export const ReceiverModal: React.FC<ReceiverModalProps> = ({
               type="text"
               value={receiverAddress}
               onChange={(e) => setReceiverAddress(e.target.value)}
-              placeholder="e.g. 192.168.1.104:8443 or localhost:8443"
+              placeholder="e.g. 192.168.1.100:8443 or localhost:8443"
               className="flex-1 bg-black/60 border border-white/20 focus:border-[#eb0029] rounded-2xl px-4 py-3 font-mono text-sm text-white placeholder-zinc-600 outline-none transition-all"
             />
             <button

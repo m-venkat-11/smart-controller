@@ -13,6 +13,7 @@ import {
   Sparkles,
   Camera,
   Edit2,
+  Download,
 } from 'lucide-react';
 import { PlatformType } from '../core/protocol/dynamicActions';
 import { QRScannerModal } from './QRScannerModal';
@@ -74,20 +75,7 @@ export const DeviceHubModal: React.FC<DeviceHubModalProps> = ({
         if (saved) return JSON.parse(saved);
       } catch (_) {}
     }
-    return [
-      {
-        id: 'dev_win_current',
-        hostname: 'Primary PC Workstation',
-        platform: 'windows',
-        osName: 'Windows 11',
-        ip: '192.168.1.4',
-        port: 8443,
-        status: 'ONLINE',
-        isTrusted: true,
-        authToken: 'tok_trusted_default_1',
-        pairedAt: Date.now() - 86400000,
-      },
-    ];
+    return [];
   });
 
   // Discovered LAN devices
@@ -190,7 +178,7 @@ export const DeviceHubModal: React.FC<DeviceHubModalProps> = ({
         hostname: connectedHost,
         platform: activePlatform,
         osName: activePlatform === 'windows' ? 'Windows 11' : activePlatform === 'macos' ? 'macOS Sonoma' : 'Linux',
-        ip: receiverAddress.split(':')[0] || '192.168.1.4',
+        ip: receiverAddress.split(':')[0] || '127.0.0.1',
         port: parseInt(receiverAddress.split(':')[1]) || 8443,
         latency: 12,
         status: 'ONLINE',
@@ -217,7 +205,7 @@ export const DeviceHubModal: React.FC<DeviceHubModalProps> = ({
       } else if (text.startsWith('dtp://')) {
         const query = text.split('?')[1] || '';
         const params = new URLSearchParams(query);
-        targetIp = `${params.get('ip') || '192.168.1.4'}:${params.get('port') || 8443}`;
+        targetIp = `${params.get('ip') || '127.0.0.1'}:${params.get('port') || 8443}`;
         pin = params.get('pin') || '';
         token = params.get('token') || '';
       }
@@ -395,19 +383,26 @@ export const DeviceHubModal: React.FC<DeviceHubModalProps> = ({
                         ? 'Scanning local Wi-Fi subnet for Digital Touchpad receivers...'
                         : 'No active receiver detected on the subnet.'}
                     </p>
-                    <div className="flex justify-center gap-3">
+                    <div className="flex flex-wrap justify-center gap-2.5">
                       <button
                         onClick={() => setIsQRScannerOpen(true)}
-                        className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-white font-mono text-xs flex items-center gap-1.5"
+                        className="px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-white font-mono text-xs flex items-center gap-1.5"
                       >
                         <QrCode className="w-3.5 h-3.5 text-[#eb0029]" /> Scan QR Code
                       </button>
                       <button
                         onClick={runRealSubnetScan}
-                        className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-white font-mono text-xs flex items-center gap-1.5"
+                        className="px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-white font-mono text-xs flex items-center gap-1.5"
                       >
                         <RefreshCw className="w-3.5 h-3.5 text-emerald-400" /> Re-scan
                       </button>
+                      <a
+                        href="/DigitalTouchpad-Receiver.zip"
+                        download="DigitalTouchpad-Receiver.zip"
+                        className="px-3.5 py-2 rounded-xl bg-[#eb0029]/20 hover:bg-[#eb0029]/30 border border-[#eb0029]/40 text-white font-mono text-xs flex items-center gap-1.5"
+                      >
+                        <Download className="w-3.5 h-3.5 text-[#eb0029]" /> Get Companion (.zip)
+                      </a>
                     </div>
                   </div>
                 ) : (
@@ -462,8 +457,16 @@ export const DeviceHubModal: React.FC<DeviceHubModalProps> = ({
                 </p>
 
                 {trustedDevices.length === 0 ? (
-                  <div className="p-8 rounded-2xl bg-white/5 border border-dashed border-white/10 text-center font-mono text-xs text-zinc-400">
-                    No trusted computers saved yet. Pair with a computer to enable one-tap reconnection.
+                  <div className="p-8 rounded-2xl bg-white/5 border border-dashed border-white/10 text-center space-y-3 font-mono text-xs text-zinc-400">
+                    <p>No trusted computers saved yet. Pair with a computer to enable one-tap reconnection.</p>
+                    <div className="flex justify-center gap-3">
+                      <button
+                        onClick={() => setIsQRScannerOpen(true)}
+                        className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-white font-mono text-xs flex items-center gap-1.5"
+                      >
+                        <QrCode className="w-3.5 h-3.5 text-[#eb0029]" /> Pair via QR Code
+                      </button>
+                    </div>
                   </div>
                 ) : (
                   trustedDevices.map((dev) => (
@@ -550,7 +553,7 @@ export const DeviceHubModal: React.FC<DeviceHubModalProps> = ({
                     type="text"
                     value={receiverAddress}
                     onChange={(e) => setReceiverAddress(e.target.value)}
-                    placeholder="e.g. 192.168.1.4:8443"
+                    placeholder="e.g. 192.168.1.100:8443"
                     className="w-full bg-black/50 border border-white/15 rounded-xl px-3 py-2.5 text-xs font-mono text-white focus:outline-none focus:border-[#eb0029]"
                   />
                 </div>
@@ -565,6 +568,21 @@ export const DeviceHubModal: React.FC<DeviceHubModalProps> = ({
                 </button>
               </div>
             )}
+          </div>
+
+          {/* Quick Standalone Companion Download Section */}
+          <div className="pt-3 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs font-mono text-zinc-400">
+            <div className="flex items-center gap-2">
+              <Download className="w-4 h-4 text-[#00e575]" />
+              <span>Connecting a new PC or laptop?</span>
+            </div>
+            <a
+              href="/DigitalTouchpad-Receiver.zip"
+              download="DigitalTouchpad-Receiver.zip"
+              className="px-3.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/15 text-white flex items-center gap-2 transition-all font-dot text-[11px] font-bold"
+            >
+              <span>📥 DOWNLOAD PC RECEIVER (.ZIP)</span>
+            </a>
           </div>
         </div>
       </div>

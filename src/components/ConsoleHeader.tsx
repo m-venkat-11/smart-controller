@@ -119,14 +119,15 @@ export const ConsoleHeader: React.FC<ConsoleHeaderProps> = ({
               )}
             </button>
 
-            {/* Quick Link to Download Receiver */}
+            {/* Quick Link to Download Standalone Receiver */}
             <a
-              href="#/download"
+              href="/DigitalTouchpad-Receiver.zip"
+              download="DigitalTouchpad-Receiver.zip"
               className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-zinc-300 transition-colors hidden sm:flex items-center gap-1 font-mono text-[10px]"
-              title="Download Companion Receiver"
+              title="Download 1-Click Desktop Receiver for Windows (No Git, Zero Terminal)"
             >
-              <Download className="w-3.5 h-3.5" />
-              <span>GET RECEIVER</span>
+              <Download className="w-3.5 h-3.5 text-[#00e575]" />
+              <span>GET RECEIVER (.ZIP)</span>
             </a>
 
             {/* Fullscreen Toggle */}

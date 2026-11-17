@@ -13,7 +13,12 @@ export const InteractivePlayground: React.FC = () => {
   const [connectionState, setConnectionState] = useState<ConnectionState>('CONNECTED');
 
   // Real WebSocket bridge to PC receiver
-  const [pcAddress, setPcAddress] = useState('192.168.1.104:8443');
+  const [pcAddress, setPcAddress] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('glyph_receiver_addr') || '';
+    }
+    return '';
+  });
   const [isRealConnected, setIsRealConnected] = useState(false);
   const [realWs, setRealWs] = useState<WebSocket | null>(null);
 

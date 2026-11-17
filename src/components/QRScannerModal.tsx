@@ -178,7 +178,7 @@ export const QRScannerModal: React.FC<QRScannerModalProps> = ({
                 type="text"
                 value={manualCode}
                 onChange={(e) => setManualCode(e.target.value)}
-                placeholder="e.g. 192.168.1.4:8443 or 749201"
+                placeholder="e.g. 192.168.1.100:8443 or PIN"
                 className="flex-1 bg-black/50 border border-white/15 rounded-xl px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-[#eb0029]"
               />
               <button

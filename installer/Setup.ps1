@@ -1,4 +1,4 @@
-﻿# ==============================================================================
+# ==============================================================================
 # DIGITAL TOUCHPAD — WINDOWS INSTALLER SCRIPT
 # Installs to %LOCALAPPDATA%\DigitalTouchpad (No admin rights required for files)
 # Creates Shortcuts, Firewall Rule, and Uninstaller

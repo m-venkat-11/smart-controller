@@ -31,16 +31,15 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
   // Connection & WebSocket state
   const [receiverAddress, setReceiverAddress] = useState<string>(() => {
     if (typeof window !== 'undefined') {
-      // If loaded directly from the PC receiver (e.g. http://192.168.1.4:8443)
+      // If loaded directly from the PC receiver over LAN (e.g. http://192.168.x.x:8443)
       if (window.location.port && window.location.port !== '80' && window.location.port !== '443') {
         return window.location.host;
       }
       const saved = localStorage.getItem('glyph_receiver_addr');
-      if (saved && !saved.includes('localhost')) return saved;
-      // Default to common PC IP or host
-      return '192.168.1.4:8443';
+      if (saved && !saved.includes('localhost') && saved.includes(':')) return saved;
+      return '';
     }
-    return '192.168.1.4:8443';
+    return '';
   });
   const [isRealConnected, setIsRealConnected] = useState(false);
   const [connectionState, setConnectionState] = useState<ConnectionState>('DISCONNECTED');
@@ -60,9 +59,11 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
   const pingIntervalRef = useRef<any>(null);
   const lastPacketLogRef = useRef<number>(0);
 
-  // Auto-connect on initial load
+  // Auto-connect on initial load only if a receiver was previously configured
   useEffect(() => {
-    connectToReceiver();
+    if (receiverAddress) {
+      connectToReceiver();
+    }
     return () => {
       disconnectFromReceiver();
     };
@@ -94,6 +95,10 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
     disconnectFromReceiver();
 
     const targetAddr = customAddress || receiverAddress;
+    if (!targetAddr || !targetAddr.trim()) {
+      setConnectionState('DISCONNECTED');
+      return;
+    }
 
     try {
       let cleanAddr = targetAddr
@@ -291,8 +296,8 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#08090a] text-[#f5f6f8]">
-      {/* Mobile HTTPS Mixed-Content Guidance Pill */}
-      {typeof window !== 'undefined' && window.location.protocol === 'https:' && !isRealConnected && (
+      {/* Mobile HTTPS Mixed-Content Guidance Pill (only when target receiver is known) */}
+      {typeof window !== 'undefined' && window.location.protocol === 'https:' && !isRealConnected && receiverAddress && (
         <div className="bg-[#14171a] border-b border-[#eb0029]/40 px-3 py-2 text-center text-xs font-mono text-zinc-300 flex items-center justify-center gap-2">
           <span className="w-2 h-2 rounded-full bg-[#eb0029] animate-pulse"></span>
           <span>
@@ -306,7 +311,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
       <ConsoleHeader
         connectionState={connectionState}
         latency={latency}
-        receiverHost={isRealConnected ? connectedHost : receiverAddress}
+        receiverHost={isRealConnected ? connectedHost : (receiverAddress || 'Not Connected')}
         isRealConnected={isRealConnected}
         activePlatform={activePlatform}
         setActivePlatform={setActivePlatform}
@@ -364,7 +369,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
             latency={latency}
             packets={packets}
             isRealConnected={isRealConnected}
-            receiverHost={isRealConnected ? `${connectedHost} (${activePlatform.toUpperCase()})` : receiverAddress}
+            receiverHost={isRealConnected ? `${connectedHost} (${activePlatform.toUpperCase()})` : (receiverAddress || 'Not Connected')}
             onRunPingTest={() => {
               if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
                 const start = Date.now();
@@ -428,7 +433,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
               <div className="space-y-2 p-4 rounded-2xl bg-black/40 border border-white/5">
                 <div className="font-dot text-white font-bold tracking-wider">🪟 WINDOWS PC / LAPTOP</div>
                 <p className="text-zinc-400">
-                  Run <code className="text-zinc-200 bg-white/10 px-1 py-0.5 rounded">start-receiver.bat</code>. Implements native Win32 SendInput with zero driver installations. Dynamic Windows actions (Task Manager, Snipping Tool, Win+D, Virtual Desktops).
+                  Double-click <code className="text-zinc-200 bg-white/10 px-1 py-0.5 rounded">DigitalTouchpad.vbs</code> (zero terminal, runs in background). Or download the 75KB companion: <a href="/DigitalTouchpad-Receiver.zip" download="DigitalTouchpad-Receiver.zip" className="text-[#00e575] underline font-bold">DigitalTouchpad-Receiver.zip</a>.
                 </p>
               </div>
 
