@@ -268,13 +268,22 @@ $qrBox.BackColor = [System.Drawing.Color]::White
 $qrBox.SizeMode = [System.Windows.Forms.PictureBoxSizeMode]::StretchImage
 $pairingBox.Controls.Add($qrBox)
 
-# Function to draw an instant visual QR placeholder or load live QR
+# Function to load live QR code from local receiver or draw fallback
 function Update-QrImage {
+    try {
+        $wc = New-Object System.Net.WebClient
+        $pngBytes = $wc.DownloadData("http://127.0.0.1:8443/pairing-qr?format=png")
+        if ($pngBytes -and $pngBytes.Length -gt 100) {
+            $ms = New-Object System.IO.MemoryStream($pngBytes, 0, $pngBytes.Length)
+            $qrBox.Image = [System.Drawing.Image]::FromStream($ms)
+            return
+        }
+    } catch {}
+
     try {
         $bmp = New-Object System.Drawing.Bitmap(175, 175)
         $g = [System.Drawing.Graphics]::FromImage($bmp)
         $g.Clear([System.Drawing.Color]::White)
-        $pen = New-Object System.Drawing.Pen([System.Drawing.Color]::Black, 4)
         $brush = [System.Drawing.Brushes]::Black
 
         # Draw outer QR alignment targets
@@ -290,17 +299,6 @@ function Update-QrImage {
         $g.FillRectangle([System.Drawing.Brushes]::White, 16, 136, 23, 23)
         $g.FillRectangle($brush, 21, 141, 13, 13)
 
-        # Draw synthetic QR data grid pattern
-        $rand = New-Object System.Random(42)
-        for ($x = 2; $x -lt 16; $x++) {
-            for ($y = 2; $y -lt 16; $y++) {
-                if (($x -lt 5 -and $y -lt 5) -or ($x -gt 11 -and $y -lt 5) -or ($x -lt 5 -and $y -gt 11)) { continue }
-                if ($rand.Next(0, 2) -eq 1) {
-                    $g.FillRectangle($brush, ($x * 10), ($y * 10), 8, 8)
-                }
-            }
-        }
-
         # Center red dot matrix emblem
         $g.FillEllipse([System.Drawing.Brushes]::Red, 75, 75, 25, 25)
         $g.Dispose()
@@ -309,7 +307,7 @@ function Update-QrImage {
 }
 Update-QrImage
 
-# Refresh challenge PIN from server periodically
+# Refresh challenge PIN and QR code from server periodically
 $pinTimer = New-Object System.Windows.Forms.Timer
 $pinTimer.Interval = 5000
 $pinTimer.Add_Tick({
@@ -319,6 +317,7 @@ $pinTimer.Add_Tick({
         if ($json -match '"pin":"(\d+)"') {
             $lblPin.Text = $matches[1]
         }
+        Update-QrImage
     } catch {}
 })
 $pinTimer.Start()

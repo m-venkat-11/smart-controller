@@ -335,19 +335,32 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  // QR Code Dynamic Pairing Endpoint (Generates live scannable SVG)
+  // QR Code Dynamic Pairing Endpoint (Generates live scannable PNG or SVG)
   if (pathname === '/pairing-qr') {
     const pairUrl = `http://${primaryIp}:${PORT}?pair=${currentPairingPin}&token=${currentPairingToken}`;
+    const format = parsedUrl.searchParams.get('format') || 'png';
     if (QRCode) {
       try {
-        const svg = await QRCode.toString(pairUrl, {
-          type: 'svg',
-          color: { dark: '#ffffff', light: '#00000000' },
-          margin: 1,
-        });
-        res.writeHead(200, { 'Content-Type': 'image/svg+xml' });
-        res.end(svg);
-        return;
+        if (format === 'svg') {
+          const svg = await QRCode.toString(pairUrl, {
+            type: 'svg',
+            color: { dark: '#000000', light: '#ffffff' },
+            margin: 1,
+          });
+          res.writeHead(200, { 'Content-Type': 'image/svg+xml' });
+          res.end(svg);
+          return;
+        } else {
+          const pngBuf = await QRCode.toBuffer(pairUrl, {
+            type: 'png',
+            width: 256,
+            margin: 1,
+            color: { dark: '#000000', light: '#ffffff' },
+          });
+          res.writeHead(200, { 'Content-Type': 'image/png' });
+          res.end(pngBuf);
+          return;
+        }
       } catch (_) {}
     }
     // Fallback JSON payload if QRCode library is not loaded
