@@ -6,5 +6,21 @@
     "pairedAt": 1794897632398,
     "lastSeen": 1794897632398,
     "ip": "127.0.0.1"
+  },
+  {
+    "id": "phone_9944sso",
+    "name": "Mobile Client",
+    "token": "cb4feb22fcdb077c9ce2a558167a61ed587ae3d1c5036967",
+    "pairedAt": 1794898635248,
+    "lastSeen": 1794898635248,
+    "ip": "127.0.0.1"
+  },
+  {
+    "id": "phone_uqjfout",
+    "name": "Android Phone",
+    "token": "d6f1cd2b34e92e0be05ac9c484dfa653f2b57bb5f6d007cd",
+    "pairedAt": 1794898742297,
+    "lastSeen": 1794898772254,
+    "ip": "192.168.1.2"
   }
 ]

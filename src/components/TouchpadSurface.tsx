@@ -372,80 +372,87 @@ export const TouchpadSurface: React.FC<TouchpadSurfaceProps> = ({
         </div>
       </div>
 
-      {/* Main Touch Area - Pure Touch + Pointer Hybrid with Hardware Non-Passive Hooks */}
-      <div
-        ref={padRef}
-        onPointerDown={handlePointerDown}
-        onPointerMove={handlePointerMove}
-        onPointerUp={handlePointerUp}
-        className={`relative flex-1 min-h-[380px] sm:min-h-[460px] rounded-[32px] border transition-all cursor-crosshair overflow-hidden touch-none ${
-          surfaceTheme === 'emerald'
-            ? 'card-radiant-green'
-            : surfaceTheme === 'rose'
-            ? 'card-radiant-pink'
-            : surfaceTheme === 'blue'
-            ? 'card-radiant-blue'
-            : surfaceTheme === 'purple'
-            ? 'card-radiant-purple'
-            : 'bg-gradient-to-b from-[#191f2c] via-[#121620] to-[#0a0d13] border-2 border-white/20 shadow-[0_16px_48px_rgba(0,0,0,0.85),inset_0_1px_2px_rgba(255,255,255,0.25)]'
-        }`}
-        style={{
-          touchAction: 'none',
-          backgroundImage:
-            'radial-gradient(rgba(255, 255, 255, 0.22) 1.5px, transparent 1.5px)',
-          backgroundSize: '18px 18px',
-        }}
-      >
-        {/* Authentic Nothing OS Phone Transparent Back Graphic & Charging Coil Watermark */}
-        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none select-none opacity-35">
-          <div className="relative w-44 h-44 rounded-full border-2 border-dashed border-white/40 flex items-center justify-center">
-            <div className="w-32 h-32 rounded-full border border-white/30 flex items-center justify-center">
-              <div className="w-18 h-18 rounded-full border-2 border-white/60 flex items-center justify-center">
-                <div className="w-6 h-6 rounded-full bg-[#eb0029] shadow-[0_0_14px_#eb0029]"></div>
-              </div>
-            </div>
-            {/* Red recording LED indicator */}
-            <span className="absolute top-2 right-6 w-2.5 h-2.5 rounded-full bg-[#eb0029] shadow-[0_0_8px_#eb0029]"></span>
-          </div>
-
-          <span className="font-dot text-base font-bold tracking-[0.25em] text-white mt-3">GLYPHPAD (01)</span>
-          <span className="font-mono text-[9px] tracking-widest text-zinc-300 mt-0.5 uppercase">
-            MODEL: A065 • UCP v2.0 SURFACE
-          </span>
-        </div>
-
-        {/* Industrial Corner Crosshair Markers */}
-        <div className="absolute top-3 left-3 text-white/50 font-mono text-xs pointer-events-none">+</div>
-        <div className="absolute top-3 right-3 text-white/50 font-mono text-xs pointer-events-none">+</div>
-        <div className="absolute bottom-3 left-3 text-white/50 font-mono text-xs pointer-events-none">+</div>
-        <div className="absolute bottom-3 right-3 text-white/50 font-mono text-xs pointer-events-none">+</div>
-
-        {/* Visual Touch Points Ripple Follower */}
-        {activeTouches.map((touch) => (
-          <div
-            key={touch.id}
-            className="absolute pointer-events-none -translate-x-1/2 -translate-y-1/2"
-            style={{
-              left: `${touch.x - (padRef.current?.getBoundingClientRect().left || 0)}px`,
-              top: `${touch.y - (padRef.current?.getBoundingClientRect().top || 0)}px`,
-            }}
-          >
-            <div className="w-14 h-14 rounded-full bg-white/10 border border-white/40 animate-ping"></div>
-            <div className="absolute inset-0 w-8 h-8 m-auto rounded-full bg-[#eb0029] shadow-[0_0_15px_#eb0029]"></div>
-          </div>
-        ))}
-
-        {/* Virtual Cursor Indicator on Pad */}
+      {/* Main Touch Area Housing - High-Contrast Elevated Chassis Frame (Never mixes with background) */}
+      <div className="p-1.5 sm:p-2.5 rounded-[34px] sm:rounded-[38px] bg-[#151a26]/95 border-2 border-white/30 shadow-[0_16px_50px_rgba(0,0,0,0.95),inset_0_1px_2px_rgba(255,255,255,0.3)] flex flex-col flex-1">
         <div
-          className="absolute w-3.5 h-3.5 rounded-full bg-white border-2 border-black shadow-[0_0_10px_rgba(255,255,255,0.8)] pointer-events-none transition-all duration-75 -translate-x-1/2 -translate-y-1/2"
+          ref={padRef}
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+          className={`relative flex-1 min-h-[380px] sm:min-h-[460px] rounded-[28px] sm:rounded-[32px] border-2 transition-all cursor-crosshair overflow-hidden touch-none ${
+            surfaceTheme === 'emerald'
+              ? 'card-radiant-green border-emerald-400/60'
+              : surfaceTheme === 'rose'
+              ? 'card-radiant-pink border-rose-400/60'
+              : surfaceTheme === 'blue'
+              ? 'card-radiant-blue border-blue-400/60'
+              : surfaceTheme === 'purple'
+              ? 'card-radiant-purple border-purple-400/60'
+              : 'bg-[#1c2333] border-[#eb0029]/80 shadow-[inset_0_3px_14px_rgba(0,0,0,0.9),0_0_24px_rgba(235,0,41,0.25)]'
+          }`}
           style={{
-            left: `${cursorPosPreview.x}%`,
-            top: `${cursorPosPreview.y}%`,
+            touchAction: 'none',
+            backgroundImage:
+              'radial-gradient(rgba(255, 255, 255, 0.40) 1.5px, transparent 1.5px)',
+            backgroundSize: '16px 16px',
           }}
-        />
+        >
+          {/* Top Edge Nothing Crimson Laser Accent Rail */}
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#eb0029] to-transparent pointer-events-none shadow-[0_0_10px_#eb0029]" />
+
+          {/* Authentic Nothing OS Phone Transparent Back Graphic & Charging Coil Watermark */}
+          <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none select-none opacity-45">
+            <div className="relative w-44 h-44 rounded-full border-2 border-dashed border-white/60 flex items-center justify-center shadow-[inset_0_0_20px_rgba(255,255,255,0.05)]">
+              <div className="w-32 h-32 rounded-full border border-white/50 flex items-center justify-center">
+                <div className="w-18 h-18 rounded-full border-2 border-white/80 flex items-center justify-center">
+                  <div className="w-6 h-6 rounded-full bg-[#eb0029] shadow-[0_0_16px_#eb0029]"></div>
+                </div>
+              </div>
+              {/* Red recording LED indicator */}
+              <span className="absolute top-2 right-6 w-2.5 h-2.5 rounded-full bg-[#eb0029] shadow-[0_0_10px_#eb0029]"></span>
+            </div>
+
+            <span className="font-dot text-base font-bold tracking-[0.25em] text-white mt-3 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+              GLYPHPAD (01)
+            </span>
+            <span className="font-mono text-[9px] tracking-widest text-zinc-200 mt-0.5 uppercase drop-shadow">
+              TOUCHPAD SURFACE • UCP v2.0
+            </span>
+          </div>
+
+          {/* High-Visibility Nothing Crimson Corner Brackets (Exact boundary markers for mobile) */}
+          <div className="absolute top-3 left-3 w-4 h-4 border-t-2 border-l-2 border-[#eb0029] pointer-events-none shadow-[0_0_6px_#eb0029]" />
+          <div className="absolute top-3 right-3 w-4 h-4 border-t-2 border-r-2 border-[#eb0029] pointer-events-none shadow-[0_0_6px_#eb0029]" />
+          <div className="absolute bottom-3 left-3 w-4 h-4 border-b-2 border-l-2 border-[#eb0029] pointer-events-none shadow-[0_0_6px_#eb0029]" />
+          <div className="absolute bottom-3 right-3 w-4 h-4 border-b-2 border-r-2 border-[#eb0029] pointer-events-none shadow-[0_0_6px_#eb0029]" />
+
+          {/* Visual Touch Points Ripple Follower */}
+          {activeTouches.map((touch) => (
+            <div
+              key={touch.id}
+              className="absolute pointer-events-none -translate-x-1/2 -translate-y-1/2"
+              style={{
+                left: `${touch.x - (padRef.current?.getBoundingClientRect().left || 0)}px`,
+                top: `${touch.y - (padRef.current?.getBoundingClientRect().top || 0)}px`,
+              }}
+            >
+              <div className="w-14 h-14 rounded-full bg-white/20 border-2 border-white/60 animate-ping"></div>
+              <div className="absolute inset-0 w-8 h-8 m-auto rounded-full bg-[#eb0029] shadow-[0_0_20px_#eb0029]"></div>
+            </div>
+          ))}
+
+          {/* Virtual Cursor Indicator on Pad */}
+          <div
+            className="absolute w-4 h-4 rounded-full bg-white border-2 border-black shadow-[0_0_12px_rgba(255,255,255,0.9)] pointer-events-none transition-all duration-75 -translate-x-1/2 -translate-y-1/2"
+            style={{
+              left: `${cursorPosPreview.x}%`,
+              top: `${cursorPosPreview.y}%`,
+            }}
+          />
+        </div>
       </div>
 
-      {/* Tactile Bottom Mouse Click Bar (Nothing OS Aesthetic) */}
+      {/* Tactile Bottom Mouse Click Bar (Nothing OS Aesthetic - High-Contrast Buttons) */}
       <div className="grid grid-cols-4 gap-2 sm:gap-2.5 pt-0.5 sm:pt-1">
         <button
           onClick={() => {
@@ -454,7 +461,7 @@ export const TouchpadSurface: React.FC<TouchpadSurfaceProps> = ({
             setCurrentGesture('LEFT CLICK');
             vibrate(20);
           }}
-          className="col-span-2 py-2.5 sm:py-4 rounded-xl sm:rounded-2xl nothing-card hover:bg-[#222a3a] active:bg-[#eb0029] text-white border border-white/15 active:border-[#eb0029] font-dot text-xs sm:text-sm font-bold tracking-wider transition-all shadow-md active:scale-95 flex items-center justify-center gap-2"
+          className="col-span-2 py-3 sm:py-4 rounded-xl sm:rounded-2xl bg-[#202738] hover:bg-[#2a344a] active:bg-[#eb0029] text-white border-2 border-white/25 active:border-[#eb0029] font-dot text-xs sm:text-sm font-bold tracking-wider transition-all shadow-lg active:scale-95 flex items-center justify-center gap-2"
         >
           <span>LEFT CLICK</span>
         </button>
@@ -466,7 +473,7 @@ export const TouchpadSurface: React.FC<TouchpadSurfaceProps> = ({
             setCurrentGesture('MIDDLE CLICK');
             vibrate(20);
           }}
-          className="py-2.5 sm:py-4 rounded-xl sm:rounded-2xl nothing-card hover:bg-[#222a3a] active:bg-[#eb0029] text-white border border-white/15 active:border-[#eb0029] font-dot text-xs sm:text-sm font-bold tracking-wider transition-all shadow-md active:scale-95 flex items-center justify-center"
+          className="py-3 sm:py-4 rounded-xl sm:rounded-2xl bg-[#202738] hover:bg-[#2a344a] active:bg-[#eb0029] text-white border-2 border-white/25 active:border-[#eb0029] font-dot text-xs sm:text-sm font-bold tracking-wider transition-all shadow-lg active:scale-95 flex items-center justify-center"
         >
           <span>MIDDLE</span>
         </button>
@@ -478,7 +485,7 @@ export const TouchpadSurface: React.FC<TouchpadSurfaceProps> = ({
             setCurrentGesture('RIGHT CLICK');
             vibrate(20);
           }}
-          className="py-2.5 sm:py-4 rounded-xl sm:rounded-2xl nothing-card hover:bg-[#222a3a] active:bg-[#eb0029] text-white border border-white/15 active:border-[#eb0029] font-dot text-xs sm:text-sm font-bold tracking-wider transition-all shadow-md active:scale-95 flex items-center justify-center"
+          className="py-3 sm:py-4 rounded-xl sm:rounded-2xl bg-[#202738] hover:bg-[#2a344a] active:bg-[#eb0029] text-white border-2 border-white/25 active:border-[#eb0029] font-dot text-xs sm:text-sm font-bold tracking-wider transition-all shadow-lg active:scale-95 flex items-center justify-center"
         >
           <span>RIGHT</span>
         </button>

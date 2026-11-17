@@ -1,0 +1,34 @@
+================================================================
+           DIGITAL TOUCHPAD — UNIVERSAL COMPANION RECEIVER
+                     Works on ANY Windows PC, Mac, or Linux
+================================================================
+
+1. ON WINDOWS PC / LAPTOP (ZERO CONFIGURATION):
+   • Double-click "start-receiver.bat".
+   • It launches the receiver IN THE BACKGROUND on port 8443.
+   • YOU CAN SAFELY CLOSE THE WINDOW! The receiver keeps running in the background.
+   • To stop it anytime, simply double-click "stop-receiver.bat".
+
+2. ON APPLE MACBOOK / MAC DESKTOP:
+   • Open Terminal in this folder.
+   • Run: node receiver/server.js
+   • Automatically enables macOS Quartz/AppleScript injection, Spotlight, & Mission Control.
+
+3. ON LINUX (UBUNTU / FEDORA / ARCH):
+   • Open Terminal in this folder.
+   • Run: node receiver/server.js
+   • Automatically uses X11 / Wayland uinput for seamless pointer and key control.
+
+================================================================
+📱 HOW TO CONNECT FROM YOUR PHONE:
+================================================================
+Method 1 (Instant & Recommended — Zero Mixed-Content Blocks):
+   On your phone's browser (Chrome or Safari), simply open:
+   http://<YOUR-PC-IP>:8443
+   (e.g. http://192.168.1.4:8443 shown when launching the receiver)
+
+Method 2 (Via Web App):
+   1. Open https://smart-controller.vercel.app on your phone.
+   2. Click "PAIR PC".
+   3. Enter your PC's IP address (or scan the QR code) and tap "CONNECT".
+================================================================

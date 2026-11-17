@@ -114,33 +114,38 @@ export const DeviceHubModal: React.FC<DeviceHubModalProps> = ({
     setIsScanning(true);
     const discovered: DiscoveredDevice[] = [];
 
-    // Always probe localhost and the current receiver address first
+    // Always probe localhost and current receiver address first
     const candidates = new Set<string>();
     candidates.add('127.0.0.1:8443');
     candidates.add('localhost:8443');
     if (receiverAddress) candidates.add(receiverAddress);
 
-    // Derive subnet from current window host or common subnets
-    const currentHost = typeof window !== 'undefined' ? window.location.hostname : '';
-    let subnetPrefix = '192.168.1.';
-    if (currentHost.startsWith('192.168.')) {
-      const parts = currentHost.split('.');
-      subnetPrefix = `${parts[0]}.${parts[1]}.${parts[2]}.`;
+    // Derive subnet from current receiver address if set
+    if (receiverAddress) {
+      const cleanRecv = receiverAddress.replace('http://', '').replace('https://', '').split(':')[0];
+      if (cleanRecv.includes('.')) {
+        const p = cleanRecv.split('.');
+        const recvSub = `${p[0]}.${p[1]}.${p[2]}.`;
+        for (let i = 1; i <= 25; i++) candidates.add(`${recvSub}${i}:8443`);
+      }
     }
 
-    // Add common IP range (1..30)
-    for (let i = 2; i <= 25; i++) {
-      candidates.add(`${subnetPrefix}${i}:8443`);
-    }
+    // Common router subnets across consumer Wi-Fi routers
+    const commonSubnets = ['192.168.1.', '192.168.0.', '192.168.29.', '10.0.0.'];
+    commonSubnets.forEach((sub) => {
+      for (let i = 1; i <= 15; i++) {
+        candidates.add(`${sub}${i}:8443`);
+      }
+    });
 
     const probeList = Array.from(candidates);
 
-    // Fast parallel probe with 500ms timeout
+    // Fast parallel probe with 450ms timeout
     await Promise.all(
       probeList.map(async (addr) => {
         try {
           const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 600);
+          const timeoutId = setTimeout(() => controller.abort(), 450);
           const clean = addr.replace('http://', '').replace('https://', '');
           const res = await fetch(`http://${clean}/status`, {
             signal: controller.signal,
@@ -332,6 +337,35 @@ export const DeviceHubModal: React.FC<DeviceHubModalProps> = ({
               </button>
             )}
           </div>
+
+          {/* Quick Auto-Detected PC Banner (Zero-input 1-tap connection) */}
+          {discoveredList.length > 0 && !isRealConnected && (
+            <div className="p-3.5 rounded-2xl bg-gradient-to-r from-emerald-500/20 via-emerald-500/10 to-transparent border-2 border-emerald-500/50 flex items-center justify-between gap-3 shadow-[0_0_20px_rgba(16,185,129,0.25)]">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-emerald-500/30 flex items-center justify-center text-lg">
+                  {discoveredList[0].platform === 'macos' ? '🍏' : discoveredList[0].platform === 'linux' ? '🐧' : '🪟'}
+                </div>
+                <div>
+                  <div className="font-dot text-xs font-bold text-white flex items-center gap-1.5">
+                    <span>{discoveredList[0].hostname.toUpperCase()}</span>
+                    <span className="px-1.5 py-0.2 rounded bg-emerald-500/30 text-emerald-300 font-mono text-[9px]">
+                      READY ON WI-FI
+                    </span>
+                  </div>
+                  <div className="font-mono text-[10px] text-zinc-300">
+                    {discoveredList[0].ip}:{discoveredList[0].port}
+                  </div>
+                </div>
+              </div>
+
+              <button
+                onClick={() => handleSelectDiscovered(discoveredList[0])}
+                className="px-4 py-2 rounded-xl bg-[#00e575] hover:bg-emerald-400 text-black font-dot text-xs font-bold transition-all shadow-[0_0_15px_#00e575] active:scale-95 whitespace-nowrap"
+              >
+                CONNECT (1-TAP)
+              </button>
+            </div>
+          )}
 
           {/* Quick Direct IP Entry Card (Always visible for instantaneous zero-friction connection) */}
           <div className="p-4 rounded-2xl bg-black/60 border border-white/20 space-y-3 shadow-lg">

@@ -36,7 +36,9 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
         return window.location.host;
       }
       const saved = localStorage.getItem('glyph_receiver_addr');
-      if (saved && !saved.includes('localhost') && saved.includes(':')) return saved;
+      if (saved && !saved.includes('localhost')) {
+        return saved.includes(':') ? saved : `${saved}:8443`;
+      }
       return '';
     }
     return '';
