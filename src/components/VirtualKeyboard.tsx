@@ -87,7 +87,7 @@ export const VirtualKeyboard: React.FC<VirtualKeyboardProps> = ({
       </div>
 
       {/* Tactile Modifier & System Keys */}
-      <div className="rounded-[32px] bg-[#111315] border border-white/10 p-6 space-y-6">
+      <div className="rounded-[32px] nothing-card p-6 space-y-6">
         <div className="flex items-center justify-between">
           <span className="font-dot text-xs text-zinc-400 tracking-wider">
             {activePlatform.toUpperCase()} MODIFIER ROW
@@ -99,14 +99,14 @@ export const VirtualKeyboard: React.FC<VirtualKeyboardProps> = ({
         <div className="grid grid-cols-3 sm:grid-cols-6 gap-2.5">
           <button
             onClick={() => handleKeyClick('ESC')}
-            className="py-3.5 rounded-2xl bg-[#1c2024] hover:bg-[#252a30] active:bg-[#eb0029] active:text-white text-zinc-200 border border-white/10 font-mono text-xs font-bold transition-all active:scale-95 shadow-sm text-center"
+            className="py-3.5 rounded-2xl bg-[#1a202c]/90 hover:bg-[#252a30] active:bg-[#eb0029] active:text-white text-zinc-200 border border-white/10 font-mono text-xs font-bold transition-all active:scale-95 shadow-sm text-center"
           >
             ESC
           </button>
 
           <button
             onClick={() => handleKeyClick('TAB')}
-            className="py-3.5 rounded-2xl bg-[#1c2024] hover:bg-[#252a30] active:bg-[#eb0029] active:text-white text-zinc-200 border border-white/10 font-mono text-xs font-bold transition-all active:scale-95 shadow-sm text-center"
+            className="py-3.5 rounded-2xl bg-[#1a202c]/90 hover:bg-[#252a30] active:bg-[#eb0029] active:text-white text-zinc-200 border border-white/10 font-mono text-xs font-bold transition-all active:scale-95 shadow-sm text-center"
           >
             TAB
           </button>
@@ -114,7 +114,7 @@ export const VirtualKeyboard: React.FC<VirtualKeyboardProps> = ({
           {/* Dynamic Meta / Command / Super key */}
           <button
             onClick={() => onAction('SHOW_DESKTOP')}
-            className="py-3.5 rounded-2xl bg-[#1c2024] hover:bg-[#252a30] active:bg-[#eb0029] active:text-white text-zinc-200 border border-white/10 font-mono text-xs font-bold transition-all active:scale-95 shadow-sm text-center"
+            className="py-3.5 rounded-2xl bg-[#1a202c]/90 hover:bg-[#252a30] active:bg-[#eb0029] active:text-white text-zinc-200 border border-white/10 font-mono text-xs font-bold transition-all active:scale-95 shadow-sm text-center"
           >
             {platformInfo.defaultKeyModifiers.meta}
           </button>
@@ -122,7 +122,7 @@ export const VirtualKeyboard: React.FC<VirtualKeyboardProps> = ({
           {/* Dynamic Ctrl key */}
           <button
             onClick={() => onAction('TASK_MANAGER')}
-            className="py-3.5 rounded-2xl bg-[#1c2024] hover:bg-[#252a30] active:bg-[#eb0029] active:text-white text-zinc-200 border border-white/10 font-mono text-xs font-bold transition-all active:scale-95 shadow-sm text-center"
+            className="py-3.5 rounded-2xl bg-[#1a202c]/90 hover:bg-[#252a30] active:bg-[#eb0029] active:text-white text-zinc-200 border border-white/10 font-mono text-xs font-bold transition-all active:scale-95 shadow-sm text-center"
           >
             {platformInfo.defaultKeyModifiers.ctrl}
           </button>
@@ -130,14 +130,14 @@ export const VirtualKeyboard: React.FC<VirtualKeyboardProps> = ({
           {/* Dynamic Alt / Opt key */}
           <button
             onClick={() => onAction('ALT_TAB')}
-            className="py-3.5 rounded-2xl bg-[#1c2024] hover:bg-[#252a30] active:bg-[#eb0029] active:text-white text-zinc-200 border border-white/10 font-mono text-xs font-bold transition-all active:scale-95 shadow-sm text-center"
+            className="py-3.5 rounded-2xl bg-[#1a202c]/90 hover:bg-[#252a30] active:bg-[#eb0029] active:text-white text-zinc-200 border border-white/10 font-mono text-xs font-bold transition-all active:scale-95 shadow-sm text-center"
           >
             {platformInfo.defaultKeyModifiers.alt}
           </button>
 
           <button
             onClick={() => handleKeyClick('BACKSPACE')}
-            className="py-3.5 rounded-2xl bg-[#1c2024] hover:bg-[#252a30] active:bg-[#eb0029] active:text-white text-zinc-200 border border-white/10 font-mono text-xs font-bold transition-all active:scale-95 shadow-sm flex items-center justify-center gap-1"
+            className="py-3.5 rounded-2xl bg-[#1a202c]/90 hover:bg-[#252a30] active:bg-[#eb0029] active:text-white text-zinc-200 border border-white/10 font-mono text-xs font-bold transition-all active:scale-95 shadow-sm flex items-center justify-center gap-1"
           >
             <Delete className="w-3.5 h-3.5" />
             <span>{activePlatform === 'macos' ? 'DELETE' : 'BKSP'}</span>
@@ -150,7 +150,7 @@ export const VirtualKeyboard: React.FC<VirtualKeyboardProps> = ({
           <div className="flex flex-col gap-2.5">
             <button
               onClick={() => handleKeyClick('SPACE', 'SPACE')}
-              className="py-4 rounded-2xl bg-[#1c2024] hover:bg-[#252a30] active:bg-blue-600 active:text-white text-zinc-200 border border-white/10 font-dot text-xs font-bold transition-all active:scale-95 shadow-sm flex items-center justify-center gap-2"
+              className="py-4 rounded-2xl bg-[#1a202c]/90 hover:bg-[#252a30] active:bg-blue-600 active:text-white text-zinc-200 border border-white/10 font-dot text-xs font-bold transition-all active:scale-95 shadow-sm flex items-center justify-center gap-2"
             >
               <span>[ SPACE BAR ]</span>
             </button>
@@ -168,7 +168,7 @@ export const VirtualKeyboard: React.FC<VirtualKeyboardProps> = ({
           <div className="bg-black/40 rounded-2xl p-3 border border-white/10 flex flex-col items-center justify-center gap-2">
             <button
               onClick={() => handleKeyClick('UP', 'ARROW UP')}
-              className="w-12 h-10 rounded-xl bg-[#1c2024] hover:bg-[#252a30] active:bg-white active:text-black text-zinc-200 border border-white/10 flex items-center justify-center transition-all active:scale-95"
+              className="w-12 h-10 rounded-xl bg-[#1a202c]/90 hover:bg-[#252a30] active:bg-white active:text-black text-zinc-200 border border-white/10 flex items-center justify-center transition-all active:scale-95"
             >
               <ArrowUp className="w-4 h-4" />
             </button>
@@ -176,21 +176,21 @@ export const VirtualKeyboard: React.FC<VirtualKeyboardProps> = ({
             <div className="flex items-center gap-2">
               <button
                 onClick={() => handleKeyClick('LEFT', 'ARROW LEFT')}
-                className="w-12 h-10 rounded-xl bg-[#1c2024] hover:bg-[#252a30] active:bg-white active:text-black text-zinc-200 border border-white/10 flex items-center justify-center transition-all active:scale-95"
+                className="w-12 h-10 rounded-xl bg-[#1a202c]/90 hover:bg-[#252a30] active:bg-white active:text-black text-zinc-200 border border-white/10 flex items-center justify-center transition-all active:scale-95"
               >
                 <ArrowLeft className="w-4 h-4" />
               </button>
 
               <button
                 onClick={() => handleKeyClick('DOWN', 'ARROW DOWN')}
-                className="w-12 h-10 rounded-xl bg-[#1c2024] hover:bg-[#252a30] active:bg-white active:text-black text-zinc-200 border border-white/10 flex items-center justify-center transition-all active:scale-95"
+                className="w-12 h-10 rounded-xl bg-[#1a202c]/90 hover:bg-[#252a30] active:bg-white active:text-black text-zinc-200 border border-white/10 flex items-center justify-center transition-all active:scale-95"
               >
                 <ArrowDown className="w-4 h-4" />
               </button>
 
               <button
                 onClick={() => handleKeyClick('RIGHT', 'ARROW RIGHT')}
-                className="w-12 h-10 rounded-xl bg-[#1c2024] hover:bg-[#252a30] active:bg-white active:text-black text-zinc-200 border border-white/10 flex items-center justify-center transition-all active:scale-95"
+                className="w-12 h-10 rounded-xl bg-[#1a202c]/90 hover:bg-[#252a30] active:bg-white active:text-black text-zinc-200 border border-white/10 flex items-center justify-center transition-all active:scale-95"
               >
                 <ArrowRight className="w-4 h-4" />
               </button>

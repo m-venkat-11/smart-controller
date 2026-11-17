@@ -29,7 +29,7 @@ export const NothingGamepad: React.FC<NothingGamepadProps> = ({
   return (
     <div className="max-w-3xl mx-auto p-3 sm:p-6 space-y-6">
       {/* Top Banner */}
-      <div className="flex items-center justify-between px-4 py-2.5 rounded-2xl bg-[#121417] border border-white/10">
+      <div className="flex items-center justify-between px-4 py-2.5 rounded-2xl nothing-card-subtle">
         <div className="flex items-center gap-2">
           <div className="w-2.5 h-2.5 rounded-full bg-purple-500 shadow-[0_0_10px_#a855f7]"></div>
           <span className="font-dot text-xs text-white tracking-wider">NOTHING OS TACTILE CONTROLLER</span>

@@ -140,7 +140,7 @@ export const DiagnosticsPanel: React.FC<DiagnosticsPanelProps> = ({
       </div>
 
       {/* Input Verification Matrix (PRD Section 15 Requirement) */}
-      <div className="rounded-[32px] bg-[#111315] border border-white/10 p-6 space-y-4">
+      <div className="rounded-[32px] nothing-card p-6 space-y-4">
         <div className="flex items-center justify-between">
           <h4 className="font-dot text-xs text-white tracking-wider">HARDWARE INPUT SELF-TEST SUITE</h4>
           <span className="font-mono text-[10px] text-zinc-500">CLICK EACH TARGET TO VERIFY</span>
@@ -227,7 +227,7 @@ export const DiagnosticsPanel: React.FC<DiagnosticsPanelProps> = ({
       </div>
 
       {/* Real-time UCP Protocol Packet Terminal */}
-      <div className="rounded-[32px] bg-[#0c0e10] border border-white/10 p-6 space-y-3">
+      <div className="rounded-[32px] nothing-card p-6 space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Terminal className="w-4 h-4 text-emerald-400" />

@@ -123,7 +123,7 @@ export const QuickActionsGrid: React.FC<QuickActionsGridProps> = ({
   return (
     <div className="max-w-6xl mx-auto p-2 sm:p-6 space-y-6">
       {/* HUD Active Action Notification Banner */}
-      <div className="flex items-center justify-between px-4 py-2.5 rounded-2xl bg-[#121417] border border-white/10 backdrop-blur-md">
+      <div className="flex items-center justify-between px-4 py-2.5 rounded-2xl nothing-card">
         <div className="flex items-center gap-2">
           <Sparkles className="w-4 h-4 text-[#eb0029]" />
           <span className="font-dot text-xs text-white tracking-wider">
@@ -144,7 +144,7 @@ export const QuickActionsGrid: React.FC<QuickActionsGridProps> = ({
       </div>
 
       {/* SECTION 1: DYNAMIC SYSTEM APPLICATIONS (ADAPTED TO CONNECTED OS) */}
-      <div className="rounded-[32px] bg-[#111315] border border-white/10 p-5 sm:p-6 space-y-4">
+      <div className="rounded-[32px] nothing-card p-5 sm:p-6 space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <LayoutGrid className="w-4 h-4 text-emerald-400" />
@@ -172,7 +172,7 @@ export const QuickActionsGrid: React.FC<QuickActionsGridProps> = ({
                   : 'SETTINGS'
               )
             }
-            className="py-3.5 px-2 rounded-2xl bg-[#1c2024] hover:bg-[#252a30] active:scale-95 border border-white/10 text-white font-dot text-xs font-bold transition-all flex flex-col items-center justify-center gap-1.5 shadow-sm"
+            className="py-3.5 px-2 rounded-2xl bg-[#1a202c]/90 hover:bg-[#252a30] active:scale-95 border border-white/10 text-white font-dot text-xs font-bold transition-all flex flex-col items-center justify-center gap-1.5 shadow-sm"
           >
             <Settings className="w-4 h-4 text-zinc-300" />
             <span>{activePlatform === 'macos' ? 'SYS PREFS' : 'SETTINGS'}</span>
@@ -186,7 +186,7 @@ export const QuickActionsGrid: React.FC<QuickActionsGridProps> = ({
                 activePlatform === 'windows' ? 'EXPLORER (WIN+E)' : activePlatform === 'macos' ? 'FINDER' : 'FILES'
               )
             }
-            className="py-3.5 px-2 rounded-2xl bg-[#1c2024] hover:bg-[#252a30] active:scale-95 border border-white/10 text-white font-dot text-xs font-bold transition-all flex flex-col items-center justify-center gap-1.5 shadow-sm"
+            className="py-3.5 px-2 rounded-2xl bg-[#1a202c]/90 hover:bg-[#252a30] active:scale-95 border border-white/10 text-white font-dot text-xs font-bold transition-all flex flex-col items-center justify-center gap-1.5 shadow-sm"
           >
             <Folder className="w-4 h-4 text-amber-400" />
             <span>{activePlatform === 'macos' ? 'FINDER' : activePlatform === 'windows' ? 'EXPLORER' : 'FILES'}</span>
@@ -200,7 +200,7 @@ export const QuickActionsGrid: React.FC<QuickActionsGridProps> = ({
                 activePlatform === 'windows' ? 'SEARCH (WIN+S)' : activePlatform === 'macos' ? 'SPOTLIGHT (CMD+SPACE)' : 'OVERVIEW'
               )
             }
-            className="py-3.5 px-2 rounded-2xl bg-[#1c2024] hover:bg-[#252a30] active:scale-95 border border-white/10 text-white font-dot text-xs font-bold transition-all flex flex-col items-center justify-center gap-1.5 shadow-sm"
+            className="py-3.5 px-2 rounded-2xl bg-[#1a202c]/90 hover:bg-[#252a30] active:scale-95 border border-white/10 text-white font-dot text-xs font-bold transition-all flex flex-col items-center justify-center gap-1.5 shadow-sm"
           >
             <Search className="w-4 h-4 text-blue-400" />
             <span>{activePlatform === 'macos' ? 'SPOTLIGHT' : 'SEARCH'}</span>
@@ -214,7 +214,7 @@ export const QuickActionsGrid: React.FC<QuickActionsGridProps> = ({
                 activePlatform === 'macos' ? 'ACTIVITY MONITOR' : 'TASK MANAGER'
               )
             }
-            className="py-3.5 px-2 rounded-2xl bg-[#1c2024] hover:bg-[#252a30] active:scale-95 border border-white/10 text-white font-dot text-xs font-bold transition-all flex flex-col items-center justify-center gap-1.5 shadow-sm"
+            className="py-3.5 px-2 rounded-2xl bg-[#1a202c]/90 hover:bg-[#252a30] active:scale-95 border border-white/10 text-white font-dot text-xs font-bold transition-all flex flex-col items-center justify-center gap-1.5 shadow-sm"
           >
             <Activity className="w-4 h-4 text-emerald-400" />
             <span>{activePlatform === 'macos' ? 'ACTIVITY' : 'TASK MGR'}</span>
@@ -223,7 +223,7 @@ export const QuickActionsGrid: React.FC<QuickActionsGridProps> = ({
           {/* Terminal */}
           <button
             onClick={() => trigger('TERMINAL', 'TERMINAL')}
-            className="py-3.5 px-2 rounded-2xl bg-[#1c2024] hover:bg-[#252a30] active:scale-95 border border-white/10 text-white font-dot text-xs font-bold transition-all flex flex-col items-center justify-center gap-1.5 shadow-sm"
+            className="py-3.5 px-2 rounded-2xl bg-[#1a202c]/90 hover:bg-[#252a30] active:scale-95 border border-white/10 text-white font-dot text-xs font-bold transition-all flex flex-col items-center justify-center gap-1.5 shadow-sm"
           >
             <Terminal className="w-4 h-4 text-cyan-400" />
             <span>TERMINAL</span>
@@ -232,7 +232,7 @@ export const QuickActionsGrid: React.FC<QuickActionsGridProps> = ({
           {/* Calculator */}
           <button
             onClick={() => trigger('CALCULATOR', 'CALCULATOR')}
-            className="py-3.5 px-2 rounded-2xl bg-[#1c2024] hover:bg-[#252a30] active:scale-95 border border-white/10 text-white font-dot text-xs font-bold transition-all flex flex-col items-center justify-center gap-1.5 shadow-sm"
+            className="py-3.5 px-2 rounded-2xl bg-[#1a202c]/90 hover:bg-[#252a30] active:scale-95 border border-white/10 text-white font-dot text-xs font-bold transition-all flex flex-col items-center justify-center gap-1.5 shadow-sm"
           >
             <Calculator className="w-4 h-4 text-rose-400" />
             <span>CALC</span>
@@ -241,7 +241,7 @@ export const QuickActionsGrid: React.FC<QuickActionsGridProps> = ({
           {/* Web Browser */}
           <button
             onClick={() => trigger('BROWSER', activePlatform === 'macos' ? 'SAFARI / BROWSER' : 'DEFAULT BROWSER')}
-            className="py-3.5 px-2 rounded-2xl bg-[#1c2024] hover:bg-[#252a30] active:scale-95 border border-white/10 text-white font-dot text-xs font-bold transition-all flex flex-col items-center justify-center gap-1.5 shadow-sm"
+            className="py-3.5 px-2 rounded-2xl bg-[#1a202c]/90 hover:bg-[#252a30] active:scale-95 border border-white/10 text-white font-dot text-xs font-bold transition-all flex flex-col items-center justify-center gap-1.5 shadow-sm"
           >
             <Globe className="w-4 h-4 text-sky-400" />
             <span>{activePlatform === 'macos' ? 'SAFARI' : 'BROWSER'}</span>
@@ -250,7 +250,7 @@ export const QuickActionsGrid: React.FC<QuickActionsGridProps> = ({
           {/* Text Editor */}
           <button
             onClick={() => trigger('NOTEPAD', activePlatform === 'macos' ? 'TEXTEDIT' : 'NOTEPAD')}
-            className="py-3.5 px-2 rounded-2xl bg-[#1c2024] hover:bg-[#252a30] active:scale-95 border border-white/10 text-white font-dot text-xs font-bold transition-all flex flex-col items-center justify-center gap-1.5 shadow-sm"
+            className="py-3.5 px-2 rounded-2xl bg-[#1a202c]/90 hover:bg-[#252a30] active:scale-95 border border-white/10 text-white font-dot text-xs font-bold transition-all flex flex-col items-center justify-center gap-1.5 shadow-sm"
           >
             <FileText className="w-4 h-4 text-zinc-300" />
             <span>{activePlatform === 'macos' ? 'TEXTEDIT' : 'NOTEPAD'}</span>
@@ -264,7 +264,7 @@ export const QuickActionsGrid: React.FC<QuickActionsGridProps> = ({
                 activePlatform === 'windows' ? 'SNIPPING TOOL (WIN+SHIFT+S)' : activePlatform === 'macos' ? 'CAPTURE (CMD+SHIFT+4)' : 'SCREENSHOT'
               )
             }
-            className="py-3.5 px-2 rounded-2xl bg-[#1c2024] hover:bg-[#252a30] active:scale-95 border border-white/10 text-white font-dot text-xs font-bold transition-all flex flex-col items-center justify-center gap-1.5 shadow-sm"
+            className="py-3.5 px-2 rounded-2xl bg-[#1a202c]/90 hover:bg-[#252a30] active:scale-95 border border-white/10 text-white font-dot text-xs font-bold transition-all flex flex-col items-center justify-center gap-1.5 shadow-sm"
           >
             <Camera className="w-4 h-4 text-purple-400" />
             <span>{activePlatform === 'macos' ? 'SCREENSHOT' : 'SNIP TOOL'}</span>
@@ -278,7 +278,7 @@ export const QuickActionsGrid: React.FC<QuickActionsGridProps> = ({
                 activePlatform === 'macos' ? 'MISSION CONTROL (F3)' : 'TASK VIEW (WIN+TAB)'
               )
             }
-            className="py-3.5 px-2 rounded-2xl bg-[#1c2024] hover:bg-[#252a30] active:scale-95 border border-white/10 text-white font-dot text-xs font-bold transition-all flex flex-col items-center justify-center gap-1.5 shadow-sm"
+            className="py-3.5 px-2 rounded-2xl bg-[#1a202c]/90 hover:bg-[#252a30] active:scale-95 border border-white/10 text-white font-dot text-xs font-bold transition-all flex flex-col items-center justify-center gap-1.5 shadow-sm"
           >
             <Layers className="w-4 h-4 text-teal-400" />
             <span>{activePlatform === 'macos' ? 'MISSION CTRL' : 'TASK VIEW'}</span>
@@ -292,7 +292,7 @@ export const QuickActionsGrid: React.FC<QuickActionsGridProps> = ({
                 activePlatform === 'windows' ? 'DESKTOP (WIN+D)' : activePlatform === 'macos' ? 'DESKTOP (F11)' : 'DESKTOP (SUPER+D)'
               )
             }
-            className="py-3.5 px-2 rounded-2xl bg-[#1c2024] hover:bg-[#252a30] active:scale-95 border border-white/10 text-white font-dot text-xs font-bold transition-all flex flex-col items-center justify-center gap-1.5 shadow-sm"
+            className="py-3.5 px-2 rounded-2xl bg-[#1a202c]/90 hover:bg-[#252a30] active:scale-95 border border-white/10 text-white font-dot text-xs font-bold transition-all flex flex-col items-center justify-center gap-1.5 shadow-sm"
           >
             <Monitor className="w-4 h-4 text-emerald-400" />
             <span>DESKTOP</span>
@@ -306,7 +306,7 @@ export const QuickActionsGrid: React.FC<QuickActionsGridProps> = ({
                 activePlatform === 'macos' ? 'APP SWITCH (CMD+TAB)' : 'APP SWITCH (ALT+TAB)'
               )
             }
-            className="py-3.5 px-2 rounded-2xl bg-[#1c2024] hover:bg-[#252a30] active:scale-95 border border-white/10 text-white font-dot text-xs font-bold transition-all flex flex-col items-center justify-center gap-1.5 shadow-sm"
+            className="py-3.5 px-2 rounded-2xl bg-[#1a202c]/90 hover:bg-[#252a30] active:scale-95 border border-white/10 text-white font-dot text-xs font-bold transition-all flex flex-col items-center justify-center gap-1.5 shadow-sm"
           >
             <Layers className="w-4 h-4 text-indigo-400" />
             <span>{activePlatform === 'macos' ? 'CMD+TAB' : 'ALT+TAB'}</span>
@@ -705,7 +705,7 @@ export const QuickActionsGrid: React.FC<QuickActionsGridProps> = ({
       </div>
 
       {/* SECTION 3: DYNAMIC EDITING SHORTCUTS */}
-      <div className="rounded-[32px] bg-[#111315] border border-white/10 p-5 sm:p-6 space-y-4">
+      <div className="rounded-[32px] nothing-card p-5 sm:p-6 space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Clipboard className="w-4 h-4 text-purple-400" />
@@ -719,7 +719,7 @@ export const QuickActionsGrid: React.FC<QuickActionsGridProps> = ({
         <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-8 gap-2.5">
           <button
             onClick={() => trigger('COPY', activePlatform === 'macos' ? 'COPY (CMD+C)' : 'COPY (CTRL+C)')}
-            className="py-3 rounded-2xl bg-[#1c2024] hover:bg-[#252a30] active:scale-95 border border-white/10 text-white font-mono text-xs font-bold transition-all flex flex-col items-center justify-center gap-1"
+            className="py-3 rounded-2xl bg-[#1a202c]/90 hover:bg-[#252a30] active:scale-95 border border-white/10 text-white font-mono text-xs font-bold transition-all flex flex-col items-center justify-center gap-1"
           >
             <Copy className="w-3.5 h-3.5 text-zinc-300" />
             <span>COPY</span>
@@ -727,7 +727,7 @@ export const QuickActionsGrid: React.FC<QuickActionsGridProps> = ({
 
           <button
             onClick={() => trigger('PASTE', activePlatform === 'macos' ? 'PASTE (CMD+V)' : 'PASTE (CTRL+V)')}
-            className="py-3 rounded-2xl bg-[#1c2024] hover:bg-[#252a30] active:scale-95 border border-white/10 text-white font-mono text-xs font-bold transition-all flex flex-col items-center justify-center gap-1"
+            className="py-3 rounded-2xl bg-[#1a202c]/90 hover:bg-[#252a30] active:scale-95 border border-white/10 text-white font-mono text-xs font-bold transition-all flex flex-col items-center justify-center gap-1"
           >
             <Clipboard className="w-3.5 h-3.5 text-zinc-300" />
             <span>PASTE</span>
@@ -735,7 +735,7 @@ export const QuickActionsGrid: React.FC<QuickActionsGridProps> = ({
 
           <button
             onClick={() => trigger('CUT', activePlatform === 'macos' ? 'CUT (CMD+X)' : 'CUT (CTRL+X)')}
-            className="py-3 rounded-2xl bg-[#1c2024] hover:bg-[#252a30] active:scale-95 border border-white/10 text-white font-mono text-xs font-bold transition-all flex flex-col items-center justify-center gap-1"
+            className="py-3 rounded-2xl bg-[#1a202c]/90 hover:bg-[#252a30] active:scale-95 border border-white/10 text-white font-mono text-xs font-bold transition-all flex flex-col items-center justify-center gap-1"
           >
             <Scissors className="w-3.5 h-3.5 text-zinc-300" />
             <span>CUT</span>
@@ -743,7 +743,7 @@ export const QuickActionsGrid: React.FC<QuickActionsGridProps> = ({
 
           <button
             onClick={() => trigger('UNDO', activePlatform === 'macos' ? 'UNDO (CMD+Z)' : 'UNDO (CTRL+Z)')}
-            className="py-3 rounded-2xl bg-[#1c2024] hover:bg-[#252a30] active:scale-95 border border-white/10 text-white font-mono text-xs font-bold transition-all flex flex-col items-center justify-center gap-1"
+            className="py-3 rounded-2xl bg-[#1a202c]/90 hover:bg-[#252a30] active:scale-95 border border-white/10 text-white font-mono text-xs font-bold transition-all flex flex-col items-center justify-center gap-1"
           >
             <Undo2 className="w-3.5 h-3.5 text-zinc-300" />
             <span>UNDO</span>
@@ -751,7 +751,7 @@ export const QuickActionsGrid: React.FC<QuickActionsGridProps> = ({
 
           <button
             onClick={() => trigger('REDO', activePlatform === 'macos' ? 'REDO (CMD+SHIFT+Z)' : 'REDO (CTRL+Y)')}
-            className="py-3 rounded-2xl bg-[#1c2024] hover:bg-[#252a30] active:scale-95 border border-white/10 text-white font-mono text-xs font-bold transition-all flex flex-col items-center justify-center gap-1"
+            className="py-3 rounded-2xl bg-[#1a202c]/90 hover:bg-[#252a30] active:scale-95 border border-white/10 text-white font-mono text-xs font-bold transition-all flex flex-col items-center justify-center gap-1"
           >
             <Redo2 className="w-3.5 h-3.5 text-zinc-300" />
             <span>REDO</span>
@@ -759,7 +759,7 @@ export const QuickActionsGrid: React.FC<QuickActionsGridProps> = ({
 
           <button
             onClick={() => trigger('SELECT_ALL', activePlatform === 'macos' ? 'SELECT ALL (CMD+A)' : 'SELECT ALL (CTRL+A)')}
-            className="py-3 rounded-2xl bg-[#1c2024] hover:bg-[#252a30] active:scale-95 border border-white/10 text-white font-mono text-xs font-bold transition-all flex flex-col items-center justify-center gap-1"
+            className="py-3 rounded-2xl bg-[#1a202c]/90 hover:bg-[#252a30] active:scale-95 border border-white/10 text-white font-mono text-xs font-bold transition-all flex flex-col items-center justify-center gap-1"
           >
             <AppWindow className="w-3.5 h-3.5 text-zinc-300" />
             <span>ALL</span>
@@ -767,7 +767,7 @@ export const QuickActionsGrid: React.FC<QuickActionsGridProps> = ({
 
           <button
             onClick={() => trigger('SAVE', activePlatform === 'macos' ? 'SAVE (CMD+S)' : 'SAVE (CTRL+S)')}
-            className="py-3 rounded-2xl bg-[#1c2024] hover:bg-[#252a30] active:scale-95 border border-white/10 text-white font-mono text-xs font-bold transition-all flex flex-col items-center justify-center gap-1"
+            className="py-3 rounded-2xl bg-[#1a202c]/90 hover:bg-[#252a30] active:scale-95 border border-white/10 text-white font-mono text-xs font-bold transition-all flex flex-col items-center justify-center gap-1"
           >
             <Save className="w-3.5 h-3.5 text-emerald-400" />
             <span>SAVE</span>
@@ -775,7 +775,7 @@ export const QuickActionsGrid: React.FC<QuickActionsGridProps> = ({
 
           <button
             onClick={() => trigger('FIND', activePlatform === 'macos' ? 'FIND (CMD+F)' : 'FIND (CTRL+F)')}
-            className="py-3 rounded-2xl bg-[#1c2024] hover:bg-[#252a30] active:scale-95 border border-white/10 text-white font-mono text-xs font-bold transition-all flex flex-col items-center justify-center gap-1"
+            className="py-3 rounded-2xl bg-[#1a202c]/90 hover:bg-[#252a30] active:scale-95 border border-white/10 text-white font-mono text-xs font-bold transition-all flex flex-col items-center justify-center gap-1"
           >
             <Search className="w-3.5 h-3.5 text-blue-400" />
             <span>FIND</span>

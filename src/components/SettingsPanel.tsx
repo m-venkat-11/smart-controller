@@ -29,7 +29,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
   return (
     <div className="max-w-3xl mx-auto p-3 sm:p-6 space-y-6">
       {/* Title */}
-      <div className="flex items-center justify-between px-4 py-2.5 rounded-2xl bg-[#121417] border border-white/10">
+      <div className="flex items-center justify-between px-4 py-2.5 rounded-2xl nothing-card-subtle">
         <div className="flex items-center gap-2">
           <Sliders className="w-4 h-4 text-white" />
           <span className="font-dot text-xs text-white tracking-wider">TOUCH & GESTURE PREFERENCES</span>
@@ -48,7 +48,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
         </button>
       </div>
 
-      <div className="rounded-[32px] bg-[#111315] border border-white/10 p-6 space-y-6">
+      <div className="rounded-[32px] nothing-card p-6 space-y-6">
         {/* Pointer Sensitivity Slider */}
         <div className="space-y-3 pb-6 border-b border-white/10">
           <div className="flex items-center justify-between">

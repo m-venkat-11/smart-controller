@@ -296,7 +296,42 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#08090a] text-[#f5f6f8]">
+    <div className="relative min-h-screen flex flex-col nothing-canvas-bg text-[#f5f6f8] overflow-x-hidden">
+      {/* Background Micro-Dot Grid Layer */}
+      <div 
+        className="fixed inset-0 pointer-events-none z-0 nothing-grid-overlay opacity-90" 
+      />
+
+      {/* Atmospheric Nothing Hardware Ambient Lighting Effects */}
+      <div className="fixed top-0 left-1/2 -translate-x-1/2 w-[850px] h-[360px] bg-gradient-to-b from-[#eb0029]/14 via-[#eb0029]/2 to-transparent blur-3xl pointer-events-none z-0" />
+      <div className="fixed -bottom-24 -right-24 w-[500px] h-[500px] bg-emerald-500/8 blur-3xl pointer-events-none z-0" />
+      <div className="fixed top-1/3 -left-32 w-[450px] h-[450px] bg-blue-500/6 blur-3xl pointer-events-none z-0" />
+
+      {/* Nothing Phone Transparent Charging Coil Architectural Silhouette */}
+      <div className="fixed inset-0 pointer-events-none z-0 select-none overflow-hidden opacity-[0.07] flex items-center justify-center">
+        <div className="w-[620px] h-[620px] rounded-full border-[3px] border-white flex items-center justify-center">
+          <div className="w-[490px] h-[490px] rounded-full border border-dashed border-white flex items-center justify-center">
+            <div className="w-[360px] h-[360px] rounded-full border-[2px] border-white flex items-center justify-center">
+              <div className="w-[220px] h-[220px] rounded-full border border-dashed border-white" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Structural Corner Registration Crosshairs & Silkscreen Markings */}
+      <div className="fixed top-24 left-4 z-0 pointer-events-none select-none font-mono text-[9px] text-white/30 tracking-widest hidden md:block">
+        + LOC: 01.A // UCP-CORE
+      </div>
+      <div className="fixed top-24 right-4 z-0 pointer-events-none select-none font-mono text-[9px] text-white/30 tracking-widest hidden md:block">
+        FREQ: 2.4/5GHz // +
+      </div>
+      <div className="fixed bottom-12 left-4 z-0 pointer-events-none select-none font-mono text-[9px] text-white/30 tracking-widest hidden md:block">
+        + CHASSIS: A065
+      </div>
+      <div className="fixed bottom-12 right-4 z-0 pointer-events-none select-none font-mono text-[9px] text-white/30 tracking-widest hidden md:block">
+        NOTHING OS // +
+      </div>
+
       {/* Top Header & Connection Bar with Dynamic OS State */}
       <ConsoleHeader
         connectionState={connectionState}
@@ -311,7 +346,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
       />
 
       {/* Main Working Interface with compact mobile breathing space */}
-      <main className="flex-1 flex flex-col p-1.5 sm:p-4 mt-1 sm:mt-3 max-w-7xl mx-auto w-full">
+      <main className="relative z-10 flex-1 flex flex-col p-1.5 sm:p-4 mt-1 sm:mt-3 max-w-7xl mx-auto w-full">
         {activeTab === 'touchpad' && (
           <TouchpadSurface
             onPointerMove={handlePointerMove}

@@ -328,14 +328,14 @@ export const TouchpadSurface: React.FC<TouchpadSurfaceProps> = ({
   return (
     <div className="flex flex-col h-full w-full max-w-4xl mx-auto space-y-2 sm:space-y-3 p-1 sm:p-4 select-none">
       {/* HUD Bar above Touchpad */}
-      <div className="flex items-center justify-between px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-xl sm:rounded-2xl bg-[#111315]/80 border border-white/10 backdrop-blur-md">
+      <div className="flex items-center justify-between px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-xl sm:rounded-2xl nothing-card">
         <div className="flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-[#eb0029] animate-pulse"></div>
+          <div className="w-2 h-2 rounded-full bg-[#eb0029] animate-pulse shadow-[0_0_8px_#eb0029]"></div>
           <span className="font-dot text-xs font-bold text-white tracking-widest uppercase">
             {currentGesture}
           </span>
           {/* Authentic Nothing Glyph Interface Light Indicator */}
-          <div className="hidden xs:flex items-center gap-1 px-2 py-0.5 rounded-full bg-black/60 border border-white/10" title="Nothing Glyph Interface Status">
+          <div className="hidden xs:flex items-center gap-1 px-2 py-0.5 rounded-full bg-black/60 border border-white/15" title="Nothing Glyph Interface Status">
             <span className={`w-2.5 h-1 rounded-full transition-all duration-150 ${
               currentGesture !== 'READY' ? 'bg-white shadow-[0_0_8px_#ffffff]' : 'bg-white/20'
             }`} />
@@ -349,24 +349,24 @@ export const TouchpadSurface: React.FC<TouchpadSurfaceProps> = ({
         </div>
 
         {/* Dynamic Gestures Helper */}
-        <div className="hidden sm:flex items-center gap-2 font-mono text-[10px] text-zinc-400">
-          <span className="px-2 py-0.5 rounded-full bg-white/5 border border-white/5">1-Tap: Left</span>
-          <span className="px-2 py-0.5 rounded-full bg-white/5 border border-white/5">2-Tap: Right</span>
-          <span className="px-2 py-0.5 rounded-full bg-white/5 border border-white/5">2-Drag: Scroll</span>
-          <span className="px-2 py-0.5 rounded-full bg-white/5 border border-white/5">3-Swipe: Desktop</span>
+        <div className="hidden sm:flex items-center gap-2 font-mono text-[10px] text-zinc-300">
+          <span className="px-2 py-0.5 rounded-full bg-white/10 border border-white/10">1-Tap: Left</span>
+          <span className="px-2 py-0.5 rounded-full bg-white/10 border border-white/10">2-Tap: Right</span>
+          <span className="px-2 py-0.5 rounded-full bg-white/10 border border-white/10">2-Drag: Scroll</span>
+          <span className="px-2 py-0.5 rounded-full bg-white/10 border border-white/10">3-Swipe: Desktop</span>
         </div>
 
         {/* Live Packet Counter & Cursor Position */}
         <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1.5 font-mono text-[10px] text-[#00e575] bg-[#00e575]/10 px-2 py-0.5 rounded-full border border-[#00e575]/20">
+          <div className="flex items-center gap-1.5 font-mono text-[10px] text-[#00e575] bg-[#00e575]/15 px-2 py-0.5 rounded-full border border-[#00e575]/30">
             <span className="w-1.5 h-1.5 rounded-full bg-[#00e575] animate-ping"></span>
             <span>TX {txCount}</span>
           </div>
 
-          <div className="flex items-center gap-1.5 font-mono text-[10px] text-zinc-300 bg-white/5 px-2.5 py-1 rounded-full border border-white/10">
+          <div className="flex items-center gap-1.5 font-mono text-[10px] text-zinc-200 bg-white/10 px-2.5 py-1 rounded-full border border-white/15">
             <MousePointer className="w-3 h-3 text-[#eb0029]" />
             <span>{Math.round(cursorPosPreview.x)}%</span>
-            <span className="text-zinc-600">|</span>
+            <span className="text-zinc-500">|</span>
             <span>{Math.round(cursorPosPreview.y)}%</span>
           </div>
         </div>
@@ -387,25 +387,25 @@ export const TouchpadSurface: React.FC<TouchpadSurfaceProps> = ({
             ? 'card-radiant-blue'
             : surfaceTheme === 'purple'
             ? 'card-radiant-purple'
-            : 'bg-[#121417] border-white/10'
+            : 'bg-gradient-to-b from-[#191f2c] via-[#121620] to-[#0a0d13] border-2 border-white/20 shadow-[0_16px_48px_rgba(0,0,0,0.85),inset_0_1px_2px_rgba(255,255,255,0.25)]'
         }`}
         style={{
           touchAction: 'none',
           backgroundImage:
-            'radial-gradient(rgba(255, 255, 255, 0.12) 1.5px, transparent 1.5px)',
-          backgroundSize: '20px 20px',
+            'radial-gradient(rgba(255, 255, 255, 0.22) 1.5px, transparent 1.5px)',
+          backgroundSize: '18px 18px',
         }}
       >
         {/* Authentic Nothing OS Phone Transparent Back Graphic & Charging Coil Watermark */}
-        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none select-none opacity-20">
-          <div className="relative w-40 h-40 rounded-full border border-dashed border-white/40 flex items-center justify-center">
-            <div className="w-28 h-28 rounded-full border border-white/30 flex items-center justify-center">
-              <div className="w-16 h-16 rounded-full border-2 border-white/50 flex items-center justify-center">
-                <div className="w-5 h-5 rounded-full bg-[#eb0029] shadow-[0_0_12px_#eb0029]"></div>
+        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none select-none opacity-35">
+          <div className="relative w-44 h-44 rounded-full border-2 border-dashed border-white/40 flex items-center justify-center">
+            <div className="w-32 h-32 rounded-full border border-white/30 flex items-center justify-center">
+              <div className="w-18 h-18 rounded-full border-2 border-white/60 flex items-center justify-center">
+                <div className="w-6 h-6 rounded-full bg-[#eb0029] shadow-[0_0_14px_#eb0029]"></div>
               </div>
             </div>
             {/* Red recording LED indicator */}
-            <span className="absolute top-2 right-6 w-2 h-2 rounded-full bg-[#eb0029]"></span>
+            <span className="absolute top-2 right-6 w-2.5 h-2.5 rounded-full bg-[#eb0029] shadow-[0_0_8px_#eb0029]"></span>
           </div>
 
           <span className="font-dot text-base font-bold tracking-[0.25em] text-white mt-3">GLYPHPAD (01)</span>
@@ -415,10 +415,10 @@ export const TouchpadSurface: React.FC<TouchpadSurfaceProps> = ({
         </div>
 
         {/* Industrial Corner Crosshair Markers */}
-        <div className="absolute top-3 left-3 text-white/30 font-mono text-xs pointer-events-none">+</div>
-        <div className="absolute top-3 right-3 text-white/30 font-mono text-xs pointer-events-none">+</div>
-        <div className="absolute bottom-3 left-3 text-white/30 font-mono text-xs pointer-events-none">+</div>
-        <div className="absolute bottom-3 right-3 text-white/30 font-mono text-xs pointer-events-none">+</div>
+        <div className="absolute top-3 left-3 text-white/50 font-mono text-xs pointer-events-none">+</div>
+        <div className="absolute top-3 right-3 text-white/50 font-mono text-xs pointer-events-none">+</div>
+        <div className="absolute bottom-3 left-3 text-white/50 font-mono text-xs pointer-events-none">+</div>
+        <div className="absolute bottom-3 right-3 text-white/50 font-mono text-xs pointer-events-none">+</div>
 
         {/* Visual Touch Points Ripple Follower */}
         {activeTouches.map((touch) => (
@@ -454,7 +454,7 @@ export const TouchpadSurface: React.FC<TouchpadSurfaceProps> = ({
             setCurrentGesture('LEFT CLICK');
             vibrate(20);
           }}
-          className="col-span-2 py-2.5 sm:py-4 rounded-xl sm:rounded-2xl bg-[#1c2024] hover:bg-[#252a30] active:bg-[#eb0029] text-white border border-white/10 active:border-[#eb0029] font-dot text-xs sm:text-sm font-bold tracking-wider transition-all shadow-md active:scale-95 flex items-center justify-center gap-2"
+          className="col-span-2 py-2.5 sm:py-4 rounded-xl sm:rounded-2xl nothing-card hover:bg-[#222a3a] active:bg-[#eb0029] text-white border border-white/15 active:border-[#eb0029] font-dot text-xs sm:text-sm font-bold tracking-wider transition-all shadow-md active:scale-95 flex items-center justify-center gap-2"
         >
           <span>LEFT CLICK</span>
         </button>
@@ -466,7 +466,7 @@ export const TouchpadSurface: React.FC<TouchpadSurfaceProps> = ({
             setCurrentGesture('MIDDLE CLICK');
             vibrate(20);
           }}
-          className="col-span-1 py-2.5 sm:py-4 rounded-xl sm:rounded-2xl bg-[#14171a] hover:bg-[#1c2024] active:bg-white active:text-black text-zinc-300 border border-white/10 font-dot text-[11px] sm:text-xs font-bold tracking-wider transition-all shadow-md active:scale-95 flex items-center justify-center"
+          className="py-2.5 sm:py-4 rounded-xl sm:rounded-2xl nothing-card hover:bg-[#222a3a] active:bg-[#eb0029] text-white border border-white/15 active:border-[#eb0029] font-dot text-xs sm:text-sm font-bold tracking-wider transition-all shadow-md active:scale-95 flex items-center justify-center"
         >
           <span>MIDDLE</span>
         </button>
@@ -476,9 +476,9 @@ export const TouchpadSurface: React.FC<TouchpadSurfaceProps> = ({
             nothingAudio.playClick('sharp');
             onClick('RIGHT');
             setCurrentGesture('RIGHT CLICK');
-            vibrate(25);
+            vibrate(20);
           }}
-          className="col-span-1 py-2.5 sm:py-4 rounded-xl sm:rounded-2xl bg-[#1c2024] hover:bg-[#252a30] active:bg-[#eb0029] text-white border border-white/10 active:border-[#eb0029] font-dot text-xs sm:text-sm font-bold tracking-wider transition-all shadow-md active:scale-95 flex items-center justify-center"
+          className="py-2.5 sm:py-4 rounded-xl sm:rounded-2xl nothing-card hover:bg-[#222a3a] active:bg-[#eb0029] text-white border border-white/15 active:border-[#eb0029] font-dot text-xs sm:text-sm font-bold tracking-wider transition-all shadow-md active:scale-95 flex items-center justify-center"
         >
           <span>RIGHT</span>
         </button>
