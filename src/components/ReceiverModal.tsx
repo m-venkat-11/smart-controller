@@ -43,7 +43,7 @@ export const ReceiverModal: React.FC<ReceiverModalProps> = ({
           </div>
           <div>
             <h3 className="font-dot text-base font-bold text-white tracking-wider">CONNECT TO WINDOWS PC</h3>
-            <p className="font-mono text-xs text-zinc-400">Universal Control Protocol (UCP v1.0) Bridge</p>
+            <p className="font-mono text-xs text-zinc-400">Universal Control Protocol (UCP v2.0) Bridge</p>
           </div>
         </div>
 

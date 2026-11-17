@@ -202,6 +202,19 @@ export const ConsoleHeader: React.FC<ConsoleHeaderProps> = ({
             <span className="font-dot font-semibold">GET (.ZIP)</span>
           </a>
 
+          {/* Quick Settings Button */}
+          <button
+            onClick={() => setActiveTab('settings')}
+            className={`p-1.5 rounded-lg border transition-all ${
+              activeTab === 'settings'
+                ? 'bg-amber-400 text-black border-amber-400 shadow-[0_0_12px_rgba(251,191,36,0.6)] font-bold'
+                : 'bg-white/10 hover:bg-amber-400/20 text-zinc-300 hover:text-amber-300 border-white/15'
+            }`}
+            title="Touchpad Settings & Customization"
+          >
+            <Settings className="w-3.5 h-3.5" />
+          </button>
+
           {/* Fullscreen Toggle */}
           <button
             onClick={toggleFullscreen}

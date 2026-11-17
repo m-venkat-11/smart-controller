@@ -140,7 +140,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPage, onNavigate }) => {
           <div className="pt-2 border-t border-white/10 flex items-center justify-between text-xs font-mono text-zinc-400">
             <span className="flex items-center gap-1.5 text-aura-green">
               <span className="w-1.5 h-1.5 rounded-full bg-aura-green animate-pulse"></span>
-              <span>UCP v1.0 ONLINE</span>
+              <span>UCP v2.0 ONLINE</span>
             </span>
             <span className="font-dot text-[11px] text-zinc-500">GLYPHPAD (1)</span>
           </div>

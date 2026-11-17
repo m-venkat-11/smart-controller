@@ -396,7 +396,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                 <span className="uppercase">UNIVERSAL CROSS-PLATFORM • {activePlatform} ACTIVE</span>
               </span>
               <span>•</span>
-              <span>UCP v1.0 PROTOCOL</span>
+              <span>UCP v2.0 PROTOCOL</span>
             </div>
 
             <div className="flex items-center gap-4">

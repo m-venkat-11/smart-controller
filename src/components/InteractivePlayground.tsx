@@ -156,7 +156,7 @@ export const InteractivePlayground: React.FC = () => {
           <div>
             <div className="flex items-center gap-2">
               <span className="font-dot text-sm text-rose-400 tracking-widest">LIVE PROTOCOL SANDBOX</span>
-              <span className="px-2 py-0.5 rounded-full bg-white/10 text-[10px] font-mono text-zinc-300">UCP v1.0</span>
+              <span className="px-2 py-0.5 rounded-full bg-white/10 text-[10px] font-mono text-zinc-300">UCP v2.0</span>
             </div>
             <h1 className="text-2xl sm:text-4xl font-extrabold text-white mt-1">Interactive Touchpad Simulator</h1>
             <p className="text-xs sm:text-sm text-zinc-400 font-sans mt-0.5">

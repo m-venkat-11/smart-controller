@@ -30,7 +30,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
             <div className="flex flex-wrap items-center gap-3 pt-2">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] border border-white/10 text-xs font-mono text-zinc-300">
                 <span className="w-2 h-2 rounded-full bg-aura-green"></span>
-                <span>UCP v1.0 • TLS 1.3</span>
+                <span>UCP v2.0 • TLS 1.3</span>
               </div>
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] border border-white/10 text-xs font-mono text-zinc-300">
                 <Shield className="w-3.5 h-3.5 text-aura-cyan" />
