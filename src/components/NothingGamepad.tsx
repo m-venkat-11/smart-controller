@@ -1,6 +1,7 @@
 import React from 'react';
 import { DotMatrixDisplay } from './DotMatrixDisplay';
 import { ArrowUp, ArrowDown, ArrowLeft, ArrowRight, Play, Square, Circle } from 'lucide-react';
+import { nothingAudio } from '../utils/audioFeedback';
 
 interface NothingGamepadProps {
   onSendKey: (key: string) => void;
@@ -20,6 +21,7 @@ export const NothingGamepad: React.FC<NothingGamepadProps> = ({
   };
 
   const handlePress = (key: string) => {
+    nothingAudio.playClick('sharp');
     onSendKey(key);
     vibrate(20);
   };

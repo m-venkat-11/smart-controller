@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { MousePointer, Lock, Unlock, Hand, RefreshCw } from 'lucide-react';
 import { DotMatrixDisplay } from './DotMatrixDisplay';
+import { nothingAudio } from '../utils/audioFeedback';
 
 interface TouchpadSurfaceProps {
   onPointerMove: (dx: number, dy: number) => void;
@@ -290,6 +291,18 @@ export const TouchpadSurface: React.FC<TouchpadSurfaceProps> = ({
           <span className="font-dot text-xs font-bold text-white tracking-widest uppercase">
             {currentGesture}
           </span>
+          {/* Authentic Nothing Glyph Interface Light Indicator */}
+          <div className="hidden xs:flex items-center gap-1 px-2 py-0.5 rounded-full bg-black/60 border border-white/10" title="Nothing Glyph Interface Status">
+            <span className={`w-2.5 h-1 rounded-full transition-all duration-150 ${
+              currentGesture !== 'READY' ? 'bg-white shadow-[0_0_8px_#ffffff]' : 'bg-white/20'
+            }`} />
+            <span className={`w-1.5 h-1 -skew-x-12 rounded-full transition-all duration-150 ${
+              currentGesture !== 'READY' ? 'bg-[#eb0029] shadow-[0_0_8px_#eb0029]' : 'bg-[#eb0029]/30'
+            }`} />
+            <span className={`w-3 h-1 rounded-full transition-all duration-150 ${
+              currentGesture !== 'READY' ? 'bg-white shadow-[0_0_8px_#ffffff]' : 'bg-white/20'
+            }`} />
+          </div>
         </div>
 
         {/* Dynamic Gestures Helper */}
@@ -340,14 +353,29 @@ export const TouchpadSurface: React.FC<TouchpadSurfaceProps> = ({
           backgroundSize: '20px 20px',
         }}
       >
-        {/* Subtle Watermark Branding */}
-        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none opacity-20">
-          <div className="w-16 h-16 rounded-full border border-white/40 flex items-center justify-center mb-3">
-            <div className="w-6 h-6 rounded-full bg-[#eb0029]"></div>
+        {/* Authentic Nothing OS Phone Transparent Back Graphic & Charging Coil Watermark */}
+        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none select-none opacity-20">
+          <div className="relative w-40 h-40 rounded-full border border-dashed border-white/40 flex items-center justify-center">
+            <div className="w-28 h-28 rounded-full border border-white/30 flex items-center justify-center">
+              <div className="w-16 h-16 rounded-full border-2 border-white/50 flex items-center justify-center">
+                <div className="w-5 h-5 rounded-full bg-[#eb0029] shadow-[0_0_12px_#eb0029]"></div>
+              </div>
+            </div>
+            {/* Red recording LED indicator */}
+            <span className="absolute top-2 right-6 w-2 h-2 rounded-full bg-[#eb0029]"></span>
           </div>
-          <span className="font-dot text-lg font-bold tracking-[0.25em] text-white">GLYPHPAD</span>
-          <span className="font-mono text-xs text-zinc-300 mt-1">TOUCH SURFACE</span>
+
+          <span className="font-dot text-base font-bold tracking-[0.25em] text-white mt-3">GLYPHPAD (01)</span>
+          <span className="font-mono text-[9px] tracking-widest text-zinc-300 mt-0.5 uppercase">
+            MODEL: A065 • UCP v2.0 SURFACE
+          </span>
         </div>
+
+        {/* Industrial Corner Crosshair Markers */}
+        <div className="absolute top-3 left-3 text-white/30 font-mono text-xs pointer-events-none">+</div>
+        <div className="absolute top-3 right-3 text-white/30 font-mono text-xs pointer-events-none">+</div>
+        <div className="absolute bottom-3 left-3 text-white/30 font-mono text-xs pointer-events-none">+</div>
+        <div className="absolute bottom-3 right-3 text-white/30 font-mono text-xs pointer-events-none">+</div>
 
         {/* Visual Touch Points Ripple Follower */}
         {activeTouches.map((touch) => (
@@ -378,6 +406,7 @@ export const TouchpadSurface: React.FC<TouchpadSurfaceProps> = ({
       <div className="grid grid-cols-4 gap-2 sm:gap-2.5 pt-0.5 sm:pt-1">
         <button
           onClick={() => {
+            nothingAudio.playClick('sharp');
             onClick('LEFT');
             setCurrentGesture('LEFT CLICK');
             vibrate(20);
@@ -389,6 +418,7 @@ export const TouchpadSurface: React.FC<TouchpadSurfaceProps> = ({
 
         <button
           onClick={() => {
+            nothingAudio.playClick('sharp');
             onClick('MIDDLE');
             setCurrentGesture('MIDDLE CLICK');
             vibrate(20);
@@ -400,6 +430,7 @@ export const TouchpadSurface: React.FC<TouchpadSurfaceProps> = ({
 
         <button
           onClick={() => {
+            nothingAudio.playClick('sharp');
             onClick('RIGHT');
             setCurrentGesture('RIGHT CLICK');
             vibrate(25);
@@ -414,6 +445,7 @@ export const TouchpadSurface: React.FC<TouchpadSurfaceProps> = ({
       <div className="flex items-center justify-between gap-2 px-1">
         <button
           onClick={() => {
+            nothingAudio.playClick('pop');
             setDragLock(!dragLock);
             vibrate(30);
           }}
@@ -429,6 +461,7 @@ export const TouchpadSurface: React.FC<TouchpadSurfaceProps> = ({
 
         <button
           onClick={() => {
+            nothingAudio.playClick('light');
             onAction('SHOW_DESKTOP');
             vibrate(25);
           }}
@@ -439,6 +472,7 @@ export const TouchpadSurface: React.FC<TouchpadSurfaceProps> = ({
 
         <button
           onClick={() => {
+            nothingAudio.playClick('light');
             onAction('TASK_MANAGER');
             vibrate(25);
           }}
@@ -446,6 +480,14 @@ export const TouchpadSurface: React.FC<TouchpadSurfaceProps> = ({
         >
           TASK MGR
         </button>
+      </div>
+
+      {/* Nothing OS Industrial Hardware Specs Tape Strip */}
+      <div className="flex flex-wrap items-center justify-between gap-2 px-3 py-1.5 rounded-xl bg-black/40 border border-white/5 text-[9px] font-mono text-zinc-500 uppercase tracking-widest">
+        <span>[CHASSIS: NOTHING-01]</span>
+        <span>[TOUCH ENGINE: 120HZ]</span>
+        <span>[CRYPT: AES-256]</span>
+        <span>[PROTOCOL: UCP v2.0]</span>
       </div>
     </div>
   );

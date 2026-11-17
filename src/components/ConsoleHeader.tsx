@@ -2,21 +2,14 @@ import React, { useState } from 'react';
 import {
   Wifi,
   WifiOff,
-  Laptop,
   Settings,
-  Terminal,
-  Shield,
-  RefreshCw,
   Maximize2,
   Minimize2,
-  Sparkles,
-  Smartphone,
   Download,
-  BookOpen,
 } from 'lucide-react';
-import { DotMatrixDisplay } from './DotMatrixDisplay';
 import { ConnectionState } from '../core/protocol/types';
-import { PlatformType, PLATFORM_INFO } from '../core/protocol/dynamicActions';
+import { PlatformType } from '../core/protocol/dynamicActions';
+import { nothingAudio } from '../utils/audioFeedback';
 
 interface ConsoleHeaderProps {
   connectionState: ConnectionState;
@@ -44,11 +37,17 @@ export const ConsoleHeader: React.FC<ConsoleHeaderProps> = ({
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   const toggleFullscreen = () => {
+    nothingAudio.playClick('sharp');
     if (!document.fullscreenElement) {
       document.documentElement.requestFullscreen().then(() => setIsFullscreen(true)).catch(() => {});
     } else {
       document.exitFullscreen().then(() => setIsFullscreen(false)).catch(() => {});
     }
+  };
+
+  const switchTab = (tab: 'touchpad' | 'actions' | 'keyboard' | 'gamepad' | 'diagnostics' | 'settings') => {
+    nothingAudio.playClick('pop');
+    setActiveTab(tab);
   };
 
   const getPlatformIcon = () => {
@@ -58,7 +57,13 @@ export const ConsoleHeader: React.FC<ConsoleHeaderProps> = ({
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-[#131722]/98 backdrop-blur-3xl border-b-2 border-[#eb0029] shadow-[0_4px_25px_rgba(0,0,0,0.8),0_2px_10px_rgba(235,0,41,0.25)] transition-all">
+    <header
+      className="sticky top-0 z-50 w-full bg-[#1e2330]/95 backdrop-blur-2xl border-t border-white/20 border-b-2 border-[#eb0029] shadow-[0_6px_28px_rgba(0,0,0,0.7),0_2px_14px_rgba(235,0,41,0.35)] transition-all"
+      style={{
+        backgroundImage: 'radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px)',
+        backgroundSize: '10px 10px',
+      }}
+    >
       <div className="max-w-7xl mx-auto px-2.5 sm:px-4 lg:px-6 py-1.5 sm:py-2 lg:py-2.5 flex flex-col lg:flex-row items-center justify-between gap-1.5 sm:gap-2 lg:gap-4">
         {/* ROW 1 ON MOBILE / LEFT SECTION ON DESKTOP */}
         <div className="flex items-center justify-between w-full lg:w-auto gap-2 lg:gap-3">
@@ -123,7 +128,7 @@ export const ConsoleHeader: React.FC<ConsoleHeaderProps> = ({
 
             {/* Mobile Settings Icon */}
             <button
-              onClick={() => setActiveTab('settings')}
+              onClick={() => switchTab('settings')}
               className={`p-1 rounded-lg border transition-all ${
                 activeTab === 'settings'
                   ? 'bg-amber-400 text-black border-amber-400 shadow-[0_0_10px_rgba(251,191,36,0.6)] font-bold'
@@ -148,7 +153,7 @@ export const ConsoleHeader: React.FC<ConsoleHeaderProps> = ({
         {/* CENTER / ROW 2: Slim High-Contrast Mode Dock */}
         <nav className="w-full lg:w-auto flex items-center justify-start lg:justify-center gap-1 p-0.5 sm:p-1 rounded-xl bg-black/70 border border-white/15 overflow-x-auto scrollbar-none shadow-inner">
           <button
-            onClick={() => setActiveTab('touchpad')}
+            onClick={() => switchTab('touchpad')}
             className={`px-2.5 sm:px-3 py-1 rounded-lg font-dot text-[11px] sm:text-xs font-bold transition-all whitespace-nowrap ${
               activeTab === 'touchpad'
                 ? 'bg-white text-black shadow-[0_0_12px_rgba(255,255,255,0.45)] scale-100'
@@ -159,7 +164,7 @@ export const ConsoleHeader: React.FC<ConsoleHeaderProps> = ({
           </button>
 
           <button
-            onClick={() => setActiveTab('actions')}
+            onClick={() => switchTab('actions')}
             className={`px-2.5 sm:px-3 py-1 rounded-lg font-dot text-[11px] sm:text-xs font-bold transition-all whitespace-nowrap ${
               activeTab === 'actions'
                 ? 'bg-[#eb0029] text-white shadow-[0_0_12px_rgba(235,0,41,0.5)]'
@@ -170,7 +175,7 @@ export const ConsoleHeader: React.FC<ConsoleHeaderProps> = ({
           </button>
 
           <button
-            onClick={() => setActiveTab('keyboard')}
+            onClick={() => switchTab('keyboard')}
             className={`px-2.5 sm:px-3 py-1 rounded-lg font-dot text-[11px] sm:text-xs font-bold transition-all whitespace-nowrap ${
               activeTab === 'keyboard'
                 ? 'bg-sky-500 text-black shadow-[0_0_12px_rgba(14,165,233,0.45)]'
@@ -181,7 +186,7 @@ export const ConsoleHeader: React.FC<ConsoleHeaderProps> = ({
           </button>
 
           <button
-            onClick={() => setActiveTab('gamepad')}
+            onClick={() => switchTab('gamepad')}
             className={`px-2.5 sm:px-3 py-1 rounded-lg font-dot text-[11px] sm:text-xs font-bold transition-all whitespace-nowrap ${
               activeTab === 'gamepad'
                 ? 'bg-purple-500 text-white shadow-[0_0_12px_rgba(168,85,247,0.45)]'
@@ -192,7 +197,7 @@ export const ConsoleHeader: React.FC<ConsoleHeaderProps> = ({
           </button>
 
           <button
-            onClick={() => setActiveTab('diagnostics')}
+            onClick={() => switchTab('diagnostics')}
             className={`px-2.5 sm:px-3 py-1 rounded-lg font-dot text-[11px] sm:text-xs font-bold transition-all whitespace-nowrap ${
               activeTab === 'diagnostics'
                 ? 'bg-emerald-500 text-black shadow-[0_0_12px_rgba(16,185,129,0.45)]'
@@ -204,7 +209,7 @@ export const ConsoleHeader: React.FC<ConsoleHeaderProps> = ({
 
           {/* Prominent SETTINGS tab */}
           <button
-            onClick={() => setActiveTab('settings')}
+            onClick={() => switchTab('settings')}
             className={`px-2.5 sm:px-3 py-1 rounded-lg font-dot text-[11px] sm:text-xs font-bold flex items-center gap-1 transition-all whitespace-nowrap ${
               activeTab === 'settings'
                 ? 'bg-amber-400 text-black shadow-[0_0_12px_rgba(251,191,36,0.6)] font-bold'
@@ -254,7 +259,7 @@ export const ConsoleHeader: React.FC<ConsoleHeaderProps> = ({
 
           {/* Quick Settings Icon */}
           <button
-            onClick={() => setActiveTab('settings')}
+            onClick={() => switchTab('settings')}
             className={`p-1.5 rounded-lg border transition-all ${
               activeTab === 'settings'
                 ? 'bg-amber-400 text-black border-amber-400 shadow-[0_0_12px_rgba(251,191,36,0.6)] font-bold'

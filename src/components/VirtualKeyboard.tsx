@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Send, CornerDownLeft, Delete, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, Sparkles, Key } from 'lucide-react';
 import { PlatformType, PLATFORM_INFO } from '../core/protocol/dynamicActions';
+import { nothingAudio } from '../utils/audioFeedback';
 
 interface VirtualKeyboardProps {
   onTypeText: (text: string) => void;
@@ -29,6 +30,7 @@ export const VirtualKeyboard: React.FC<VirtualKeyboardProps> = ({
   const handleSendText = (e: React.FormEvent) => {
     e.preventDefault();
     if (!inputText) return;
+    nothingAudio.playClick('pop');
     onTypeText(inputText);
     setLastDispatched(`"${inputText}"`);
     setInputText('');
@@ -37,6 +39,7 @@ export const VirtualKeyboard: React.FC<VirtualKeyboardProps> = ({
   };
 
   const handleKeyClick = (key: string, label?: string) => {
+    nothingAudio.playClick('sharp');
     onSendKey(key);
     setLastDispatched(label || key);
     vibrate(15);

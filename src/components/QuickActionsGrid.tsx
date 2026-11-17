@@ -46,6 +46,7 @@ import {
 } from 'lucide-react';
 import { DotMatrixDisplay } from './DotMatrixDisplay';
 import { PlatformType, PLATFORM_INFO } from '../core/protocol/dynamicActions';
+import { nothingAudio } from '../utils/audioFeedback';
 
 interface QuickActionsGridProps {
   onAction: (action: string) => void;
@@ -81,6 +82,7 @@ export const QuickActionsGrid: React.FC<QuickActionsGridProps> = ({
   };
 
   const trigger = (action: string, label: string) => {
+    nothingAudio.playClick('light');
     onAction(action);
     setActiveFeedback(label);
     vibrate(25);
