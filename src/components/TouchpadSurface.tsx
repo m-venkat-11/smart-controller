@@ -59,6 +59,10 @@ export const TouchpadSurface: React.FC<TouchpadSurfaceProps> = ({
   });
 
   const lastTapRef = useRef<number>(0);
+  const pendingDeltaRef = useRef({ dx: 0, dy: 0 });
+  const pendingScrollRef = useRef({ deltaY: 0, deltaX: 0 });
+  const rafIdRef = useRef<number | null>(null);
+  const lastHudUpdateRef = useRef<number>(0);
 
   const vibrate = (ms: number = 20) => {
     if (hapticEnabled && typeof window !== 'undefined' && 'vibrate' in navigator) {
@@ -105,40 +109,54 @@ export const TouchpadSurface: React.FC<TouchpadSurfaceProps> = ({
 
     const onTouchMove = (e: TouchEvent) => {
       e.preventDefault();
-      const touches = Array.from(e.touches).map((t) => ({
-        id: t.identifier,
-        x: t.clientX,
-        y: t.clientY,
-      }));
-      setActiveTouches(touches);
-
       const state = touchStartRef.current;
+
       if (e.touches.length === 1) {
         const current = e.touches[0];
         const rawDx = current.clientX - state.lastX;
         const rawDy = current.clientY - state.lastY;
 
-        // Pointer acceleration & base 1.8x mobile-to-desktop scale
+        // Dynamic pointer acceleration curve
         const speed = Math.hypot(rawDx, rawDy);
-        const accel = speed > 10 ? 1.5 : (speed > 5 ? 1.25 : 1.0);
-        const dx = rawDx * sensitivity * accel * 1.8;
-        const dy = rawDy * sensitivity * accel * 1.8;
+        const accel = speed > 15 ? 1.7 : speed > 6 ? 1.3 : 1.0;
+        const dx = rawDx * sensitivity * accel * 1.5;
+        const dy = rawDy * sensitivity * accel * 1.5;
 
         if (Math.hypot(current.clientX - state.startX, current.clientY - state.startY) > 3) {
           state.moved = true;
         }
 
-        onPointerMove(dx, dy);
-        setTxCount((c) => c + 1);
-
-        setCursorPosPreview((prev) => ({
-          x: Math.max(5, Math.min(95, prev.x + (dx / 10))),
-          y: Math.max(5, Math.min(95, prev.y + (dy / 10))),
-        }));
+        pendingDeltaRef.current.dx += dx;
+        pendingDeltaRef.current.dy += dy;
 
         state.lastX = current.clientX;
         state.lastY = current.clientY;
-        setCurrentGesture(dragLock ? 'DRAGGING' : 'MOVING');
+
+        // Schedule hardware frame flush via requestAnimationFrame (0ms latency, zero frame drops)
+        if (!rafIdRef.current) {
+          rafIdRef.current = requestAnimationFrame(() => {
+            rafIdRef.current = null;
+            const flushDx = pendingDeltaRef.current.dx;
+            const flushDy = pendingDeltaRef.current.dy;
+            pendingDeltaRef.current.dx = 0;
+            pendingDeltaRef.current.dy = 0;
+
+            if (flushDx !== 0 || flushDy !== 0) {
+              onPointerMove(flushDx, flushDy);
+            }
+
+            const now = performance.now();
+            if (now - lastHudUpdateRef.current > 40) {
+              lastHudUpdateRef.current = now;
+              setTxCount((c) => c + 1);
+              setCursorPosPreview((prev) => ({
+                x: Math.max(5, Math.min(95, prev.x + flushDx * 0.1)),
+                y: Math.max(5, Math.min(95, prev.y + flushDy * 0.1)),
+              }));
+              setCurrentGesture(dragLock ? 'DRAGGING' : 'MOVING');
+            }
+          });
+        }
       } else if (e.touches.length === 2) {
         state.moved = true;
         const current = e.touches[0];
@@ -146,15 +164,30 @@ export const TouchpadSurface: React.FC<TouchpadSurfaceProps> = ({
         const rawDx = current.clientX - state.lastX;
 
         const scrollSign = naturalScroll ? -1 : 1;
-        const deltaY = rawDy * scrollSign * 3.5;
-        const deltaX = rawDx * scrollSign * 3.0;
+        const deltaY = rawDy * scrollSign * 3.0;
+        const deltaX = rawDx * scrollSign * 2.5;
 
-        onScroll(deltaY, deltaX);
-        setTxCount((c) => c + 1);
+        pendingScrollRef.current.deltaY += deltaY;
+        pendingScrollRef.current.deltaX += deltaX;
 
         state.lastX = current.clientX;
         state.lastY = current.clientY;
-        setCurrentGesture('SCROLLING');
+
+        if (!rafIdRef.current) {
+          rafIdRef.current = requestAnimationFrame(() => {
+            rafIdRef.current = null;
+            const sY = pendingScrollRef.current.deltaY;
+            const sX = pendingScrollRef.current.deltaX;
+            pendingScrollRef.current.deltaY = 0;
+            pendingScrollRef.current.deltaX = 0;
+
+            if (sY !== 0 || sX !== 0) {
+              onScroll(sY, sX);
+              setTxCount((c) => c + 1);
+              setCurrentGesture('SCROLLING');
+            }
+          });
+        }
       } else if (e.touches.length === 3) {
         state.moved = true;
         const current = e.touches[0];
@@ -176,6 +209,15 @@ export const TouchpadSurface: React.FC<TouchpadSurfaceProps> = ({
 
     const onTouchEnd = (e: TouchEvent) => {
       e.preventDefault();
+      if (rafIdRef.current) {
+        cancelAnimationFrame(rafIdRef.current);
+        rafIdRef.current = null;
+        if (pendingDeltaRef.current.dx !== 0 || pendingDeltaRef.current.dy !== 0) {
+          onPointerMove(pendingDeltaRef.current.dx, pendingDeltaRef.current.dy);
+          pendingDeltaRef.current.dx = 0;
+          pendingDeltaRef.current.dy = 0;
+        }
+      }
       const remaining = Array.from(e.touches).map((t) => ({
         id: t.identifier,
         x: t.clientX,
@@ -222,6 +264,7 @@ export const TouchpadSurface: React.FC<TouchpadSurfaceProps> = ({
     pad.addEventListener('touchcancel', onTouchEnd, options);
 
     return () => {
+      if (rafIdRef.current) cancelAnimationFrame(rafIdRef.current);
       pad.removeEventListener('touchstart', onTouchStart);
       pad.removeEventListener('touchmove', onTouchMove);
       pad.removeEventListener('touchend', onTouchEnd);

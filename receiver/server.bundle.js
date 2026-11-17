@@ -8680,6 +8680,10 @@ var clientCount = 0;
 wss.on("connection", (ws, req) => {
   clientCount++;
   const clientIp = req.socket.remoteAddress;
+  try {
+    req.socket.setNoDelay(true);
+  } catch (_) {
+  }
   let authenticatedDeviceId = null;
   let isSessionAuthenticated = false;
   console.log(`[Digital Touchpad] Device connected from ${clientIp} (Total active: ${clientCount})`);

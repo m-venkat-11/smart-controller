@@ -186,16 +186,124 @@ namespace GlyphPad {
             }
         }
 
-        public static void ReleaseAll() {
-            MouseUp(MOUSEEVENTF_LEFTUP);
-            MouseUp(MOUSEEVENTF_RIGHTUP);
-            MouseUp(MOUSEEVENTF_MIDDLEUP);
-            INPUT[] inputs = new INPUT[4];
-            inputs[0].type = INPUT_KEYBOARD; inputs[0].ki.wVk = VK_SHIFT; inputs[0].ki.dwFlags = KEYEVENTF_KEYUP;
-            inputs[1].type = INPUT_KEYBOARD; inputs[1].ki.wVk = VK_CONTROL; inputs[1].ki.dwFlags = KEYEVENTF_KEYUP;
-            inputs[2].type = INPUT_KEYBOARD; inputs[2].ki.wVk = VK_MENU; inputs[2].ki.dwFlags = KEYEVENTF_KEYUP;
-            inputs[3].type = INPUT_KEYBOARD; inputs[3].ki.wVk = VK_LWIN; inputs[3].ki.dwFlags = KEYEVENTF_KEYUP;
-            SendInput(4, inputs, InputSize);
+        public static void RunLoop() {
+            try {
+                Console.OutputEncoding = Encoding.UTF8;
+            } catch { }
+
+            Console.Out.WriteLine("INJECTOR_READY");
+            Console.Out.Flush();
+
+            string line;
+            while ((line = Console.ReadLine()) != null) {
+                if (line.Length == 0) continue;
+                try {
+                    int spaceIdx = line.IndexOf(' ');
+                    string cmd = spaceIdx > 0 ? line.Substring(0, spaceIdx).ToUpper() : line.ToUpper();
+                    string args = spaceIdx > 0 ? line.Substring(spaceIdx + 1).Trim() : "";
+
+                    if (cmd == "M") {
+                        int s2 = args.IndexOf(' ');
+                        if (s2 > 0) {
+                            int dx, dy;
+                            if (int.TryParse(args.Substring(0, s2), out dx) &&
+                                int.TryParse(args.Substring(s2 + 1), out dy)) {
+                                Move(dx, dy);
+                            }
+                        }
+                    }
+                    else if (cmd == "LC") {
+                        MouseClick(MOUSEEVENTF_LEFTDOWN, MOUSEEVENTF_LEFTUP);
+                    }
+                    else if (cmd == "LDC") {
+                        DoubleClick();
+                    }
+                    else if (cmd == "RC") {
+                        MouseClick(MOUSEEVENTF_RIGHTDOWN, MOUSEEVENTF_RIGHTUP);
+                    }
+                    else if (cmd == "MC") {
+                        MouseClick(MOUSEEVENTF_MIDDLEDOWN, MOUSEEVENTF_MIDDLEUP);
+                    }
+                    else if (cmd == "LD") {
+                        MouseDown(MOUSEEVENTF_LEFTDOWN);
+                    }
+                    else if (cmd == "LU") {
+                        MouseUp(MOUSEEVENTF_LEFTUP);
+                    }
+                    else if (cmd == "RD") {
+                        MouseDown(MOUSEEVENTF_RIGHTDOWN);
+                    }
+                    else if (cmd == "RU") {
+                        MouseUp(MOUSEEVENTF_RIGHTUP);
+                    }
+                    else if (cmd == "MD") {
+                        MouseDown(MOUSEEVENTF_MIDDLEDOWN);
+                    }
+                    else if (cmd == "MU") {
+                        MouseUp(MOUSEEVENTF_MIDDLEUP);
+                    }
+                    else if (cmd == "S") {
+                        int delta;
+                        if (int.TryParse(args, out delta)) Scroll(delta);
+                    }
+                    else if (cmd == "HS") {
+                        int delta;
+                        if (int.TryParse(args, out delta)) HScroll(delta);
+                    }
+                    else if (cmd == "K") {
+                        ushort vk;
+                        if (ushort.TryParse(args, out vk)) TapKey(vk);
+                    }
+                    else if (cmd == "TEXT") {
+                        if (!string.IsNullOrEmpty(args)) {
+                            byte[] bytes = Convert.FromBase64String(args);
+                            string txt = Encoding.UTF8.GetString(bytes);
+                            TypeString(txt);
+                        }
+                    }
+                    else if (cmd == "RELEASE_ALL") {
+                        ReleaseAll();
+                    }
+                    else if (cmd == "ACTION") {
+                        string act = args.ToUpper();
+                        if (act == "SHOW_DESKTOP") SendChord(VK_LWIN, 0x44); // Win+D
+                        else if (act == "TASK_VIEW") SendChord(VK_LWIN, VK_TAB); // Win+Tab
+                        else if (act == "TASK_MANAGER") SendChord3(VK_CONTROL, VK_SHIFT, VK_ESCAPE); // Ctrl+Shift+Esc
+                        else if (act == "EXPLORER" || act == "FILE_MANAGER") SendChord(VK_LWIN, 0x45); // Win+E
+                        else if (act == "SETTINGS") SendChord(VK_LWIN, 0x49); // Win+I
+                        else if (act == "SEARCH") SendChord(VK_LWIN, 0x53); // Win+S
+                        else if (act == "CLIPBOARD") SendChord(VK_LWIN, 0x56); // Win+V
+                        else if (act == "SCREENSHOT") SendChord3(VK_LWIN, VK_SHIFT, 0x53); // Win+Shift+S
+                        else if (act == "LOCK_PC") LockWorkStation();
+                        else if (act == "TERMINAL") {
+                            try { System.Diagnostics.Process.Start("wt.exe"); } catch { System.Diagnostics.Process.Start("cmd.exe"); }
+                        }
+                        else if (act == "CALCULATOR") {
+                            try { System.Diagnostics.Process.Start("calc.exe"); } catch { }
+                        }
+                        else if (act == "NOTEPAD") {
+                            try { System.Diagnostics.Process.Start("notepad.exe"); } catch { }
+                        }
+                        else if (act == "VOL_UP") TapKey(VK_VOLUME_UP);
+                        else if (act == "VOL_DOWN") TapKey(VK_VOLUME_DOWN);
+                        else if (act == "MUTE") TapKey(VK_VOLUME_MUTE);
+                        else if (act == "MEDIA_PLAY_PAUSE") TapKey(VK_MEDIA_PLAY_PAUSE);
+                        else if (act == "MEDIA_NEXT") TapKey(VK_MEDIA_NEXT_TRACK);
+                        else if (act == "MEDIA_PREV") TapKey(VK_MEDIA_PREV_TRACK);
+                        else if (act == "SLEEP") SetSuspendState(false, true, false);
+                        else if (act == "COPY") SendChord(VK_CONTROL, 0x43); // Ctrl+C
+                        else if (act == "PASTE") SendChord(VK_CONTROL, 0x56); // Ctrl+V
+                        else if (act == "SELECT_ALL") SendChord(VK_CONTROL, 0x41); // Ctrl+A
+                        else if (act == "UNDO") SendChord(VK_CONTROL, 0x5A); // Ctrl+Z
+                        else if (act == "ENTER") TapKey(VK_RETURN);
+                        else if (act == "ESCAPE") TapKey(VK_ESCAPE);
+                        else if (act == "BACKSPACE") TapKey(VK_BACK);
+                        else if (act == "TAB") TapKey(VK_TAB);
+                    }
+                } catch {
+                    // Fail-safe: continue loop without dropping connection
+                }
+            }
         }
     }
 }
@@ -207,125 +315,5 @@ try {
     # Type may already be loaded in session
 }
 
-# Signal to Node server that injector is active
-[Console]::Out.WriteLine("INJECTOR_READY")
-[Console]::Out.Flush()
-
-while ($true) {
-    $line = [Console]::In.ReadLine()
-    if ($null -eq $line) { break }
-    $line = $line.Trim()
-    if ([string]::IsNullOrEmpty($line)) { continue }
-
-    try {
-        $parts = $line.Split(' ')
-        $cmd = $parts[0].ToUpper()
-
-        switch ($cmd) {
-            "M" {
-                if ($parts.Length -ge 3) {
-                    $dx = [int]$parts[1]
-                    $dy = [int]$parts[2]
-                    [GlyphPad.WinInput]::Move($dx, $dy)
-                }
-            }
-            "LD" {
-                [GlyphPad.WinInput]::MouseDown([GlyphPad.WinInput]::MOUSEEVENTF_LEFTDOWN)
-            }
-            "LU" {
-                [GlyphPad.WinInput]::MouseUp([GlyphPad.WinInput]::MOUSEEVENTF_LEFTUP)
-            }
-            "LC" {
-                [GlyphPad.WinInput]::MouseClick([GlyphPad.WinInput]::MOUSEEVENTF_LEFTDOWN, [GlyphPad.WinInput]::MOUSEEVENTF_LEFTUP)
-            }
-            "LDC" {
-                [GlyphPad.WinInput]::DoubleClick()
-            }
-            "RD" {
-                [GlyphPad.WinInput]::MouseDown([GlyphPad.WinInput]::MOUSEEVENTF_RIGHTDOWN)
-            }
-            "RU" {
-                [GlyphPad.WinInput]::MouseUp([GlyphPad.WinInput]::MOUSEEVENTF_RIGHTUP)
-            }
-            "RC" {
-                [GlyphPad.WinInput]::MouseClick([GlyphPad.WinInput]::MOUSEEVENTF_RIGHTDOWN, [GlyphPad.WinInput]::MOUSEEVENTF_RIGHTUP)
-            }
-            "MD" {
-                [GlyphPad.WinInput]::MouseDown([GlyphPad.WinInput]::MOUSEEVENTF_MIDDLEDOWN)
-            }
-            "MU" {
-                [GlyphPad.WinInput]::MouseUp([GlyphPad.WinInput]::MOUSEEVENTF_MIDDLEUP)
-            }
-            "MC" {
-                [GlyphPad.WinInput]::MouseClick([GlyphPad.WinInput]::MOUSEEVENTF_MIDDLEDOWN, [GlyphPad.WinInput]::MOUSEEVENTF_MIDDLEUP)
-            }
-            "S" {
-                if ($parts.Length -ge 2) {
-                    $delta = [int]$parts[1]
-                    [GlyphPad.WinInput]::Scroll($delta)
-                }
-            }
-            "HS" {
-                if ($parts.Length -ge 2) {
-                    $hdelta = [int]$parts[1]
-                    [GlyphPad.WinInput]::HScroll($hdelta)
-                }
-            }
-            "K" {
-                if ($parts.Length -ge 2) {
-                    $vk = [ushort]$parts[1]
-                    [GlyphPad.WinInput]::TapKey($vk)
-                }
-            }
-            "TEXT" {
-                if ($parts.Length -ge 2) {
-                    $bytes = [Convert]::FromBase64String($parts[1])
-                    $txt = [System.Text.Encoding]::UTF8.GetString($bytes)
-                    [GlyphPad.WinInput]::TypeString($txt)
-                }
-            }
-            "RELEASE_ALL" {
-                [GlyphPad.WinInput]::ReleaseAll()
-            }
-            "ACTION" {
-                if ($parts.Length -ge 2) {
-                    $act = $parts[1].ToUpper()
-                    switch ($act) {
-                        "SHOW_DESKTOP" { [GlyphPad.WinInput]::SendChord([GlyphPad.WinInput]::VK_LWIN, 0x44) } # Win+D
-                        "TASK_VIEW" { [GlyphPad.WinInput]::SendChord([GlyphPad.WinInput]::VK_LWIN, [GlyphPad.WinInput]::VK_TAB) } # Win+Tab
-                        "TASK_MANAGER" { [GlyphPad.WinInput]::SendChord3([GlyphPad.WinInput]::VK_CONTROL, [GlyphPad.WinInput]::VK_SHIFT, [GlyphPad.WinInput]::VK_ESCAPE) } # Ctrl+Shift+Esc
-                        "EXPLORER" { [GlyphPad.WinInput]::SendChord([GlyphPad.WinInput]::VK_LWIN, 0x45) } # Win+E
-                        "FILE_MANAGER" { [GlyphPad.WinInput]::SendChord([GlyphPad.WinInput]::VK_LWIN, 0x45) }
-                        "SETTINGS" { [GlyphPad.WinInput]::SendChord([GlyphPad.WinInput]::VK_LWIN, 0x49) } # Win+I
-                        "SEARCH" { [GlyphPad.WinInput]::SendChord([GlyphPad.WinInput]::VK_LWIN, 0x53) } # Win+S
-                        "CLIPBOARD" { [GlyphPad.WinInput]::SendChord([GlyphPad.WinInput]::VK_LWIN, 0x56) } # Win+V
-                        "SCREENSHOT" { [GlyphPad.WinInput]::SendChord3([GlyphPad.WinInput]::VK_LWIN, [GlyphPad.WinInput]::VK_SHIFT, 0x53) } # Win+Shift+S
-                        "LOCK_PC" { [GlyphPad.WinInput]::LockWorkStation() }
-                        "TERMINAL" { Start-Process "wt.exe" -ErrorAction SilentlyContinue }
-                        "CALCULATOR" { Start-Process "calc.exe" -ErrorAction SilentlyContinue }
-                        "NOTEPAD" { Start-Process "notepad.exe" -ErrorAction SilentlyContinue }
-                        "VOL_UP" { [GlyphPad.WinInput]::TapKey([GlyphPad.WinInput]::VK_VOLUME_UP) }
-                        "VOL_DOWN" { [GlyphPad.WinInput]::TapKey([GlyphPad.WinInput]::VK_VOLUME_DOWN) }
-                        "MUTE" { [GlyphPad.WinInput]::TapKey([GlyphPad.WinInput]::VK_VOLUME_MUTE) }
-                        "MEDIA_PLAY_PAUSE" { [GlyphPad.WinInput]::TapKey([GlyphPad.WinInput]::VK_MEDIA_PLAY_PAUSE) }
-                        "MEDIA_NEXT" { [GlyphPad.WinInput]::TapKey([GlyphPad.WinInput]::VK_MEDIA_NEXT_TRACK) }
-                        "MEDIA_PREV" { [GlyphPad.WinInput]::TapKey([GlyphPad.WinInput]::VK_MEDIA_PREV_TRACK) }
-                        "SLEEP" { [GlyphPad.WinInput]::SetSuspendState($false, $true, $false) }
-                        "SHUTDOWN" { Stop-Computer -Force -ErrorAction SilentlyContinue }
-                        "RESTART" { Restart-Computer -Force -ErrorAction SilentlyContinue }
-                        "COPY" { [GlyphPad.WinInput]::SendChord([GlyphPad.WinInput]::VK_CONTROL, 0x43) } # Ctrl+C
-                        "PASTE" { [GlyphPad.WinInput]::SendChord([GlyphPad.WinInput]::VK_CONTROL, 0x56) } # Ctrl+V
-                        "SELECT_ALL" { [GlyphPad.WinInput]::SendChord([GlyphPad.WinInput]::VK_CONTROL, 0x41) } # Ctrl+A
-                        "UNDO" { [GlyphPad.WinInput]::SendChord([GlyphPad.WinInput]::VK_CONTROL, 0x5A) } # Ctrl+Z
-                        "ENTER" { [GlyphPad.WinInput]::TapKey([GlyphPad.WinInput]::VK_RETURN) }
-                        "ESCAPE" { [GlyphPad.WinInput]::TapKey([GlyphPad.WinInput]::VK_ESCAPE) }
-                        "BACKSPACE" { [GlyphPad.WinInput]::TapKey([GlyphPad.WinInput]::VK_BACK) }
-                        "TAB" { [GlyphPad.WinInput]::TapKey([GlyphPad.WinInput]::VK_TAB) }
-                    }
-                }
-            }
-        }
-    } catch {
-        # Continue gracefully on error
-    }
-}
+# Enter compiled native C# CLR loop (Zero-overhead, microsecond stdin processing)
+[GlyphPad.WinInput]::RunLoop()
